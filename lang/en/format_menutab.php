@@ -25,6 +25,24 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['collapsed'] = 'Top section collapsed?';
+$string['collapsed_help'] = 'Should top section (in regular Moodle courses know as Section 0) be collapsed when students enter the course? Default Yes';
+$string['currentsection'] = 'This topic';
+$string['hidden'] = 'Unavailable for students';
+$string['hidefromothers'] = 'Hide from others';
+$string['showfromothers'] = 'Show from others';
+$string['main_menu'] = 'Course menu';
+$string['numcolumns'] = 'Number of columns';
+$string['numcolumns_help'] = 'Select the number of columns you would like per row on the course front page.';
+$string['return'] = 'Course home';
+$string['start_here'] = 'Start here';
+$string['pluginname'] = 'Menu/Tab';
+$string['section0name'] = 'Start';
+$string['privacy:metadata'] = 'The Menu/Tab Course Format does not store any personal data.';
+//New tags
+$string['access'] = 'Access';
+$string['toggle_course_menu'] = 'Toggle course menu';
+//Required language strings
 $string['addsections'] = 'Add section';
 $string['currentsection'] = 'This section';
 $string['deletesection'] = 'Delete section';
@@ -32,6 +50,5 @@ $string['editsection'] = 'Edit section';
 $string['editsectionname'] = 'Edit section name';
 $string['hidefromothers'] = 'Hide section';
 $string['newsectionname'] = 'New name for section {$a}';
-$string['pluginname'] = 'Menu/Tab';
 $string['sectionname'] = 'Section';
 $string['showfromothers'] = 'Show section';

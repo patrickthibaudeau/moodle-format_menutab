@@ -34,6 +34,15 @@ $context = context_course::instance($course->id);
 
 // Add any extra logic here.
 
+
+// Make sure section 0 is created.
+course_create_sections_if_missing($course, 0);
+
+// Setup the format base instance.
+if (!empty($displaysection)) {
+    $format->set_section_number($displaysection);
+}
+
 $renderer = $format->get_renderer($PAGE);
 
 // Output course content.
