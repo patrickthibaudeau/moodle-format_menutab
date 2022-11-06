@@ -17,6 +17,7 @@
 namespace format_menutab\output;
 
 use core_courseformat\output\section_renderer;
+use renderable;
 use moodle_page;
 
 /**
@@ -52,6 +53,27 @@ class renderer extends section_renderer {
      */
     public function section_title_without_link($section, $course) {
         return $this->render(format_base::instance($course)->inplace_editable_render_section_name($section, false));
+    }
+
+    /**
+     * Override this so that we can use our own local templates.
+     * @return void
+     */
+    public function render_content() {
+        $format = course_get_format($this->page->course->id);
+        $contentclass = $format->get_output_classname('content');
+        $section = optional_param('section', 0, PARAM_INT);
+        $displayoptions = [];
+        $contentoutput = new $contentclass(
+            $format,
+            $section,
+            null,
+            $displayoptions
+        );
+
+        $data = $contentoutput->export_for_template($this);
+
+        echo $this->render_from_template('format_tiles/local/content/content', $data);
     }
 
 }

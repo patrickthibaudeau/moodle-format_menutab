@@ -104,9 +104,77 @@ class format_menutab extends core_courseformat\base {
     }
 
     /**
+     * Returns the default section name for the topics course format.
+     *
+     * If the section number is 0, it will use the string with key = section0name from the course format's lang file.
+     * If the section number is not 0, the base implementation of course_format::get_default_section_name which uses
+     * the string with the key = 'sectionname' from the course format's lang file + the section number will be used.
+     *
+     * @param stdClass $section Section object from database or just field course_sections section
+     * @return string The default value for the section name.
+     */
+    public function get_default_section_name($section) {
+        if ($section->section == 0) {
+            // Return the general section.
+            return get_string('section0name', 'format_topics');
+        } else {
+            // Use course_format::get_default_section_name implementation which
+            // will display the section name in "Topic n" format.
+            return parent::get_default_section_name($section);
+        }
+    }
+
+    /**
+     * The URL to use for the specified course (with section).
+     *
+     * @param int|stdClass $section Section object from database or just field course_sections.section
+     *     if omitted the course view page is returned
+     * @param array $options options for view URL. At the moment core uses:
+     *     'navigation' (bool) if true and section has no separate page, the function returns null
+     *     'sr' (int) used by multipage formats to specify to which section to return
+     * @return null|moodle_url
+     */
+    public function get_view_url($section, $options = []) {
+        global $CFG;
+        $course = $this->get_course();
+        $url = new moodle_url('/course/view.php', ['id' => $course->id]);
+
+        $sr = null;
+        if (array_key_exists('sr', $options)) {
+            $sr = $options['sr'];
+        }
+        if (is_object($section)) {
+            $sectionno = $section->section;
+        } else {
+            $sectionno = $section;
+        }
+        if ($sectionno !== null) {
+            if ($sr !== null) {
+                if ($sr) {
+                    $usercoursedisplay = COURSE_DISPLAY_MULTIPAGE;
+                    $sectionno = $sr;
+                } else {
+                    $usercoursedisplay = COURSE_DISPLAY_SINGLEPAGE;
+                }
+            } else {
+                $usercoursedisplay = $course->coursedisplay ?? COURSE_DISPLAY_SINGLEPAGE;
+            }
+            if ($sectionno != 0 && $usercoursedisplay == COURSE_DISPLAY_MULTIPAGE) {
+                $url->param('section', $sectionno);
+            } else {
+                if (empty($CFG->linkcoursesections) && !empty($options['navigation'])) {
+                    return null;
+                }
+                $url->set_anchor('section-'.$sectionno);
+            }
+        }
+        return $url;
+    }
+
+    /**
      * Definitions of the additional options that this course format uses for course
      *
-     * glendon format uses the following options:
+     * Menu/Tab format uses the following options:
      * - coursedisplay
      * - numsections
      * - hiddensections
@@ -117,9 +185,7 @@ class format_menutab extends core_courseformat\base {
     public function course_format_options($foreditform = false) {
         global $COURSE;
         static $courseformatoptions = false;
-        $glendoncourseconfig = get_config('format_menutab');
         $context = context_course::instance($COURSE->id);
-
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
             $courseformatoptions = array(
@@ -136,33 +202,30 @@ class format_menutab extends core_courseformat\base {
                     'type' => PARAM_INT,
                 ),
                 'numcolumns' => array(
-                    'default' => $glendoncourseconfig->numcolumns,
+                    'default' => 3,
                     'type' => PARAM_INT,
                 ),
                 'collapsed' => array(
-                    'default' => $glendoncourseconfig->collapsed,
+                    'default' => 1,
                     'type' => PARAM_INT,
                 )
             );
         }
-        if ($foreditform && !isset($courseformatoptions['numsections']['label'])) {
+        if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
             $courseconfig = get_config('moodlecourse');
-            $max = $courseconfig->maxsections;
-            if (!isset($max) || !is_numeric($max)) {
-                $max = 52;
-            }
-            $sectionmenu = array();
+            $max = (int)$courseconfig->maxsections;
+            $sectionmenu = [];
             for ($i = 0; $i <= $max; $i++) {
                 $sectionmenu[$i] = "$i";
             }
             $courseformatoptionsedit = array(
                 'numsections' => array(
-                    'label' => new lang_string('numberweeks'),
-                    'element_type' => 'hidden',
+                    'label' => new \lang_string('numberweeks'),
+                    'element_type' => 'select',
                     'element_attributes' => array($sectionmenu),
                 ),
                 'hiddensections' => array(
-                    'label' => new lang_string('hiddensections'),
+                    'label' => new \lang_string('hiddensections'),
                     'help' => 'hiddensections',
                     'help_component' => 'moodle',
                     'element_type' => 'select',
@@ -175,26 +238,16 @@ class format_menutab extends core_courseformat\base {
                 ),
                 'coursedisplay' => array(
                     'label' => new lang_string('coursedisplay'),
-                    'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            COURSE_DISPLAY_SINGLEPAGE => new lang_string('coursedisplay_single')
-                        )
-                    ),
-                    'help' => 'coursedisplay',
-                    'help_component' => 'moodle',
+                    'element_type' => 'hidden',
+                    'element_attributes' => [[COURSE_DISPLAY_SINGLEPAGE => new \lang_string('coursedisplay_single')]]
                 ),
                 'numcolumns' => array(
                     'label' => new lang_string('numcolumns', 'format_menutab'),
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
-                            1 => '1',
-                            2 => '2',
                             3 => '3',
                             4 => '4',
-                            6 => '6',
-                            12 => '12'
                         )
                     ),
                     'help' => 'numcolumns',
@@ -241,7 +294,5 @@ function format_menutab_inplace_editable($itemtype, $itemid, $newvalue) {
         $format = core_courseformat\base::instance($section->course);
         return $format->inplace_editable_update_section_name($section, $itemtype, $newvalue);
     }
-
-
 }
 
