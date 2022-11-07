@@ -116,7 +116,7 @@ class format_menutab extends core_courseformat\base {
     public function get_default_section_name($section) {
         if ($section->section == 0) {
             // Return the general section.
-            return get_string('section0name', 'format_topics');
+            return get_string('section0name', 'format_menutab');
         } else {
             // Use course_format::get_default_section_name implementation which
             // will display the section name in "Topic n" format.

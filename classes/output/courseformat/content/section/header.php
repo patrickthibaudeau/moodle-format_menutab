@@ -15,18 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains the section header class.
+ *  Format base class.
  *
- * @package   format_tiles
- * @copyright 2022 David Watson
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     format_menutab
+ * @copyright   2022 UIT Innovation  <thibaud@yorku.ca>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_menutab\output\courseformat\content\section;
 
 use core_courseformat\base as course_format;
 use core_courseformat\output\local\content\section\header as header_base;
-use format_tiles\tile_photo;
 
 /**
  * Class to render a section header inside a Tiles course format.
@@ -64,11 +63,6 @@ class header extends \core_courseformat\output\local\content\section\header {
         if ($coursedisplay == COURSE_DISPLAY_MULTIPAGE && $data->editing) {
             $data->headerdisplaymultipage = true;
             $data->title = $output->render(course_get_format($course)->inplace_editable_render_section_name($this->section));
-        }
-
-        if ($this->section->section > $format->get_last_section_number()) {
-            // Stealth sections (orphaned) has special title.
-            $data->title = get_string('orphanedactivitiesinsectionno', '', $section->section);
         }
 
         if (!$section->visible) {

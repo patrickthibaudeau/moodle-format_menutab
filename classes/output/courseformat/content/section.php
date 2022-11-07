@@ -15,16 +15,18 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Contains the default section controls output class.
+ *  Format base class.
  *
- * @package   format_masonry
- * @copyright 2021 Renaat Debleu <info@eWallah.net>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     format_menutab
+ * @copyright   2022 UIT Innovation  <thibaud@yorku.ca>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_menutab\output\courseformat\content;
 
+use core_courseformat\base as course_format;
 use core_courseformat\output\local\content\section as section_base;
+use section_info;
 
 /**
  * Base class to render a course section.
@@ -34,5 +36,9 @@ use core_courseformat\output\local\content\section as section_base;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class section extends section_base {
+public function __construct(course_format $format, section_info $section)
+{
 
+    parent::__construct($format, $section);
+}
 }

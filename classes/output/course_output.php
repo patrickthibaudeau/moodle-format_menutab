@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tiles course format, main course output class to prepare data for mustache templates
+ *  Format base class.
  *
- * @package format_menutab
- * @copyright 2018 David Watson {@link http://evolutioncode.uk}
- * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     format_menutab
+ * @copyright   2022 UIT Innovation  <thibaud@yorku.ca>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_menutab\output;
@@ -28,6 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/course/format/lib.php');
 require_once("$CFG->libdir/resourcelib.php");  // To import RESOURCELIB_DISPLAY_POPUP.
+
+use format_menutab\output\courseformat\content\cm as cm;
+use format_menutab\output\courseformat\content\section;
 
 /**
  * Tiles course format, main course output class to prepare data for mustache templates
@@ -141,7 +144,7 @@ class course_output implements \renderable, \templatable
         }
         $this->devicetype = \core_useragent::get_device_type();
         $this->format = course_get_format($course);
-        $this->modinfo = get_fast_modinfo($this->course);
+        $this->modinfo = $this->format->get_modinfo();
 
         // TODO this class is no longer used if the user is editing.  To be removed.
         $this->isediting = false;
@@ -172,12 +175,12 @@ class course_output implements \renderable, \templatable
         $data = $this->append_section_zero_data($data, $output);
         // We have assembled the "common data" needed for both single and multiple section pages.
         // Now we can go off and get the specific data for the single or multiple page as required.
-        if ($this->sectionnum !== null) {
+        if ($this->sectionnum) {
             // We are outputting a single section page.s
             return $this->append_single_section_page_data($output, $data);
         } else {
             // We are outputting multi section page.
-            return $this->append_multi_section_page_data($data);
+            return $this->append_home_page_data($data);
         }
     }
 
@@ -190,6 +193,7 @@ class course_output implements \renderable, \templatable
     private function get_basic_data()
     {
         global $SESSION;
+
         $data = [];
         $data['canedit'] = has_capability('moodle/course:update', $this->coursecontext);
         $data['canviewhidden'] = $this->canviewhidden;
@@ -197,19 +201,8 @@ class course_output implements \renderable, \templatable
         $data['completionenabled'] = $this->completionenabled;
         $data['from_ajax'] = $this->fromajax;
         $data['ismobile'] = $this->devicetype == \core_useragent::DEVICETYPE_MOBILE;
-        if (isset($SESSION->format_menutab_jssuccessfullyused)) {
-            // If this flag is set, user is being shown JS versions of pages.
-            // Allow them to cancel the session var if they have no JS.
-            $data['showJScancelLink'] = 1;
-        } else {
-            $data['showJScancelLink'] = 0;
-        }
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
-        $data['jsnavadminallowed'] = get_config('format_menutab', 'usejavascriptnav');
-        $data['jsnavuserenabled'] = !get_user_preferences('format_menutab_stopjsnav');
-        $data['useSubtiles'] = get_config('format_menutab', 'allowsubtilesview') && $this->courseformatoptions['courseusesubtiles'];
-        $data['usetooltips'] = get_config('format_menutab', 'usetooltips');
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;
@@ -291,12 +284,10 @@ class course_output implements \renderable, \templatable
     private function append_section_zero_data($data, $output)
     {
         $seczero = $this->modinfo->get_section_info(0);
-
         $data['section_zero']['summary'] = self::temp_format_summary_text($seczero);
         $data['section_zero']['content']['course_modules'] = $this->section_course_mods($seczero, $output);
         $data['section_zero']['secid'] = $this->modinfo->get_section_info(0)->id;
         $data['section_zero']['is_section_zero'] = true;
-        $data['section_zero']['tileid'] = 0;
         $data['section_zero']['visible'] = true;
 
         return $data;
@@ -400,10 +391,9 @@ class course_output implements \renderable, \templatable
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function append_multi_section_page_data($data)
+    private function append_home_page_data($data)
     {
-        $data['is_multi_section'] = true;
-
+        $data['is_home_page'] = true;
         // If using completion tracking, get the data.
         if ($this->completionenabled) {
             $data['overall_progress']['num_complete'] = 0;
@@ -411,7 +401,10 @@ class course_output implements \renderable, \templatable
         }
         $data['hasNoSections'] = true;
 
-        // Before we start the section loop. get key vars for photo tiles ready.
+        // Before we start the section loop. get key vars for rows and columns
+        $number_of_sections = (count($this->format->get_sections()) - 1); // remove section zero
+        $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
+//        $bootstrap_column_number = 12 / $data['numcolumns'];
 
         $maxallowedsections = $this->format->get_max_sections();
         $sectioncountwarningissued = false;
@@ -450,76 +443,112 @@ class course_output implements \renderable, \templatable
                 ($section->visible && !$section->available && !empty($section->availableinfo));
             if ($sectionnum != 0 && $showsection) {
                 $longtitlelength = 65;
+                // Only add if section is visible to user
+                if ($section->uservisible) {
+                    if ($section->name) {
+                        $title = $section->name;
+                    } else {
 
-                $newtile = array(
-                    'tileid' => $section->section,
-                    'secid' => $section->id,
-                    'title' => $title,
-                    'current' => course_get_format($this->course)->is_section_current($section),
-                    'hidden' => !$section->visible,
-                    'visible' => $section->visible,
-                    'restricted' => !($section->available),
-                    'userclickable' => $section->available || $section->uservisible,
-                    'activity_summary' => self::temp_section_activity_summary($section),
-                    'titleclass' => strlen($title) >= $longtitlelength ? ' longtitle' : '',
-                    'progress' => false,
-                    'isactive' => $this->course->marker == $section->section,
-                    'extraclasses' => ''
-                );
+                        $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
+                    }
+
+                    $summary = $this->format_summary_text($section);
+                    //Get image for top of card
+                    preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
+                    if (isset($result[0])) {
+                        $image = $result[0] . ' class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
+                    } else {
+                        $image = '';
+                    }
+                    // Remove image from summary
+                    $summary = preg_replace("/<img[^>]+\>/i", "", $summary);
+
+                    $section_card = array(
+                        'cardid' => $section->section,
+                        'secid' => $section->id,
+                        'courseid' => $section->course,
+                        'available' => $section->available,
+                        'availability' => $section->availability,
+                        'title' => $title,
+                        'summary' => $summary,
+                        'image' => $image,
+                        'current' => course_get_format($this->course)->is_section_current($section),
+                        'uservisible' => $section->uservisible,
+                        'visible' => $section->visible,
+                        'restricted' => !($section->available),
+                        'userclickable' => $section->available || $section->uservisible,
+                        'activity_summary' => self::temp_section_activity_summary($section),
+                        'titleclass' => strlen($title) >= $longtitlelength ? ' longtitle' : '',
+                        'progress' => false,
+                        'isactive' => $this->course->marker == $section->section,
+                        'extraclasses' => '',
+                    );
 
 
-                // Include completion tracking data for each tile (if used).
-                if ($section->visible && $this->completionenabled) {
-                    if (isset($this->modinfo->sections[$sectionnum])) {
-                        $completionthistile = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
-                        // Keep track of overall progress so we can show this too - add this tile's completion to the totals.
-                        $data['overall_progress']['num_out_of'] += $completionthistile['outof'];
-                        $data['overall_progress']['num_complete'] += $completionthistile['completed'];
+                    // Include completion tracking data for each section (if used).
+                    if ($section->visible && $this->completionenabled) {
+                        if (isset($this->modinfo->sections[$sectionnum])) {
+                            $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
+                            // Keep track of overall progress so we can show this too - add this section's completion to the totals.
+                            $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
+                            $data['overall_progress']['num_complete'] += $completionthissection['completed'];
 
-                        // We only add the tile values to the individual tile if courseshowtileprogress is true.
-                        // (Otherwise we only retain overall completion as above, not for each tile).
-                        if ($this->courseformatoptions['courseshowtileprogress']) {
-                            $showaspercent = $this->courseformatoptions['courseshowtileprogress'] == 2 ? true : false;
-                            $newtile['progress'] = $this->completion_indicator(
-                                $completionthistile['completed'],
-                                $completionthistile['outof'],
-                                $showaspercent,
-                                false
-                            );
+                            // We only add the section values to the individual sections if courseshowsectionprogress is true.
+                            // (Otherwise we only retain overall completion as above, not for each section).
+                            if ($this->courseformatoptions['courseshowsectionprogress']) {
+                                $showaspercent = $this->courseformatoptions['courseshowsectionprogress'] == 2 ? true : false;
+                                $section_card['progress'] = $this->completion_indicator(
+                                    $completionthissection['completed'],
+                                    $completionthissection['outof'],
+                                    $showaspercent,
+                                    false
+                                );
+                            }
                         }
                     }
+
+                    // If item is restricted, user needs to know why.
+                    $section_card['availabilitymessage'] = $section->availableinfo || !$section->visible
+                        ? self::temp_section_availability_message($section) : '';
+
+                    // See below about when "hide add cm control" is true.
+                    $section_card['hideaddcmcontrol'] = false;
+                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
+                        $this->course, $section->section, 0
+                    );
+
+                    $section_cards[] = $section_card;
                 }
 
-                // If item is restricted, user needs to know why.
-                $newtile['availabilitymessage'] = $section->availableinfo || !$section->visible
-                    ? self::temp_section_availability_message($section) : '';
-
-                // See below about when "hide add cm control" is true.
-                $newtile['hideaddcmcontrol'] = false;
-                $newtile['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
-                    $this->course, $section->section, 0
-                );
-
-                $newtile['is_expanded'] = false;
-
-                // Finally add tile we constructed to the array.
-
-                $previoustiletitle = $title;
             } else if ($sectionnum == 0) {
                 // Add in section zero completion data to overall completion count.
                 if ($section->visible && $this->completionenabled) {
                     if (isset($this->modinfo->sections[$sectionnum])) {
-                        $completionthistile = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
-                        // Keep track of overall progress so we can show this too - add this tile's completion to the totals.
-                        $data['overall_progress']['num_out_of'] += $completionthistile['outof'];
-                        $data['overall_progress']['num_complete'] += $completionthistile['completed'];
+                        $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
+                        // Keep track of overall progress so we can show this too - add this section's completion to the totals.
+                        $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
+                        $data['overall_progress']['num_complete'] += $completionthissection['completed'];
                     }
                 }
             }
             $countincludedsections++;
         }
 
+        // Create rows for cards based on format number of rows
+        $y = 0; //sectioncards array count
+        for ($i = 0; $i < $number_of_rows; $i++) { // Loop through all rows
+            for ($x = 0; $x < $data['numcolumns']; $x++) {
+                if (($y - 1) <= $number_of_sections) {
+                    if (isset($section_cards[$y])) {
+                        $data['sectionrows'][$i]['sections'][] = $section_cards[$y];
+                        $y++;
+                    }
+                }
+            }
 
+        }
+
+        $data['sectioncards'] = $data['sectionrows'];
         $data['section_zero_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control($this->course, 0, 0);
         if ($this->completionenabled && $data['overall_progress']['num_out_of'] > 0) {
             if (get_config('format_menutab', 'showoverallprogress')) {
@@ -529,18 +558,34 @@ class course_output implements \renderable, \templatable
                     true,
                     true
                 );
-                $data['overall_progress_indicator']['tileid'] = 0;
+                $data['overall_progress_indicator']['cardid'] = 0;
             }
         }
         $data['moodlefiltersconfig'] = $this->get_filters_config();
-
         return $data;
+    }
+
+    /**
+     * Generate html for a section summary text
+     *
+     * @param stdClass $section The course_section entry from DB
+     * @return string HTML to output.
+     */
+    protected function format_summary_text($section)
+    {
+        $context = \context_course::instance($section->course);
+        $summarytext = file_rewrite_pluginfile_urls($section->summary, 'pluginfile.php', $context->id, 'course', 'section', $section->id);
+
+        $options = new \stdClass();
+        $options->noclean = true;
+        $options->overflowdiv = true;
+        return format_text($summarytext, $section->summaryformat, $options);
     }
 
     /**
      * Count the number of course modules with completion tracking activated
      * in this section, and the number which the student has completed
-     * Exclude labels if we are using sub tiles, as these are not checkable
+     * Exclude labels if we are using sub sections, as these are not checkable
      * Also exclude items the user cannot see e.g. restricted
      * @param array $sectioncmids the ids of course modules to count
      * @param array $coursecms the course module objects for this course
@@ -741,13 +786,13 @@ class course_output implements \renderable, \templatable
      * In the snap theme, course_renderer::course_section_cm_list_item() covers similar ground
      * @see \cm_info for full detail of $mod instance variables
      */
-    private function section_course_mods($section, $output)
+    private function section_course_mods($sections, $output)
     {
-        if (!isset($section->section)) {
+        if (!isset($sections->section)) {
             debugging("section->section is not set", DEBUG_DEVELOPER);
         }
 
-        if (!isset($this->modinfo->sections[$section->section]) || !$cmids = $this->modinfo->sections[$section->section]) {
+        if (!isset($this->modinfo->sections[$sections->section]) || !$cmids = $this->modinfo->sections[$sections->section]) {
             // There are no CMs for the section (i.e. section is empty) so we silently return.
             return [];
         }
@@ -765,7 +810,7 @@ class course_output implements \renderable, \templatable
 
             $moduledata = $this->course_module_data(
                 $mod,
-                $section,
+                $sections,
                 $previouswaslabel,
                 $index == 0,
                 $output
@@ -798,244 +843,245 @@ class course_output implements \renderable, \templatable
         $displayoptions = [];
         $obj = new \core_courseformat\output\local\content\section\cmitem($this->format, $section, $mod, $displayoptions);
         $moduleobject = (array)$obj->export_for_template($output);
-        if ($this->canviewhidden) {
-            $moduleobject['uservisible'] = true;
-            $moduleobject['clickable'] = true;
-        } else if (!$mod->uservisible && $mod->is_visible_on_course_page() && $mod->availableinfo && $mod->visible) {
-            // Activity is not available, not hidden from course page and has availability info.
-            // So it is actually visible on the course page (with availability info and without a link).
-            $moduleobject['uservisible'] = true;
-            $moduleobject['clickable'] = false;
-        } else {
-            $moduleobject['uservisible'] = $mod->is_visible_on_course_page();
-            $moduleobject['clickable'] = $mod->uservisible;
-        }
-        // From Moodle 3.11 onwards, we may have extra completion conditions info to display under activities.
-        if (class_exists('\core\activity_dates') && isset($this->showcompletionconditions)
-            && $this->showcompletionconditions) {
-            $activitydates = \core\activity_dates::get_dates_for_module($mod, $USER->id);
-            $completiondetails = \core_completion\cm_completion_details::get_instance(
-                $mod, $USER->id, $this->showcompletionconditions
-            );
-            if ($completiondetails->has_completion() || !empty($activitydates)) {
-                // No need to render the activity information when there's no completion info and activity dates to show.
-                $activityinfo = new \core_course\output\activity_information($mod, $completiondetails, $activitydates);
-                $moduleobject['activityinformation'] = $activityinfo->export_for_template($output);
-            }
-        }
 
-        // We check that the stealth function exists in case we are running in Totara or earlier Moodle, where it doesn't.
-        $isstealth = method_exists($mod, 'is_stealth') && $mod->is_stealth();
-        if (!$moduleobject['uservisible'] || $mod->deletioninprogress || (!$this->canviewhidden && $isstealth)) {
-            return [];
-        }
-        // If the module isn't available, or we are a teacher (can view hidden activities) get availability info.
-        if (!$mod->available || $this->canviewhidden) {
-            $moduleobject['availabilitymessage'] = self::temp_course_section_cm_availability($mod);
-        }
-        $moduleobject['available'] = $mod->available;
-        $moduleobject['cmid'] = $mod->id;
-        $moduleobject['modtitle'] = $mod->get_formatted_name();
-        $moduleobject['modname'] = $mod->modname;
-        $moduleobject['iconurl'] = $mod->get_icon_url()->out(true);
-        $moduleobject['url'] = $mod->url;
-        $moduleobject['visible'] = $mod->visible;
-        $moduleobject['launchtype'] = 'standard';
-        $moduleobject['content'] = $mod->get_formatted_content(array('overflowdiv' => true, 'noclean' => true));
-        if ($mod->indent) {
-            $moduleobject['indentlevel'] = $mod->indent;
-        }
-
-        // We set this here, with the value from the last loop, before updating it in the next block.
-        // So that we can use it again on the next loop.
-        $moduleobject['previouswaslabel'] = $previouswaslabel;
-        $treataslabel = $mod->has_custom_cmlist_item();
-        if ($treataslabel) {
-            $moduleobject['is_label'] = true;
-            $moduleobject['long_label'] = strlen($mod->content) > 300 ? 1 : 0;
-            if ($isfirst && !$previouswaslabel && $this->courseformatoptions['courseusesubtiles']) {
-                $moduleobject['hasSpacersBefore'] = 1;
-            }
-        }
-
-        if (isset($mod->instance)) {
-            $moduleobject['modinstance'] = $mod->instance;
-        }
-        $moduleobject['modResourceType'] = $this->get_resource_filetype($mod);
-        $moduleobject['modnameDisplay'] = $this->mod_displayname($mod->modname, $moduleobject['modResourceType']);
-
-        // Specific handling for embedded resource items (e.g. PDFs)  as allowed by site admin.
-        if ($mod->modname == 'resource') {
-            if (array_search($moduleobject['modResourceType'], $this->usemodalsforcoursemodules['resources']) !== false) {
-                $moduleobject['isEmbeddedResource'] = 1;
-                $moduleobject['launchtype'] = 'resource-modal';
-                $moduleobject['pluginfileUrl'] = $this->plugin_file_url($mod);
-            } else {
-                // We are not using modal, so add the standard moodle onclick event to the link to launch pop up if appropriate.
-                if ($mod->onclick) {
-                    $moduleobject['onclick'] = htmlspecialchars_decode($mod->onclick, ENT_QUOTES);
-                    $moduleobject['launchtype'] = 'standard';
-                }
-            }
-        }
-
-        // Issue 67 handling for LTI set to open in new window.
-        if ($mod->onclick == 'lti' && $mod->onclick) {
-            $moduleobject['onclick'] = htmlspecialchars_decode($mod->onclick, ENT_QUOTES);
-            $moduleobject['launchtype'] = 'standard';
-        }
-
-        // Specific handling for embedded course module items (e.g. page) as allowed by site admin.
-        if (array_search($mod->modname, $this->usemodalsforcoursemodules['modules']) !== false) {
-            $moduleobject['isEmbeddedModule'] = 1;
-            $moduleobject['launchtype'] = 'module-modal';
-        }
-        $moduleobject['showdescription'] =
-            isset($mod->showdescription) && !$treataslabel ? $mod->showdescription : 0;
-        if ($moduleobject['showdescription']) {
-            // The reason we need 'noclean' arg here is that otherwise youtube etc iframes will be stripped out.
-            $moduleobject['description'] = $mod->get_formatted_content(array('overflowdiv' => true, 'noclean' => true));
-        }
-        $moduleobject['extraclasses'] = $mod->extraclasses;
-        $moduleobject['afterlink'] = $mod->afterlink;
-        if ($isstealth) {
-            $moduleobject['extraclasses'] .= ' stealth';
-            $moduleobject['stealth'] = 1;
-        } else if (
-            (!$mod->visible && !$mod->visibleold)
-            || !$mod->available
-            || !$section->visible
-        ) {
-            $moduleobject['extraclasses'] .= ' dimmed';
-        }
-        if ($mod->completion == COMPLETION_TRACKING_MANUAL) {
-            $moduleobject['extraclasses'] .= " completion-enabled completion-manual";
-        } else if ($mod->completion == COMPLETION_VIEW_REQUIRED) {
-            // Auto completion with a view required.
-            $moduleobject['extraclasses'] .= " completion-enabled completion-view";
-        } else if ($mod->completion == COMPLETION_TRACKING_AUTOMATIC) {
-            // Auto completion with no view required (e.g. grade required).
-            $moduleobject['extraclasses'] .= " completion-enabled completion-auto";
-        }
-
-        if ($mod->modname == 'folder') {
-            // Folders set to display inline will not work this theme.
-            // This is not a very elegant solution, but it will ensure that the URL is correctly shown.
-            // If the user is editing it will change the format of the folder.
-            // It will show on a separate page, and alert the editing user as to what it has done.
-            $moduleobject['url'] = new \moodle_url('/mod/folder/view.php', array('id' => $mod->id));
-            if ($PAGE->user_is_editing()) {
-                $folder = $DB->get_record('folder', array('id' => $mod->instance));
-                if ($folder->display == FOLDER_DISPLAY_INLINE) {
-                    $DB->set_field('folder', 'display', FOLDER_DISPLAY_PAGE, array('id' => $folder->id));
-                    \core\notification::info(
-                        get_string('folderdisplayerror', 'format_menutab', $moduleobject['url']->out())
-                    );
-                    rebuild_course_cache($mod->course, true);
-                }
-            }
-        }
-
-        if ($mod->modname == 'url') {
-            $url = $DB->get_record('url', array('id' => $mod->instance), '*', MUST_EXIST);
-            $usemodalsforurl = array_search('url', $this->usemodalsforcoursemodules['resources']) !== false;
-            $modifiedvideourl = $this->check_modify_embedded_url($url->externalurl);
-            if ($url->display == RESOURCELIB_DISPLAY_POPUP || $url->display == RESOURCELIB_DISPLAY_NEW) {
-                if ($mod->onclick) {
-                    $moduleobject['onclick'] = $mod->onclick;
-                    $moduleobject['launchtype'] = 'standard';
-                } else {
-                    $moduleobject['pluginfileUrl'] = $url->externalurl;
-                    $moduleobject['extraclasses'] .= ' urlpopup';
-                    $moduleobject['launchtype'] = 'urlpopup';
-                }
-            } else if ($url->display == RESOURCELIB_DISPLAY_EMBED) {
-                // We need a secondary URL to show under the embed window so users can click it if embed doesn't work.
-                // We will also use it to redirect mobile users to YouTube or wherever since embed wont work well for them.
-                $moduleobject['secondaryurl'] = $url->externalurl;
-                if ($usemodalsforurl) {
-                    if ($modifiedvideourl) {
-                        $moduleobject['pluginfileUrl'] = $modifiedvideourl;
-                    } else {
-                        $moduleobject['pluginfileUrl'] = $url->externalurl;
-                    }
-                    $moduleobject['launchtype'] = 'url-modal';
-                }
-            } else if ($url->display == RESOURCELIB_DISPLAY_AUTO) {
-                require_once("$CFG->dirroot/mod/url/locallib.php");
-                // TODO modify this later to treat embed as launch modal.
-                $treataspopup = [
-                    RESOURCELIB_DISPLAY_EMBED,
-                    RESOURCELIB_DISPLAY_FRAME,
-                    RESOURCELIB_DISPLAY_NEW,
-                    RESOURCELIB_DISPLAY_DOWNLOAD,
-                    RESOURCELIB_DISPLAY_POPUP
-                ];
-                $displaytype = url_get_final_display_type($url);
-                if (array_search($displaytype, $treataspopup) !== false) {
-                    $moduleobject['pluginfileUrl'] = $url->externalurl;
-                    $moduleobject['extraclasses'] .= ' urlpopup';
-                }
-            }
-
-            if ($modifiedvideourl) {
-                // Even though it's really a URL activity, display it as "video" activity with video icon.
-                if ($this->courseformatoptions['courseusesubtiles']) {
-                    $moduleobject['extraclasses'] .= ' video';
-                    $moduleobject['modnameDisplay'] = get_string('displaytitle_mod_mp4', 'format_menutab');
-                } else {
-                    $moduleobject['iconurl'] = $output->image_url('play-circle-solid', 'format_menutab');
-                }
-            }
-        }
-
-        if (
-            ($mod->modname === 'url' || $mod->modname === 'resource')
-            && $this->devicetype != \core_useragent::DEVICETYPE_TABLET
-            && $this->devicetype != \core_useragent::DEVICETYPE_MOBILE
-        ) {
-            // If the non JS link is used, it redirects from /mod/xxx/view.php to external or pluginURL.
-            $moduleobject['url'] .= '&redirect=1';
-        }
-
-        // Now completion information for the individual course module.
-        $completion = $mod->completion && $this->completioninfo && $this->completioninfo->is_enabled($mod) && $mod->available;
-        if ($completion) {
-            // Add completion icon to the course module if appropriate.
-            $moduleobject['hascompletion'] = true;
-            $completiondata = $this->completioninfo->get_data($mod, true);
-            $moduleobject['completionstate'] = $completiondata->completionstate;
-            $moduleobject['iscomplete'] = $completiondata->completionstate
-                && $completiondata->completionstate !== COMPLETION_COMPLETE_FAIL;
-            $moduleobject['completionstateInverse'] = $completiondata->completionstate == 1 ? 0 : 1;
-            if ($mod->completion == COMPLETION_TRACKING_MANUAL) {
-                $moduleobject['completionIsManual'] = 1;
-                switch ($completiondata->completionstate) {
-                    case COMPLETION_INCOMPLETE:
-                        $moduleobject['completionstring'] = get_string('togglecompletionincomplete', 'format_menutab');
-                        break;
-                    case COMPLETION_COMPLETE:
-                        $moduleobject['completionstring'] = get_string('togglecompletioncomplete', 'format_menutab');
-                        break;
-                }
-            } else { // Automatic.
-                switch ($completiondata->completionstate) {
-                    case COMPLETION_INCOMPLETE:
-                        $moduleobject['completionstring'] = get_string('complete-n-auto', 'format_menutab');
-                        break;
-                    case COMPLETION_COMPLETE:
-                        $moduleobject['completionstring'] = get_string('complete-y-auto', 'format_menutab');
-                        break;
-                    case COMPLETION_COMPLETE_PASS:
-                        $moduleobject['completionstring'] = get_string('completion-pass', 'core_completion', $mod->name);
-                        break;
-                    case COMPLETION_COMPLETE_FAIL:
-                        $moduleobject['completionstring'] = get_string('completion-fail', 'core_completion', $mod->name);
-                        $moduleobject['isfail'] = 1;
-                        break;
-                }
-            }
-        }
+//        if ($this->canviewhidden) {
+//            $moduleobject['uservisible'] = true;
+//            $moduleobject['clickable'] = true;
+//        } else if (!$mod->uservisible && $mod->is_visible_on_course_page() && $mod->availableinfo && $mod->visible) {
+//            // Activity is not available, not hidden from course page and has availability info.
+//            // So it is actually visible on the course page (with availability info and without a link).
+//            $moduleobject['uservisible'] = true;
+//            $moduleobject['clickable'] = false;
+//        } else {
+//            $moduleobject['uservisible'] = $mod->is_visible_on_course_page();
+//            $moduleobject['clickable'] = $mod->uservisible;
+//        }
+//        // From Moodle 3.11 onwards, we may have extra completion conditions info to display under activities.
+//        if (class_exists('\core\activity_dates') && isset($this->showcompletionconditions)
+//            && $this->showcompletionconditions) {
+//            $activitydates = \core\activity_dates::get_dates_for_module($mod, $USER->id);
+//            $completiondetails = \core_completion\cm_completion_details::get_instance(
+//                $mod, $USER->id, $this->showcompletionconditions
+//            );
+//            if ($completiondetails->has_completion() || !empty($activitydates)) {
+//                // No need to render the activity information when there's no completion info and activity dates to show.
+//                $activityinfo = new \core_course\output\activity_information($mod, $completiondetails, $activitydates);
+//                $moduleobject['activityinformation'] = $activityinfo->export_for_template($output);
+//            }
+//        }
+//
+//        // We check that the stealth function exists in case we are running in Totara or earlier Moodle, where it doesn't.
+//        $isstealth = method_exists($mod, 'is_stealth') && $mod->is_stealth();
+//        if (!$moduleobject['uservisible'] || $mod->deletioninprogress || (!$this->canviewhidden && $isstealth)) {
+//            return [];
+//        }
+//        // If the module isn't available, or we are a teacher (can view hidden activities) get availability info.
+//        if (!$mod->available || $this->canviewhidden) {
+//            $moduleobject['availabilitymessage'] = self::temp_course_section_cm_availability($mod);
+//        }
+//        $moduleobject['available'] = $mod->available;
+//        $moduleobject['cmid'] = $mod->id;
+//        $moduleobject['modtitle'] = $mod->get_formatted_name();
+//        $moduleobject['modname'] = $mod->modname;
+//        $moduleobject['iconurl'] = $mod->get_icon_url()->out(true);
+//        $moduleobject['url'] = $mod->url;
+//        $moduleobject['visible'] = $mod->visible;
+//        $moduleobject['launchtype'] = 'standard';
+//        $moduleobject['content'] = $mod->get_formatted_content(array('overflowdiv' => true, 'noclean' => true));
+//        if ($mod->indent) {
+//            $moduleobject['indentlevel'] = $mod->indent;
+//        }
+//
+//        // We set this here, with the value from the last loop, before updating it in the next block.
+//        // So that we can use it again on the next loop.
+//        $moduleobject['previouswaslabel'] = $previouswaslabel;
+//        $treataslabel = $mod->has_custom_cmlist_item();
+//        if ($treataslabel) {
+//            $moduleobject['is_label'] = true;
+//            $moduleobject['long_label'] = strlen($mod->content) > 300 ? 1 : 0;
+//            if ($isfirst && !$previouswaslabel && $this->courseformatoptions['courseusesubtiles']) {
+//                $moduleobject['hasSpacersBefore'] = 1;
+//            }
+//        }
+//
+//        if (isset($mod->instance)) {
+//            $moduleobject['modinstance'] = $mod->instance;
+//        }
+//        $moduleobject['modResourceType'] = $this->get_resource_filetype($mod);
+//        $moduleobject['modnameDisplay'] = $this->mod_displayname($mod->modname, $moduleobject['modResourceType']);
+//
+//        // Specific handling for embedded resource items (e.g. PDFs)  as allowed by site admin.
+//        if ($mod->modname == 'resource') {
+//            if (array_search($moduleobject['modResourceType'], $this->usemodalsforcoursemodules['resources']) !== false) {
+//                $moduleobject['isEmbeddedResource'] = 1;
+//                $moduleobject['launchtype'] = 'resource-modal';
+//                $moduleobject['pluginfileUrl'] = $this->plugin_file_url($mod);
+//            } else {
+//                // We are not using modal, so add the standard moodle onclick event to the link to launch pop up if appropriate.
+//                if ($mod->onclick) {
+//                    $moduleobject['onclick'] = htmlspecialchars_decode($mod->onclick, ENT_QUOTES);
+//                    $moduleobject['launchtype'] = 'standard';
+//                }
+//            }
+//        }
+//
+//        // Issue 67 handling for LTI set to open in new window.
+//        if ($mod->onclick == 'lti' && $mod->onclick) {
+//            $moduleobject['onclick'] = htmlspecialchars_decode($mod->onclick, ENT_QUOTES);
+//            $moduleobject['launchtype'] = 'standard';
+//        }
+//
+//        // Specific handling for embedded course module items (e.g. page) as allowed by site admin.
+//        if (array_search($mod->modname, $this->usemodalsforcoursemodules['modules']) !== false) {
+//            $moduleobject['isEmbeddedModule'] = 1;
+//            $moduleobject['launchtype'] = 'module-modal';
+//        }
+//        $moduleobject['showdescription'] =
+//            isset($mod->showdescription) && !$treataslabel ? $mod->showdescription : 0;
+//        if ($moduleobject['showdescription']) {
+//            // The reason we need 'noclean' arg here is that otherwise youtube etc iframes will be stripped out.
+//            $moduleobject['description'] = $mod->get_formatted_content(array('overflowdiv' => true, 'noclean' => true));
+//        }
+//        $moduleobject['extraclasses'] = $mod->extraclasses;
+//        $moduleobject['afterlink'] = $mod->afterlink;
+//        if ($isstealth) {
+//            $moduleobject['extraclasses'] .= ' stealth';
+//            $moduleobject['stealth'] = 1;
+//        } else if (
+//            (!$mod->visible && !$mod->visibleold)
+//            || !$mod->available
+//            || !$section->visible
+//        ) {
+//            $moduleobject['extraclasses'] .= ' dimmed';
+//        }
+//        if ($mod->completion == COMPLETION_TRACKING_MANUAL) {
+//            $moduleobject['extraclasses'] .= " completion-enabled completion-manual";
+//        } else if ($mod->completion == COMPLETION_VIEW_REQUIRED) {
+//            // Auto completion with a view required.
+//            $moduleobject['extraclasses'] .= " completion-enabled completion-view";
+//        } else if ($mod->completion == COMPLETION_TRACKING_AUTOMATIC) {
+//            // Auto completion with no view required (e.g. grade required).
+//            $moduleobject['extraclasses'] .= " completion-enabled completion-auto";
+//        }
+//
+//        if ($mod->modname == 'folder') {
+//            // Folders set to display inline will not work this theme.
+//            // This is not a very elegant solution, but it will ensure that the URL is correctly shown.
+//            // If the user is editing it will change the format of the folder.
+//            // It will show on a separate page, and alert the editing user as to what it has done.
+//            $moduleobject['url'] = new \moodle_url('/mod/folder/view.php', array('id' => $mod->id));
+//            if ($PAGE->user_is_editing()) {
+//                $folder = $DB->get_record('folder', array('id' => $mod->instance));
+//                if ($folder->display == FOLDER_DISPLAY_INLINE) {
+//                    $DB->set_field('folder', 'display', FOLDER_DISPLAY_PAGE, array('id' => $folder->id));
+//                    \core\notification::info(
+//                        get_string('folderdisplayerror', 'format_menutab', $moduleobject['url']->out())
+//                    );
+//                    rebuild_course_cache($mod->course, true);
+//                }
+//            }
+//        }
+//
+//        if ($mod->modname == 'url') {
+//            $url = $DB->get_record('url', array('id' => $mod->instance), '*', MUST_EXIST);
+//            $usemodalsforurl = array_search('url', $this->usemodalsforcoursemodules['resources']) !== false;
+//            $modifiedvideourl = $this->check_modify_embedded_url($url->externalurl);
+//            if ($url->display == RESOURCELIB_DISPLAY_POPUP || $url->display == RESOURCELIB_DISPLAY_NEW) {
+//                if ($mod->onclick) {
+//                    $moduleobject['onclick'] = $mod->onclick;
+//                    $moduleobject['launchtype'] = 'standard';
+//                } else {
+//                    $moduleobject['pluginfileUrl'] = $url->externalurl;
+//                    $moduleobject['extraclasses'] .= ' urlpopup';
+//                    $moduleobject['launchtype'] = 'urlpopup';
+//                }
+//            } else if ($url->display == RESOURCELIB_DISPLAY_EMBED) {
+//                // We need a secondary URL to show under the embed window so users can click it if embed doesn't work.
+//                // We will also use it to redirect mobile users to YouTube or wherever since embed wont work well for them.
+//                $moduleobject['secondaryurl'] = $url->externalurl;
+//                if ($usemodalsforurl) {
+//                    if ($modifiedvideourl) {
+//                        $moduleobject['pluginfileUrl'] = $modifiedvideourl;
+//                    } else {
+//                        $moduleobject['pluginfileUrl'] = $url->externalurl;
+//                    }
+//                    $moduleobject['launchtype'] = 'url-modal';
+//                }
+//            } else if ($url->display == RESOURCELIB_DISPLAY_AUTO) {
+//                require_once("$CFG->dirroot/mod/url/locallib.php");
+//                // TODO modify this later to treat embed as launch modal.
+//                $treataspopup = [
+//                    RESOURCELIB_DISPLAY_EMBED,
+//                    RESOURCELIB_DISPLAY_FRAME,
+//                    RESOURCELIB_DISPLAY_NEW,
+//                    RESOURCELIB_DISPLAY_DOWNLOAD,
+//                    RESOURCELIB_DISPLAY_POPUP
+//                ];
+//                $displaytype = url_get_final_display_type($url);
+//                if (array_search($displaytype, $treataspopup) !== false) {
+//                    $moduleobject['pluginfileUrl'] = $url->externalurl;
+//                    $moduleobject['extraclasses'] .= ' urlpopup';
+//                }
+//            }
+//
+//            if ($modifiedvideourl) {
+//                // Even though it's really a URL activity, display it as "video" activity with video icon.
+//                if ($this->courseformatoptions['courseusesubtiles']) {
+//                    $moduleobject['extraclasses'] .= ' video';
+//                    $moduleobject['modnameDisplay'] = get_string('displaytitle_mod_mp4', 'format_menutab');
+//                } else {
+//                    $moduleobject['iconurl'] = $output->image_url('play-circle-solid', 'format_menutab');
+//                }
+//            }
+//        }
+//
+//        if (
+//            ($mod->modname === 'url' || $mod->modname === 'resource')
+//            && $this->devicetype != \core_useragent::DEVICETYPE_TABLET
+//            && $this->devicetype != \core_useragent::DEVICETYPE_MOBILE
+//        ) {
+//            // If the non JS link is used, it redirects from /mod/xxx/view.php to external or pluginURL.
+//            $moduleobject['url'] .= '&redirect=1';
+//        }
+//
+//        // Now completion information for the individual course module.
+//        $completion = $mod->completion && $this->completioninfo && $this->completioninfo->is_enabled($mod) && $mod->available;
+//        if ($completion) {
+//            // Add completion icon to the course module if appropriate.
+//            $moduleobject['hascompletion'] = true;
+//            $completiondata = $this->completioninfo->get_data($mod, true);
+//            $moduleobject['completionstate'] = $completiondata->completionstate;
+//            $moduleobject['iscomplete'] = $completiondata->completionstate
+//                && $completiondata->completionstate !== COMPLETION_COMPLETE_FAIL;
+//            $moduleobject['completionstateInverse'] = $completiondata->completionstate == 1 ? 0 : 1;
+//            if ($mod->completion == COMPLETION_TRACKING_MANUAL) {
+//                $moduleobject['completionIsManual'] = 1;
+//                switch ($completiondata->completionstate) {
+//                    case COMPLETION_INCOMPLETE:
+//                        $moduleobject['completionstring'] = get_string('togglecompletionincomplete', 'format_menutab');
+//                        break;
+//                    case COMPLETION_COMPLETE:
+//                        $moduleobject['completionstring'] = get_string('togglecompletioncomplete', 'format_menutab');
+//                        break;
+//                }
+//            } else { // Automatic.
+//                switch ($completiondata->completionstate) {
+//                    case COMPLETION_INCOMPLETE:
+//                        $moduleobject['completionstring'] = get_string('complete-n-auto', 'format_menutab');
+//                        break;
+//                    case COMPLETION_COMPLETE:
+//                        $moduleobject['completionstring'] = get_string('complete-y-auto', 'format_menutab');
+//                        break;
+//                    case COMPLETION_COMPLETE_PASS:
+//                        $moduleobject['completionstring'] = get_string('completion-pass', 'core_completion', $mod->name);
+//                        break;
+//                    case COMPLETION_COMPLETE_FAIL:
+//                        $moduleobject['completionstring'] = get_string('completion-fail', 'core_completion', $mod->name);
+//                        $moduleobject['isfail'] = 1;
+//                        break;
+//                }
+//            }
+//        }
         return $moduleobject;
     }
 

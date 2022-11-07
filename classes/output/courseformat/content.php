@@ -27,11 +27,11 @@ namespace format_menutab\output\courseformat;
 use core_courseformat\output\local\content as content_base;
 
 /**
- * Base class to render a course content.
+ *  Format base class.
  *
- * @package   format_masonry
- * @copyright 2021 Renaat Debleu <info@eWallah.net>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package     format_menutab
+ * @copyright   2022 UIT Innovation  <thibaud@yorku.ca>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class content extends content_base
 {
@@ -42,4 +42,18 @@ class content extends content_base
      * The responsible for the buttons is core_courseformat\output\local\content\section.
      */
     protected $hasaddsection = true;
+
+    /**
+     * Export this data so it can be used as the context for a mustache template (core/inplace_editable).
+     *
+     * @param \renderer_base $output typically, the renderer that's calling this function
+     * @return \stdClass data context for a mustache template
+     */
+    public function export_for_template(\renderer_base $output) {
+        global $PAGE;
+
+        $data = parent::export_for_template($output);
+
+        return $data;
+    }
 }
