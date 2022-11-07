@@ -393,6 +393,7 @@ class course_output implements \renderable, \templatable
      */
     private function append_home_page_data($data)
     {
+        global $CFG;
         $data['is_home_page'] = true;
         // If using completion tracking, get the data.
         if ($this->completionenabled) {
@@ -411,6 +412,7 @@ class course_output implements \renderable, \templatable
 
         $countincludedsections = 0;
 
+        $image_count = 0;
         foreach ($this->modinfo->get_section_info_all() as $sectionnum => $section) {
             // Show the section if the user is permitted to access it, OR if it's not available
             // but there is some available info text which explains the reason & should display,
@@ -458,7 +460,13 @@ class course_output implements \renderable, \templatable
                     if (isset($result[0])) {
                         $image = $result[0] . ' class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
                     } else {
-                        $image = '';
+                        // Use a default image
+                        $image = '<img src="' . $CFG->wwwroot . '/course/format/menutab/images/' . $image_count . '.png" class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
+                        $image_count++;
+                        // Reset image count
+                        if ($image_count > 6) {
+                            $image_count = 0;
+                        }
                     }
                     // Remove image from summary
                     $summary = preg_replace("/<img[^>]+\>/i", "", $summary);

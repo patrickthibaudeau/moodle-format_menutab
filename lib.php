@@ -270,6 +270,7 @@ class format_menutab extends core_courseformat\base {
         }
         return $courseformatoptions;
     }
+
 }
 
 /**
