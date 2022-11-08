@@ -194,6 +194,12 @@ class course_output implements \renderable, \templatable
     {
         global $SESSION;
 
+        $print_section_number = false;
+
+        if (get_config('format_menutab', 'print_section_number')) {
+            $print_section_number = true;
+        }
+
         $data = [];
         $data['canedit'] = has_capability('moodle/course:update', $this->coursecontext);
         $data['canviewhidden'] = $this->canviewhidden;
@@ -203,6 +209,7 @@ class course_output implements \renderable, \templatable
         $data['ismobile'] = $this->devicetype == \core_useragent::DEVICETYPE_MOBILE;
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
+        $data['print_section_number'] = $print_section_number;
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;
@@ -283,13 +290,27 @@ class course_output implements \renderable, \templatable
      */
     private function append_section_zero_data($data, $output)
     {
+        $course = $this->format->get_course();
         $seczero = $this->modinfo->get_section_info(0);
+        $collapsed = false;
+
+        if ($this->modinfo->get_section_info(0)->name) {
+            $title = $this->modinfo->get_section_info(0)->name;
+        } else {
+            $title = get_string('section0name', 'format_menutab');
+        }
+        // Is section zero collapsed
+        if ($course->collapsed) {
+            $collapsed = true;
+        }
         $data['section_zero']['summary'] = self::temp_format_summary_text($seczero);
         $data['section_zero']['content']['course_modules'] = $this->section_course_mods($seczero, $output);
         $data['section_zero']['secid'] = $this->modinfo->get_section_info(0)->id;
+        $data['section_zero']['title'] = $title;
         $data['section_zero']['is_section_zero'] = true;
         $data['section_zero']['visible'] = true;
-
+        $data['section_zero']['collapsed'] = $collapsed;
+//        print_object($data);
         return $data;
     }
 

@@ -37,6 +37,8 @@ $string['numcolumns_help'] = 'Select the number of columns you would like per ro
 $string['return'] = 'Course home';
 $string['start_here'] = 'Start here';
 $string['pluginname'] = 'Menu/Tab';
+$string['print_section_number'] = 'Display section number on top of card image';
+$string['print_section_number_help'] = 'If selected, the section number will be displayed on top of the image wihtin each section card on the front page';
 $string['section0name'] = 'Start';
 $string['privacy:metadata'] = 'The Menu/Tab Course Format does not store any personal data.';
 //New tags

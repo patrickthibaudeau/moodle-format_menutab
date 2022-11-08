@@ -215,6 +215,7 @@
 <div id="{{uniqid}}-course-format">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
+    {{> format_menutab/section_zero}}
     {{#sectionrows}}
         <div class="row mb-2">
             <div class="col">
@@ -223,8 +224,14 @@
                         <div class="card">
                             <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"
                             title="{{title}}">
-                            {{{image}}}
+                            <div class="format_menutab_image_container">
+                                {{{image}}}
+                                {{#print_section_number}}
+                                    <div class="format_menutab_section_number">{{cardid}}</div>
+                                {{/print_section_number}}
+                            </div>
                             </a>
+
                             <div class="card-body">
                                 <h5 class="card-title">
                                     <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"

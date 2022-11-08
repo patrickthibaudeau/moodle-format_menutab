@@ -208,7 +208,11 @@ class format_menutab extends core_courseformat\base {
                 'collapsed' => array(
                     'default' => 1,
                     'type' => PARAM_INT,
-                )
+                ),
+                'print_section_number' => array(
+                    'default' => 0,
+                    'type' => PARAM_INT,
+                ),
             );
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
@@ -263,6 +267,18 @@ class format_menutab extends core_courseformat\base {
                         )
                     ),
                     'help' => 'collapsed',
+                    'help_component' => 'format_menutab',
+                ),
+                'print_section_number' => array(
+                    'label' => new lang_string('print_section_number', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'print_section_number',
                     'help_component' => 'format_menutab',
                 )
             );
