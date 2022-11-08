@@ -24,22 +24,26 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/course/format/lib.php');
 
-class format_menutab extends core_courseformat\base {
+class format_menutab extends core_courseformat\base
+{
 
     /**
      * Returns true if this course format uses sections.
      *
      * @return bool
      */
-    public function uses_sections() {
+    public function uses_sections()
+    {
         return true;
     }
 
-    public function uses_indentation(): bool {
+    public function uses_indentation(): bool
+    {
         return false;
     }
 
-    public function uses_course_index() {
+    public function uses_course_index()
+    {
         return true;
     }
 
@@ -51,13 +55,15 @@ class format_menutab extends core_courseformat\base {
      *
      * @return stdClass
      */
-    public function supports_ajax() {
+    public function supports_ajax()
+    {
         $ajaxsupport = new stdClass();
         $ajaxsupport->capable = true;
         return $ajaxsupport;
     }
 
-    public function supports_components() {
+    public function supports_components()
+    {
         return true;
     }
 
@@ -69,7 +75,8 @@ class format_menutab extends core_courseformat\base {
      * @param int|stdClass|section_info $section
      * @return bool
      */
-    public function can_delete_section($section) {
+    public function can_delete_section($section)
+    {
         return true;
     }
 
@@ -78,7 +85,8 @@ class format_menutab extends core_courseformat\base {
      *
      * @return bool
      */
-    public function supports_news() {
+    public function supports_news()
+    {
         return true;
     }
 
@@ -90,7 +98,8 @@ class format_menutab extends core_courseformat\base {
      * @param int|stdClass $section Section object from database or just field section.section
      * @return string Display name that the course format prefers, e.g. "Topic 2"
      */
-    public function get_section_name($section) {
+    public function get_section_name($section)
+    {
         $section = $this->get_section($section);
         if ((string)$section->name !== '') {
             return format_string(
@@ -113,7 +122,8 @@ class format_menutab extends core_courseformat\base {
      * @param stdClass $section Section object from database or just field course_sections section
      * @return string The default value for the section name.
      */
-    public function get_default_section_name($section) {
+    public function get_default_section_name($section)
+    {
         if ($section->section == 0) {
             // Return the general section.
             return get_string('section0name', 'format_menutab');
@@ -134,7 +144,8 @@ class format_menutab extends core_courseformat\base {
      *     'sr' (int) used by multipage formats to specify to which section to return
      * @return null|moodle_url
      */
-    public function get_view_url($section, $options = []) {
+    public function get_view_url($section, $options = [])
+    {
         global $CFG;
         $course = $this->get_course();
         $url = new moodle_url('/course/view.php', ['id' => $course->id]);
@@ -149,24 +160,7 @@ class format_menutab extends core_courseformat\base {
             $sectionno = $section;
         }
         if ($sectionno !== null) {
-            if ($sr !== null) {
-                if ($sr) {
-                    $usercoursedisplay = COURSE_DISPLAY_MULTIPAGE;
-                    $sectionno = $sr;
-                } else {
-                    $usercoursedisplay = COURSE_DISPLAY_SINGLEPAGE;
-                }
-            } else {
-                $usercoursedisplay = $course->coursedisplay ?? COURSE_DISPLAY_SINGLEPAGE;
-            }
-            if ($sectionno != 0 && $usercoursedisplay == COURSE_DISPLAY_MULTIPAGE) {
-                $url->param('section', $sectionno);
-            } else {
-                if (empty($CFG->linkcoursesections) && !empty($options['navigation'])) {
-                    return null;
-                }
-                $url->set_anchor('section-'.$sectionno);
-            }
+            $url->param('section', $sectionno);
         }
         return $url;
     }
@@ -182,7 +176,8 @@ class format_menutab extends core_courseformat\base {
      * @param bool $foreditform
      * @return array of options
      */
-    public function course_format_options($foreditform = false) {
+    public function course_format_options($foreditform = false)
+    {
         global $COURSE;
         static $courseformatoptions = false;
         $context = context_course::instance($COURSE->id);
@@ -299,7 +294,8 @@ class format_menutab extends core_courseformat\base {
  * @param mixed $newvalue
  * @return inplace_editable
  */
-function format_menutab_inplace_editable($itemtype, $itemid, $newvalue) {
+function format_menutab_inplace_editable($itemtype, $itemid, $newvalue)
+{
     global $DB, $CFG;
     require_once($CFG->dirroot . '/course/lib.php');
     if ($itemtype === 'sectionname' || $itemtype === 'sectionnamenl') {
