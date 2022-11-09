@@ -310,7 +310,6 @@ class course_output implements \renderable, \templatable
         $data['section_zero']['is_section_zero'] = true;
         $data['section_zero']['visible'] = true;
         $data['section_zero']['collapsed'] = $collapsed;
-//        print_object($data);
         return $data;
     }
 
@@ -475,7 +474,7 @@ class course_output implements \renderable, \templatable
                         $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
                     }
 
-                    $summary = $this->format_summary_text($section);
+                    $summary = self::temp_format_summary_text($section);
                     //Get image for top of card
                     preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
                     if (isset($result[0])) {
@@ -592,23 +591,6 @@ class course_output implements \renderable, \templatable
         }
         $data['moodlefiltersconfig'] = $this->get_filters_config();
         return $data;
-    }
-
-    /**
-     * Generate html for a section summary text
-     *
-     * @param stdClass $section The course_section entry from DB
-     * @return string HTML to output.
-     */
-    protected function format_summary_text($section)
-    {
-        $context = \context_course::instance($section->course);
-        $summarytext = file_rewrite_pluginfile_urls($section->summary, 'pluginfile.php', $context->id, 'course', 'section', $section->id);
-
-        $options = new \stdClass();
-        $options->noclean = true;
-        $options->overflowdiv = true;
-        return format_text($summarytext, $section->summaryformat, $options);
     }
 
     /**
