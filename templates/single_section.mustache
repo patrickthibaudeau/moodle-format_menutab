@@ -72,7 +72,7 @@
         }
 }}
 {{! this has to be an li for drag and drop sections to work properly (or at all) }}
-<div id="section-{{card}}" data-section="{{cardid}}" class="section main clearfix" role="region"
+<div id="section-{{cardid}}" data-section="{{cardid}}" class="section main clearfix" role="region"
     aria-label="{{title}}">
     <div class="content">
         {{#hidden_section}}
@@ -81,8 +81,6 @@
         <div class="left side"></div>
         <div class="right side"></div>
         {{^hidden_section}}
-
-
 
             <div class="pagesechead">
                 <div class="sectiontitlecontainer">
@@ -102,14 +100,11 @@
             </div>
             {{{availabilitymessage}}}
             <div class="summary{{^visible}} dimmed{{/visible}}">{{{summary}}}</div>
-
-            {{^from_ajax}}
-                {{#single_sec_content_is_long}}
-                {{!repeat nav arrows at bottom of page if it is long}}
-                    {{>format_menutab/single_section_nav}}
-                {{/single_sec_content_is_long}}
-            {{/from_ajax}}
-
+            <ul class="section img-text">
+                {{#course_modules}}
+                    {{>format_menutab/course_module}}
+                {{/course_modules}}
+            </ul>
         {{/hidden_section}}
     </div>
 </div>
