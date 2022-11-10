@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['collapsed'] = 'Top section collapsed?';
 $string['collapsed_help'] = 'Should top section (in regular Moodle courses know as Section 0) be collapsed when students enter the course? Default Yes';
+$string['course_image'] = 'Course image';
 $string['currentsection'] = 'This topic';
 $string['hidden'] = 'Unavailable for students';
 $string['hidefromothers'] = 'Hide from others';
@@ -37,8 +38,10 @@ $string['numcolumns_help'] = 'Select the number of columns you would like per ro
 $string['return'] = 'Course home';
 $string['start_here'] = 'Start here';
 $string['pluginname'] = 'Menu/Tab';
+$string['print_progress'] = 'Display completion progress on card';
+$string['print_progress_help'] = 'If yes, and completion tracking is enabled, a progress bar will be displayed at the bottom of the section card on the course front page.';
 $string['print_section_number'] = 'Display section number on top of card image';
-$string['print_section_number_help'] = 'If selected, the section number will be displayed on top of the image wihtin each section card on the front page';
+$string['print_section_number_help'] = 'If yes, the section number will be displayed on top of the image wihtin each section card on the front page';
 $string['section0name'] = 'Start';
 $string['privacy:metadata'] = 'The Menu/Tab Course Format does not store any personal data.';
 //New tags

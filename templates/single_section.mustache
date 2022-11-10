@@ -72,7 +72,7 @@
         }
 }}
 {{! this has to be an li for drag and drop sections to work properly (or at all) }}
-<div id="section-{{tileid}}" data-section="{{tileid}}" class="section main clearfix" role="region"
+<div id="section-{{card}}" data-section="{{cardid}}" class="section main clearfix" role="region"
     aria-label="{{title}}">
     <div class="content">
         {{#hidden_section}}
@@ -87,37 +87,22 @@
             <div class="pagesechead">
                 <div class="sectiontitlecontainer">
                     <div class="sectiontitle" id="sectiontitle{{tileid}}" tabindex="3">
-                        <h2>{{#editing}}{{{inplace_editable_title}}}{{/editing}}{{^editing}}{{{title}}}{{/editing}}</h2>
+                        <h2>
+                            {{#editing}}{{{inplace_editable_title}}}{{/editing}}{{^editing}}{{{title}}}{{/editing}}
+                            <span class="float-right">
+                            <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}" class="btn btn-outline-primary">
+                            Course home
+                                </a>
+                        </span>
+                        </h2>
                         {{#hidden}}<span class="icon20" id="hiddeneye" title="Hidden"></span>{{/hidden}}
                     </div>
+
                 </div>
             </div>
             {{{availabilitymessage}}}
             <div class="summary{{^visible}} dimmed{{/visible}}">{{{summary}}}</div>
-            {{#editing}}
-                <a title="{{#str}}editsummary, core{{/str}}"
-                   href="{{{config.wwwroot}}}/course/editsection.php?id={{secid}}&sr={{tileid}}">{{#pix}}
-                    i/settings, core{{/pix}}
-                </a>
-            {{/editing}}
-            <ul class="section img-text {{^useSubtiles}}no{{/useSubtiles}}subtiles">
-                {{#course_modules}}
-                    {{>format_menutab/course_module}}
-                {{/course_modules}}
-                {{#useSubtiles}}
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                    <li class="activity subtile spacer" aria-hidden="true"></li>
-                {{/useSubtiles}}
-            </ul>
 
-            {{#editing}}
-                {{{single_sec_add_cm_control_html}}}
-            {{/editing}}
             {{^from_ajax}}
                 {{#single_sec_content_is_long}}
                 {{!repeat nav arrows at bottom of page if it is long}}

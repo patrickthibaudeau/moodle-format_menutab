@@ -210,14 +210,40 @@ class course_output implements \renderable, \templatable
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
+        $data['course_image'] = $this->get_course_image();
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;
         }
         // RTL support for nav arrows direction (Arabic/ Hebrew).
         $data['is-rtl'] = right_to_left();
-
         return $data;
+    }
+
+    /**
+     * Get teh course image
+     * @return string
+     * @throws \coding_exception
+     */
+    private function get_course_image()
+    {
+        global $COURSE, $CFG;
+        $url = '';
+        require_once( $CFG->libdir . '/filelib.php' );
+
+        $context = \context_course::instance( $COURSE->id );
+        $fs = get_file_storage();
+        $files = $fs->get_area_files( $context->id, 'course', 'overviewfiles', 0 );
+
+        foreach ( $files as $f )
+        {
+            if ( $f->is_valid_image() )
+            {
+                $url = \moodle_url::make_pluginfile_url( $f->get_contextid(), $f->get_component(), $f->get_filearea(), null, $f->get_filepath(), $f->get_filename(), false );
+            }
+        }
+
+        return $url->out();
     }
 
     /**
@@ -431,7 +457,6 @@ class course_output implements \renderable, \templatable
         $sectioncountwarningissued = false;
 
         $countincludedsections = 0;
-
         $image_count = 0;
         foreach ($this->modinfo->get_section_info_all() as $sectionnum => $section) {
             // Show the section if the user is permitted to access it, OR if it's not available
@@ -512,7 +537,6 @@ class course_output implements \renderable, \templatable
                         'extraclasses' => '',
                     );
 
-
                     // Include completion tracking data for each section (if used).
                     if ($section->visible && $this->completionenabled) {
                         if (isset($this->modinfo->sections[$sectionnum])) {
@@ -523,15 +547,17 @@ class course_output implements \renderable, \templatable
 
                             // We only add the section values to the individual sections if courseshowsectionprogress is true.
                             // (Otherwise we only retain overall completion as above, not for each section).
-                            if ($this->courseformatoptions['courseshowsectionprogress']) {
-                                $showaspercent = $this->courseformatoptions['courseshowsectionprogress'] == 2 ? true : false;
-                                $section_card['progress'] = $this->completion_indicator(
-                                    $completionthissection['completed'],
-                                    $completionthissection['outof'],
-                                    $showaspercent,
-                                    false
-                                );
-                            }
+
+                                $showaspercent = true;
+                                if ($this->courseformatoptions['print_progress'] && $completionthissection['outof'] > 0) {
+                                    $section_card['progress'] = $this->completion_indicator(
+                                        $completionthissection['completed'],
+                                        $completionthissection['outof'],
+                                        $showaspercent,
+                                        false
+                                    );
+                                }
+
                         }
                     }
 
@@ -579,7 +605,7 @@ class course_output implements \renderable, \templatable
         $data['sectioncards'] = $data['sectionrows'];
         $data['section_zero_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control($this->course, 0, 0);
         if ($this->completionenabled && $data['overall_progress']['num_out_of'] > 0) {
-            if (get_config('format_menutab', 'showoverallprogress')) {
+            if (get_config('format_menutab', 'print_progress')) {
                 $data['overall_progress_indicator'] = $this->completion_indicator(
                     $data['overall_progress']['num_complete'],
                     $data['overall_progress']['num_out_of'],
@@ -590,6 +616,7 @@ class course_output implements \renderable, \templatable
             }
         }
         $data['moodlefiltersconfig'] = $this->get_filters_config();
+//        print_object($data);
         return $data;
     }
 
@@ -1231,12 +1258,21 @@ class course_output implements \renderable, \templatable
     public function completion_indicator($numcomplete, $numoutof, $aspercent, $isoverall)
     {
         $percentcomplete = $numoutof == 0 ? 0 : round(($numcomplete / $numoutof) * 100, 0);
+        //Set progressbar colors
+        if ($percentcomplete <= 59) {
+            $background_color = 'bg-danger';
+        } else if ($percentcomplete >= 60 &&  $percentcomplete < 100) {
+            $background_color = 'bg-warning';
+        } else if ($percentcomplete == 100) {
+            $background_color = 'bg-success';
+        }
         $progressdata = array(
             'numComplete' => $numcomplete,
             'numOutOf' => $numoutof,
             'percent' => $percentcomplete,
             'isComplete' => $numcomplete > 0 && $numcomplete == $numoutof ? 1 : 0,
             'isOverall' => $isoverall,
+            'backgroundColor' => $background_color,
         );
         if ($aspercent) {
             // Percent in circle.

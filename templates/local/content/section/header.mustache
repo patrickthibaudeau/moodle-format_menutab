@@ -32,7 +32,7 @@
 
 {{#headerdisplaymultipage}}
     <h3 class="sectionid-{{id}}-title sectionname">
-        {{{title}}}
+        <a href="config.wwwroot/course/view.php?id={{courseid}}">{{{title}}}</a>
     </h3>
 {{/headerdisplaymultipage}}
 {{^headerdisplaymultipage}}
@@ -62,7 +62,7 @@
             </a>
             <h3 class="sectionid-{{id}}-title sectionname course-content-item d-flex align-self-stretch align-items-center mb-0"
                 id="coursecontentsection{{num}}" data-for="section_title" data-id="{{id}}" data-number="{{num}}">
-                {{{title}}}
+                <a href="config.wwwroot/course/view.php?id={{courseid}}">{{{title}}}</a>
             </h3>
         </div>
     {{/sitehome}}

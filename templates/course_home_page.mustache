@@ -215,6 +215,13 @@
 <div id="{{uniqid}}-course-format">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
+    {{#course_image}}
+        <div class="row mb-1">
+            <div class="col">
+                <img src="{{course_image}}" class="img-fluid" title="{{#str}}course_image, format_menutab{{/str}}"/>
+            </div>
+        </div>
+    {{/course_image}}
     {{> format_menutab/section_zero}}
     {{#sectionrows}}
         <div class="row mb-2">
@@ -243,6 +250,11 @@
                                 <p class="card-text">
                                     {{{summary}}}
                                 </p>
+                                {{#progress}}
+                                    <div class="progress">
+                                        <div class="progress-bar {{backgroundColor}}" role="progressbar" style="width: {{percent}}%;" aria-valuenow="{{percent}}" aria-valuemin="0" aria-valuemax="100">{{percent}}%</div>
+                                    </div>
+                                {{/progress}}
                             </div>
                         </div>
                     {{/sections}}
