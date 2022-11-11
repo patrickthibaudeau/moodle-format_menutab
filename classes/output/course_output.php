@@ -243,7 +243,11 @@ class course_output implements \renderable, \templatable
             }
         }
 
-        return $url->out();
+        if ($url) {
+            return $url->out();
+        }
+
+        return false;
     }
 
     /**
@@ -257,7 +261,7 @@ class course_output implements \renderable, \templatable
             $this->coursecontext->id, 'course', 'section', $section->id);
 
         $options = new \stdClass();
-        $options->noclean = true;
+        $options->noclean = false;
         $options->overflowdiv = true;
         return format_text($summarytext, $section->summaryformat, $options);
     }
