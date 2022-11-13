@@ -73,7 +73,7 @@
 }}
 {{! this has to be an li for drag and drop sections to work properly (or at all) }}
 <div id="section-{{cardid}}" data-section="{{cardid}}" class="section main clearfix" role="region"
-    aria-label="{{title}}">
+     aria-label="{{title}}">
     <div class="content">
         {{#hidden_section}}
             {{#str}}notavailable{{/str}}
@@ -84,9 +84,9 @@
 
             <div class="pagesechead">
                 <div class="sectiontitlecontainer">
-                    <div class="sectiontitle" id="sectiontitle{{tileid}}" tabindex="3">
+                    <div class="sectiontitle" id="sectiontitle{{cardid}}" tabindex="3">
                         <h2>
-                            {{#editing}}{{{inplace_editable_title}}}{{/editing}}{{^editing}}{{{title}}}{{/editing}}
+                            {{{title}}}
                             <span class="float-right">
                             <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}" class="btn btn-outline-primary">
                             Course home
@@ -99,12 +99,26 @@
                 </div>
             </div>
             {{{availabilitymessage}}}
-            <div class="summary{{^visible}} dimmed{{/visible}}">{{{summary}}}</div>
-            <ul class="section img-text">
-                {{#course_modules}}
-                    {{>format_menutab/course_module}}
-                {{/course_modules}}
+            <div class="summary{{^visible}} dimmed{{/visible}} mb-3">{{{summary}}}</div>
+            <ul class="nav nav-tabs"  id="format_menutab_tab" role="tablist">
+                {{#tabs}}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{active}}" id="tab-{{tabid}}" data-toggle="tab" data-target="#tab-content-{{tabid}}" type="button" role="tab" aria-controls="tab-content-{{tabid}}" aria-selected="true">{{title}}</button>
+                    </li>
+                {{/tabs}}
             </ul>
+
+        <div class="tab-content" id="format_menutab_tab_content">
+            {{#tabs}}
+                <div class="tab-pane fade {{class}}" id="tab-content-{{tabid}}" role="tabpanel" aria-labelledby="tab-{{tabid}}">
+                    <ul class="section">
+                        {{#course_modules}}
+                            {{>format_menutab/course_module}}
+                        {{/course_modules}}
+                    </ul>
+                </div>
+            {{/tabs}}
+        </div>
         {{/hidden_section}}
     </div>
 </div>

@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['collapsed'] = 'Top section collapsed?';
 $string['collapsed_help'] = 'Should top section (in regular Moodle courses know as Section 0) be collapsed when students enter the course? Default Yes';
+$string['content'] = 'Content';
 $string['course_image'] = 'Course image';
 $string['currentsection'] = 'This topic';
 $string['hidden'] = 'Unavailable for students';
