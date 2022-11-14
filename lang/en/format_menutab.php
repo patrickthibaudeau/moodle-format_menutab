@@ -45,7 +45,13 @@ $string['print_section_number'] = 'Display section number on top of card image';
 $string['print_section_number_help'] = 'If yes, the section number will be displayed on top of the image wihtin each section card on the front page';
 $string['section0name'] = 'Start';
 $string['privacy:metadata'] = 'The Menu/Tab Course Format does not store any personal data.';
-//New tags
+$string['show_summary_single_section'] = 'Show section summary';
+$string['show_summary_single_section_help'] = 'If yes, when viewing a section, the summary text for that section will be shown below the image.';
+$string['tab_background_color'] = 'Tab background colour';
+$string['tab_background_color_help'] = 'Select a backgrtound color for the tabs in the section page';
+$string['tab_text_color'] = 'Tab text colour';
+$string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
+//New tag
 $string['access'] = 'Access';
 $string['toggle_course_menu'] = 'Toggle course menu';
 //Required language strings

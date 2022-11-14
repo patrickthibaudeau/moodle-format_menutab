@@ -204,6 +204,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 1,
                     'type' => PARAM_INT,
                 ),
+                'show_summary' => array(
+                    'default' => 0,
+                    'type' => PARAM_INT,
+                ),
                 'print_progress' => array(
                     'default' => 0,
                     'type' => PARAM_INT,
@@ -211,6 +215,14 @@ class format_menutab extends core_courseformat\base
                 'print_section_number' => array(
                     'default' => 0,
                     'type' => PARAM_INT,
+                ),
+                'tab_background_color' => array(
+                    'default' => '#1b4c88',
+                    'type' => PARAM_TEXT,
+                ),
+                'tab_text_color' => array(
+                    'default' => '#ffffff',
+                    'type' => PARAM_TEXT,
                 ),
             );
         }
@@ -268,6 +280,18 @@ class format_menutab extends core_courseformat\base
                     'help' => 'collapsed',
                     'help_component' => 'format_menutab',
                 ),
+                'show_summary' => array(
+                    'label' => new lang_string('show_summary_single_section', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'show_summary_single_section',
+                    'help_component' => 'format_menutab',
+                ),
                 'print_progress' => array(
                     'label' => new lang_string('print_progress', 'format_menutab'),
                     'element_type' => 'select',
@@ -291,7 +315,23 @@ class format_menutab extends core_courseformat\base
                     ),
                     'help' => 'print_section_number',
                     'help_component' => 'format_menutab',
-                )
+                ),
+                'tab_background_color' => array(
+                    'label' => new lang_string('tab_background_color', 'format_menutab'),
+                    'element_type' => 'text',
+                    'element_attributes' => array(
+                    ),
+                    'help' => 'tab_background_color',
+                    'help_component' => 'format_menutab',
+                ),
+                'tab_text_color' => array(
+                    'label' => new lang_string('tab_text_color', 'format_menutab'),
+                    'element_type' => 'text',
+                    'element_attributes' => array(
+                    ),
+                    'help' => 'tab_text_color',
+                    'help_component' => 'format_menutab',
+                ),
             );
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
         }

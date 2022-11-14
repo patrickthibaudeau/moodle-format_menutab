@@ -386,23 +386,22 @@ class course_output implements \renderable, \templatable
             // No need to line break here as we have plenty of room, so remove the char by passing true.
             $data['title'] = $this->apply_linebreak_filter($data['title'], true);
         }
-        $data['summary'] = self::temp_format_summary_text($thissection);
+
+        // get proper image key
+        $image_count = 0;
+       for ($i = 0; $i < ($this->sectionnum - 1); $i++) {
+           $image_count++;
+           if ($image_count > 6) {
+               $image_count = 0;
+           }
+       }
+           // Split image and summary text
+        $summary_object = $this->split_section_summary(self::temp_format_summary_text($thissection), $image_count);
+
+        $data['image'] = $summary_object->image;
+        $data['summary'] = $summary_object->text;
         $data['cardid'] = $thissection->section;
         $data['secid'] = $thissection->id;
-
-        // If photo tile backgrounds are allowed by site admin, prepare the image for this section.
-        if (get_config('format_menutab', 'allowphototiles')) {
-            $tilephoto = new tile_photo($this->course->id, $thissection->id);
-            $tilephotourl = $tilephoto->get_image_url();
-
-            $data['phototileinlinestyle'] = 'style = "background-image: url(' . $tilephotourl . ');"';
-            $data['hastilephoto'] = $tilephotourl ? 1 : 0;
-            $data['phototileurl'] = $tilephotourl;
-            $data['phototileediturl'] = new \moodle_url(
-                '/course/format/tiles/editimage.php',
-                array('courseid' => $this->course->id, 'sectionid' => $thissection->id)
-            );
-        }
 
         // Include completion help icon HTML.
         if ($this->completioninfo) {
@@ -466,26 +465,16 @@ class course_output implements \renderable, \templatable
                     if ($section->name) {
                         $title = $section->name;
                     } else {
-
                         $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
                     }
 
                     $summary = self::temp_format_summary_text($section);
-                    //Get image for top of card
-                    preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
-                    if (isset($result[0])) {
-                        $image = $result[0] . ' class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
-                    } else {
-                        // Use a default image
-                        $image = '<img src="' . $CFG->wwwroot . '/course/format/menutab/images/' . $image_count . '.png" class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
-                        $image_count++;
-                        // Reset image count
-                        if ($image_count > 6) {
-                            $image_count = 0;
-                        }
-                    }
-                    // Remove image from summary
-                    $summary = preg_replace("/<img[^>]+\>/i", "", $summary);
+                    // Split image and summary text
+                    $summary_object = $this->split_section_summary($summary, $image_count);
+
+                    $image = $summary_object->image;
+                    $summary = $summary_object->text;
+                    $image_count = $summary_object->image_count;
 
                     $section_card = array(
                         'cardid' => $section->section,
@@ -592,6 +581,38 @@ class course_output implements \renderable, \templatable
     }
 
     /**
+     * Return section summary into object splitting the image and the text.
+     * @param $summary
+     * @param $image_count
+     * @return \stdClass
+     */
+    private function split_section_summary($summary, $image_count = 0) {
+        global $CFG;
+        //Get image for top of card
+        preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
+        if (isset($result[0])) {
+            $image = $result[0] . ' class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
+        } else {
+            // Use a default image
+            $image = '<img src="' . $CFG->wwwroot . '/course/format/menutab/images/' . $image_count . '.png" class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
+            $image_count++;
+            // Reset image count
+            if ($image_count > 6) {
+                $image_count = 0;
+            }
+        }
+        // Remove image from summary
+        $summary = preg_replace("/<img[^>]+\>/i", "", $summary);
+
+        $results = new \stdClass();
+        $results->image = $image;
+        $results->text = $summary;
+        $results->image_count = $image_count;
+
+        return $results;
+    }
+
+    /**
      * Count the number of course modules with completion tracking activated
      * in this section, and the number which the student has completed
      * Exclude labels if we are using sub sections, as these are not checkable
@@ -662,7 +683,9 @@ class course_output implements \renderable, \templatable
                 $tabs[$t]['cm_index_start'] = $index;
             } else if ($mod->get_module_type_name()->get_component() == 'label') {
                 preg_match("#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s", $mod->get_formatted_content(), $matches);
-                if ($title = strip_tags($matches[1])) {
+
+                if (isset($matches[1])) {
+                    $title = strip_tags($matches[1]);
                     $tabs[$t]['title'] = $title;
                     $tabs[$t]['tabid'] = $index;
                     // Because this mod is a label and contains a tab, get next module that follows to start the
