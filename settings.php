@@ -31,5 +31,17 @@ if ($hassiteconfig) {
     // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedIf
     if ($ADMIN->fulltree) {
         // TODO: Define actual plugin settings page and add it to the tree - {@link https://docs.moodle.org/dev/Admin_settings}.
+        $settings->add(new admin_setting_configtextarea(
+            'menutab_tab_background_colors',
+            get_string('tab_background_colors', 'format_menutab'),
+            get_string('tab_background_colors_help', 'format_menutab'),
+            "#1b4c88|Dark Blue
+                         #af0d1a|Dark Red
+                         #339999|Teal
+                         #ffcc00|Yellow
+                         #993366|Plum
+                         #00a057|Green",
+            PARAM_TEXT
+        ));
     }
 }
