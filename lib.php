@@ -318,16 +318,28 @@ class format_menutab extends core_courseformat\base
                 ),
                 'tab_background_color' => array(
                     'label' => new lang_string('tab_background_color', 'format_menutab'),
-                    'element_type' => 'text',
+                    'element_type' => 'select',
                     'element_attributes' => array(
+                        array(
+                            '#1b4c88' => 'Dark Blue',
+                            '#af0d1a' => 'Dark Red',
+                            '#339999' => 'Teal',
+                            '#ffcc00' => 'Yellow',
+                            '#993366' => 'Plum',
+                            '#00a057' => 'Green',
+                        )
                     ),
                     'help' => 'tab_background_color',
                     'help_component' => 'format_menutab',
                 ),
                 'tab_text_color' => array(
                     'label' => new lang_string('tab_text_color', 'format_menutab'),
-                    'element_type' => 'text',
+                    'element_type' => 'select',
                     'element_attributes' => array(
+                        array(
+                            '#ffffff' => 'White',
+                            '#000000' => 'Black'
+                        )
                     ),
                     'help' => 'tab_text_color',
                     'help_component' => 'format_menutab',
@@ -337,7 +349,52 @@ class format_menutab extends core_courseformat\base
         }
         return $courseformatoptions;
     }
+    /**
+     * Adds format options elements to the course/section edit form.
+     *
+     * This function is called from {@see course_edit_form::definition_after_data()}.
+     *
+     * @param MoodleQuickForm $mform form the elements are added to.
+     * @param bool $forsection 'true' if this is a section edit form, 'false' if this is course edit form.
+     * @return array array of references to the added form elements.
+     * @throws HTML_QuickForm_Error
+     * @throws coding_exception
+     * @throws dml_exception
+     */
+    public function create_edit_form_elements(&$mform, $forsection = false) {
+        global $COURSE, $PAGE, $DB, $USER;
+        $elements = parent::create_edit_form_elements($mform, $forsection);
 
+        // Call the JS edit_form_helper.js, which in turn will call edit_icon_picker.js.
+        if ($forsection) {
+            $sectionid = optional_param('id', 0, PARAM_INT);
+            $section = $DB->get_field('course_sections', 'section', array('id' => $sectionid));
+        } else {
+            // We are on the course setting page so can ignore section.
+            $section = 0;
+            $sectionid = 0;
+        }
+        $jsparams = array(
+            'pageType' => $PAGE->pagetype,
+        );
+        $PAGE->requires->js_call_amd('format_menutab/edit_form_helper', 'init', $jsparams);
+
+        if (!$forsection && (empty($COURSE->id) || $COURSE->id == SITEID)) {
+            // Add "numsections" to create course form - will force the course pre-populated with empty sections.
+            // The "Number of sections" option is no longer available when editing course.
+            // Instead teachers should delete and add sections when needed.
+
+            $courseconfig = get_config('moodlecourse');
+            $max = (int)$courseconfig->maxsections;
+            $element = $mform->addElement('select', 'numsections', get_string('numberweeks'), range(0, $max ?: 52));
+            $mform->setType('numsections', PARAM_INT);
+            if (is_null($mform->getElementValue('numsections'))) {
+                $mform->setDefault('numsections', $courseconfig->numsections);
+            }
+            array_unshift($elements, $element);
+        }
+        return $elements;
+    }
 }
 
 /**

@@ -36,3 +36,37 @@
 .section-zero-header {
     background-color:#0062ac !important;
 }
+
+.format-menutab fieldset#id_courseformathdr .colourpickercircle,
+.format-site fieldset#id_courseformathdr .colourpickercircle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0 5px 0 5px;
+    border: 3px solid;
+}
+
+.format-menutab fieldset#id_courseformathdr .colourpickercircle:hover,
+.format-site fieldset#id_courseformathdr .colourpickercircle:hover {
+    border-color: orange;
+}
+.format-menutab fieldset#id_courseformathdr .colourpickercircle.selected,
+.format-site fieldset#id_courseformathdr .colourpickercircle.selected {
+    background-image: url([[pix:format_menutab|check-white]]);
+    background-size: contain;
+    border-color: #000;
+
+}
+.format-menutab fieldset#id_courseformathdr #colourselectnotify,
+.format-site fieldset#id_courseformathdr #colourselectnotify {
+    color: #212529;
+    background-color: #e9ecef;
+    border-radius: 0.2rem;
+    padding: 2px 8px;
+    height: 26px;
+    font-size: 0.9em;
+    display: none;
+    top: 0;
+    position: relative;
+}
