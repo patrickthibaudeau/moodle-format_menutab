@@ -50,6 +50,8 @@ $string['show_summary_single_section'] = 'Show section summary';
 $string['show_summary_single_section_help'] = 'If yes, when viewing a section, the summary text for that section will be shown below the image.';
 $string['tab_background_color'] = 'Tab background colour';
 $string['tab_background_color_help'] = 'Select a backgrtound color for the tabs in the section page';
+$string['tab_background_colors'] = 'Tab background colors';
+$string['tab_background_colors_help'] = 'Enter a color per line. Each color must use the hex value of the color seperated by a pipe (|) followed by the name of the color.';
 $string['tab_text_color'] = 'Tab text colour';
 $string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
 //New tag

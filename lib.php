@@ -320,14 +320,7 @@ class format_menutab extends core_courseformat\base
                     'label' => new lang_string('tab_background_color', 'format_menutab'),
                     'element_type' => 'select',
                     'element_attributes' => array(
-                        array(
-                            '#1b4c88' => 'Dark Blue',
-                            '#af0d1a' => 'Dark Red',
-                            '#339999' => 'Teal',
-                            '#ffcc00' => 'Yellow',
-                            '#993366' => 'Plum',
-                            '#00a057' => 'Green',
-                        )
+                        $this->get_default_tab_background_colors()
                     ),
                     'help' => 'tab_background_color',
                     'help_component' => 'format_menutab',
@@ -348,6 +341,22 @@ class format_menutab extends core_courseformat\base
             $courseformatoptions = array_merge_recursive($courseformatoptions, $courseformatoptionsedit);
         }
         return $courseformatoptions;
+    }
+
+    /**
+     * Returns an array of all default colors based on format settings
+     * @return array
+     */
+    private function get_default_tab_background_colors() {
+        global $CFG;
+        $default_colors = explode("\n", $CFG->menutab_tab_background_colors);
+        $colors = [];
+        for ($i = 0; $i < count($default_colors); $i++) {
+            $color = explode("|", $default_colors[$i]);
+            $colors[$color[0]] = $color[1];
+        }
+
+        return $colors;
     }
     /**
      * Adds format options elements to the course/section edit form.
