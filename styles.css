@@ -33,10 +33,6 @@
     border-top-left-radius: 0px !important;
 }
 
-.section-zero-header {
-    background-color:#0062ac !important;
-}
-
 .format-menutab fieldset#id_courseformathdr .colourpickercircle,
 .format-site fieldset#id_courseformathdr .colourpickercircle {
     width: 25px;
@@ -69,4 +65,9 @@
     display: none;
     top: 0;
     position: relative;
+}
+
+/*Remove rounded top left corner*/
+.card-header:first-child {
+    border-radius: 0 0 0 !important;
 }

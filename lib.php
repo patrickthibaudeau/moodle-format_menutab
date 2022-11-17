@@ -204,6 +204,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 1,
                     'type' => PARAM_INT,
                 ),
+                'section_zero_background_color' => array(
+                    'default' => '#1b4c88',
+                    'type' => PARAM_TEXT,
+                ),
                 'show_summary' => array(
                     'default' => 0,
                     'type' => PARAM_INT,
@@ -278,6 +282,15 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'collapsed',
+                    'help_component' => 'format_menutab',
+                ),
+                'section_zero_background_color' => array(
+                    'label' => new lang_string('section_zero_background_color', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        $this->get_default_tab_background_colors()
+                    ),
+                    'help' => 'section_zero_background_color',
                     'help_component' => 'format_menutab',
                 ),
                 'show_summary' => array(
