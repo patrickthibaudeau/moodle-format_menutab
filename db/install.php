@@ -27,6 +27,18 @@
  * Custom code to be run on installing the plugin.
  */
 function xmldb_format_menutab_install() {
+    global $DB;
+    // Get all courses using the Glendon format and change the format to menutab
 
+    $courses = $DB->get_records('course', ['format' => 'glendon']);
+    foreach ($courses as $c) {
+        $data = [
+            'id' => $c->id,
+            'format' => 'menutab'
+        ];
+
+        $DB->update_record('course', $data);
+
+    }
     return true;
 }
