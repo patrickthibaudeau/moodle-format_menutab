@@ -56,6 +56,7 @@ $string['tab_background_colors'] = 'Tab background colors';
 $string['tab_background_colors_help'] = 'Enter a color per line. Each color must use the hex value of the color seperated by a pipe (|) followed by the name of the color.';
 $string['tab_text_color'] = 'Tab text colour';
 $string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
+$string['your_section_progress'] = 'Your progress in this section is currently at ';
 //New tag
 $string['access'] = 'Access';
 $string['toggle_course_menu'] = 'Toggle course menu';
