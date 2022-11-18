@@ -478,7 +478,7 @@ class course_output implements \renderable, \templatable
                     $image_count = $summary_object->image_count;
 
                     $section_card = array(
-                        'cardid' => $section->section,
+                        'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
                         'secid' => $section->id,
                         'courseid' => $section->course,
                         'available' => $section->available,
