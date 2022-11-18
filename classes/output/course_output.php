@@ -339,6 +339,7 @@ class course_output implements \renderable, \templatable
         $data['section_zero']['is_section_zero'] = true;
         $data['section_zero']['visible'] = true;
         $data['section_zero']['collapsed'] = $collapsed;
+        $data['section_zero']['header_background_color'] = $course->section_zero_background_color;
         return $data;
     }
 
