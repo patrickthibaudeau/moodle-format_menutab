@@ -147,7 +147,7 @@ class course_output implements \renderable, \templatable
         $this->modinfo = $this->format->get_modinfo();
 
         // TODO this class is no longer used if the user is editing.  To be removed.
-        $this->isediting = false;
+        $this->isediting = $this->format->show_editor();
         $this->coursecontext = \context_course::instance($this->course->id);
         $this->canviewhidden = has_capability('moodle/course:viewhiddensections', $this->coursecontext);
         if ($this->course->enablecompletion && !isguestuser()) {
@@ -171,7 +171,7 @@ class course_output implements \renderable, \templatable
         if (!$this->courserenderer) {
             $this->courserenderer = $output;
         }
-        $data = $this->get_basic_data();
+        $data = $this->get_basic_data($output);
         // We have assembled the "common data" needed for both single and multiple section pages.
         // Now we can go off and get the specific data for the single or course home page as required.
         if ($this->sectionnum) {
@@ -181,7 +181,7 @@ class course_output implements \renderable, \templatable
             // We are outputting multi section page.
             // Add section Zero. We only use section zero on the home page.
             $data = $this->append_section_zero_data($data, $output);
-            return $this->append_home_page_data($data);
+            return $this->append_home_page_data($data, $output);
         }
     }
 
@@ -191,7 +191,7 @@ class course_output implements \renderable, \templatable
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    private function get_basic_data()
+    private function get_basic_data($output)
     {
         global $SESSION;
 
@@ -200,8 +200,9 @@ class course_output implements \renderable, \templatable
         if (get_config('format_menutab', 'print_section_number')) {
             $print_section_number = true;
         }
-
         $data = [];
+        $data['coursename'] = $this->course->fullname;
+        $data['courseshortname'] = $this->course->shortname;
         $data['canedit'] = has_capability('moodle/course:update', $this->coursecontext);
         $data['canviewhidden'] = $this->canviewhidden;
         $data['courseid'] = $this->course->id;
@@ -211,7 +212,8 @@ class course_output implements \renderable, \templatable
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
-        $data['course_image'] = $this->get_course_image();
+        $data['course_image'] = $this->get_course_image($output);
+        $data[$this->course->course_title_position] = true;
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;
@@ -224,9 +226,10 @@ class course_output implements \renderable, \templatable
     /**
      * Get teh course image
      * @return string
+     * @param \renderer_base $output
      * @throws \coding_exception
      */
-    private function get_course_image()
+    private function get_course_image($output)
     {
         global $COURSE, $CFG;
         $url = '';
@@ -390,13 +393,13 @@ class course_output implements \renderable, \templatable
 
         // get proper image key
         $image_count = 0;
-       for ($i = 0; $i < ($this->sectionnum - 1); $i++) {
-           $image_count++;
-           if ($image_count > 6) {
-               $image_count = 0;
-           }
-       }
-           // Split image and summary text
+        for ($i = 0; $i < ($this->sectionnum - 1); $i++) {
+            $image_count++;
+            if ($image_count > 6) {
+                $image_count = 0;
+            }
+        }
+        // Split image and summary text
         $summary_object = $this->split_section_summary(self::temp_format_summary_text($thissection), $image_count);
 
         $data['image'] = $summary_object->image;
@@ -427,12 +430,13 @@ class course_output implements \renderable, \templatable
      * with data which is specific to multiple section pages, then return
      * the amalgamated data
      * @param array $data the common data
+     * @param \renderer_base $output the renderer for this format
      * @return array the amalgamated data
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function append_home_page_data($data)
+    private function append_home_page_data($data, $output)
     {
         global $CFG;
         $data['is_home_page'] = true;
@@ -442,10 +446,6 @@ class course_output implements \renderable, \templatable
             $data['overall_progress']['num_out_of'] = 0;
         }
         $data['hasNoSections'] = true;
-
-        // Before we start the section loop. get key vars for rows and columns
-        $number_of_sections = (count($this->format->get_sections()) - 1); // remove section zero
-        $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
 
         $maxallowedsections = $this->format->get_max_sections();
         $sectioncountwarningissued = false;
@@ -477,6 +477,8 @@ class course_output implements \renderable, \templatable
                     $summary = $summary_object->text;
                     $image_count = $summary_object->image_count;
 
+                    $control_menu = new \core_courseformat\output\local\content\section\controlmenu($this->format, $section);
+
                     $section_card = array(
                         'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
                         'secid' => $section->id,
@@ -496,6 +498,8 @@ class course_output implements \renderable, \templatable
                         'progress' => false,
                         'isactive' => $this->course->marker == $section->section,
                         'extraclasses' => '',
+                        'editing' => $this->isediting,
+                        'controlmenu' => $control_menu->export_for_template($output)
                     );
 
                     // Include completion tracking data for each section (if used).
@@ -531,7 +535,6 @@ class course_output implements \renderable, \templatable
                     $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
                         $this->course, $section->section, 0
                     );
-
                     $section_cards[] = $section_card;
                 }
 
@@ -549,7 +552,25 @@ class course_output implements \renderable, \templatable
             $countincludedsections++;
         }
 
-        // Create rows for cards based on format number of rows
+        // If stretch columns is set to no add missing sections to $number of sections
+        // Always base the number of sections on the number of cards
+        $number_of_sections = count($section_cards);
+        $number_of_sections_to_add = 0;
+        if ($data['stretch_columns']) {
+            // Get the number of rows
+            $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
+        } else {
+            // Get the difference between number of sections and number of columns
+            $modulo_of_sections = $number_of_sections % $data['numcolumns'];
+            if ($modulo_of_sections) {
+                $number_of_sections_to_add = $data['numcolumns'] - $modulo_of_sections;
+            }
+            $number_of_sections = ($number_of_sections + $number_of_sections_to_add);
+            // Get number of rows based on new number of sections
+            $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
+        }
+
+        // Create array for cards based on number of rows
         $y = 0; //sectioncards array count
         for ($i = 0; $i < $number_of_rows; $i++) { // Loop through all rows
             for ($x = 0; $x < $data['numcolumns']; $x++) {
@@ -557,6 +578,12 @@ class course_output implements \renderable, \templatable
                     if (isset($section_cards[$y])) {
                         $data['sectionrows'][$i]['sections'][] = $section_cards[$y];
                         $y++;
+                    } else {
+                        // Only add the column if stretch columns is false
+                        if (!$data['stretch_columns']) {
+                            $data['sectionrows'][$i]['sections'][] = [];
+                            $y++;
+                        }
                     }
                 }
             }
@@ -587,7 +614,8 @@ class course_output implements \renderable, \templatable
      * @param $image_count
      * @return \stdClass
      */
-    private function split_section_summary($summary, $image_count = 0) {
+    private function split_section_summary($summary, $image_count = 0)
+    {
         global $CFG;
         //Get image for top of card
         preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
@@ -680,6 +708,7 @@ class course_output implements \renderable, \templatable
             if ($index == 0 && $mod->get_module_type_name()->get_component() != 'label') {
                 $tabs[$t]['title'] = get_String('content', 'format_menutab');
                 $tabs[$t]['tabid'] = $index;
+                $tabs[$t]['user_visible'] = true;
                 $tabs[$t]['cm_index_skip'] = -1;
                 $tabs[$t]['cm_index_start'] = $index;
             } else if ($mod->get_module_type_name()->get_component() == 'label') {
@@ -689,6 +718,7 @@ class course_output implements \renderable, \templatable
                     $title = strip_tags($matches[1]);
                     $tabs[$t]['title'] = $title;
                     $tabs[$t]['tabid'] = $index;
+                    $tabs[$t]['user_visible'] = $mod->get_user_visible();
                     // Because this mod is a label and contains a tab, get next module that follows to start the
                     // content list
                     $tabs[$t]['cm_index_skip'] = $index;
@@ -704,7 +734,7 @@ class course_output implements \renderable, \templatable
         $cm_count = count($cmids);
         // Loop through tabs and add course modules
         for ($x = 0; $x < count($tabs); $x++) {
-            if ($x == 0 ) {
+            if ($x == 0) {
                 $tabs[$x]['class'] = 'show active';
                 $tabs[$x]['active'] = 'active';
             } else {

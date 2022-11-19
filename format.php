@@ -55,10 +55,18 @@ if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context
 $renderer =  $format->get_renderer($PAGE);
 
 if ($isediting) {
-    // If user is editing, we render the page the new way.
-    $outputclass = $format->get_output_classname('content');
-    $widget = new $outputclass($format);
-    echo $renderer->render($widget);
+
+    if ($section_number == 0) {
+        $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
+        $data = $templateable->export_for_template($renderer);
+        echo $renderer->render_from_template('format_menutab/course_home_page', $data);
+    } else {
+        // If user is editing, we render the page the old way.
+        $outputclass = $format->get_output_classname('content');
+        $widget = new $outputclass($format);
+        echo $renderer->render($widget);
+    }
+
 } else {
     if ($section_number == 0) {
         $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);

@@ -71,3 +71,7 @@
 .card-header:first-child {
     border-radius: 0 0 0 !important;
 }
+
+.card-footer:last-child {
+    border-radius: 0 0 0 !important;
+}
