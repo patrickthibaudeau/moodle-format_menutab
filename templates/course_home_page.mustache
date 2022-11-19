@@ -239,8 +239,8 @@
     <div class="row mb-1">
         <div class="col">
             {{^course_image}} <!-- if there is no image add a card-->
-                <div class="card">
-                    <div class="card-body">
+            <div class="card">
+            <div class="card-body">
             {{/course_image}}
             <div id="format_menutab_home_page_image" class="
             {{#top-left}}justify-content-start{{/top-left}}
@@ -256,15 +256,20 @@
 ">
 
                 <div class="
-{{#bottom-left}}mt-auto{{/bottom-left}}
+                    {{#bottom-left}}mt-auto{{/bottom-left}}
                     {{#bottom-center}}mt-auto{{/bottom-center}}
                     {{#bottom-right}}mt-auto{{/bottom-right}}
             "><h3>{{coursename}}</h3></div>
             </div>
             {{^course_image}}<!-- if there is no image add a card-->
-                    </div>
-                </div>
+            </div>
+            </div>
             {{/course_image}}
+            {{#editing}}
+                <div class="alert alert-danger text-center">
+                    <h4>{{#str}}currently_editing, format_menutab{{/str}}</h4>
+                </div>
+            {{/editing}}
         </div>
     </div>
     {{> format_menutab/section_zero}}
@@ -278,8 +283,10 @@
                             title="{{title}}">
                             <div class="format_menutab_image_container">
                                 {{{image}}}
+
                                 {{#print_section_number}}
-                                    <div class="format_menutab_section_number">{{cardid}}</div>
+                                    <div class="format_menutab_section_number"
+                                         style="color: {{section_number_text_color}};">{{cardid}}</div>
                                 {{/print_section_number}}
                             </div>
                             </a>
@@ -290,6 +297,13 @@
                                     title="{{title}}">
                                     {{title}}
                                     </a>
+                                    {{#editing}}
+                                        {{#controlmenu}}
+                                            <span class="float-right">
+                                                {{> format_menutab/local/content/section/controlmenu }}
+                                            </span>
+                                        {{/controlmenu}}
+                                    {{/editing}}
                                 </h5>
                                 </h5>
                                 <p class="card-text">
@@ -304,7 +318,19 @@
                                         </div>
                                     </div>
                                 {{/progress}}
+                                {{#canedit}}
+
+                                        {{^visible}}
+                                            <div>
+                                                <span class="badge badge-danger font-weight-bolder">
+                                                    {{#str}}hiddenfromstudents, core{{/str}}
+                                                </span>
+                                            </div>
+                                        {{/visible}}
+
+                                {{/canedit}}
                             </div>
+
                         </div>
                     {{/sections}}
                 </div>

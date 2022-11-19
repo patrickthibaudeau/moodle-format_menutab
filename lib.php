@@ -236,6 +236,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 1,
                     'type' => PARAM_INT,
                 ),
+                'section_number_text_color' => array(
+                    'default' => '#ffffff',
+                    'type' => PARAM_TEXT,
+                ),
                 'tab_background_color' => array(
                     'default' => '#1b4c88',
                     'type' => PARAM_TEXT,
@@ -402,6 +406,18 @@ class format_menutab extends core_courseformat\base
                     'help' => 'print_section_number',
                     'help_component' => 'format_menutab',
                 ),
+                'section_number_text_color' => array(
+                    'label' => new lang_string('section_number_text_color', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            '#ffffff' => get_string('white', 'format_menutab'),
+                            '#000000' => get_string('black', 'format_menutab')
+                        )
+                    ),
+                    'help' => 'section_number_text_color',
+                    'help_component' => 'format_menutab',
+                ),
                 'tab_background_color' => array(
                     'label' => new lang_string('tab_background_color', 'format_menutab'),
                     'element_type' => 'select',
@@ -416,8 +432,8 @@ class format_menutab extends core_courseformat\base
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
-                            '#ffffff' => 'White',
-                            '#000000' => 'Black'
+                            '#ffffff' => get_string('white', 'format_menutab'),
+                            '#000000' => get_string('black', 'format_menutab')
                         )
                     ),
                     'help' => 'tab_text_color',

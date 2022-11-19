@@ -147,7 +147,7 @@ class course_output implements \renderable, \templatable
         $this->modinfo = $this->format->get_modinfo();
 
         // TODO this class is no longer used if the user is editing.  To be removed.
-        $this->isediting = false;
+        $this->isediting = $this->format->show_editor();
         $this->coursecontext = \context_course::instance($this->course->id);
         $this->canviewhidden = has_capability('moodle/course:viewhiddensections', $this->coursecontext);
         if ($this->course->enablecompletion && !isguestuser()) {
@@ -171,7 +171,7 @@ class course_output implements \renderable, \templatable
         if (!$this->courserenderer) {
             $this->courserenderer = $output;
         }
-        $data = $this->get_basic_data();
+        $data = $this->get_basic_data($output);
         // We have assembled the "common data" needed for both single and multiple section pages.
         // Now we can go off and get the specific data for the single or course home page as required.
         if ($this->sectionnum) {
@@ -181,7 +181,7 @@ class course_output implements \renderable, \templatable
             // We are outputting multi section page.
             // Add section Zero. We only use section zero on the home page.
             $data = $this->append_section_zero_data($data, $output);
-            return $this->append_home_page_data($data);
+            return $this->append_home_page_data($data, $output);
         }
     }
 
@@ -191,7 +191,7 @@ class course_output implements \renderable, \templatable
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    private function get_basic_data()
+    private function get_basic_data($output)
     {
         global $SESSION;
 
@@ -212,7 +212,7 @@ class course_output implements \renderable, \templatable
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
-        $data['course_image'] = $this->get_course_image();
+        $data['course_image'] = $this->get_course_image($output);
         $data[$this->course->course_title_position] = true;
 
         foreach ($this->courseformatoptions as $k => $v) {
@@ -226,9 +226,10 @@ class course_output implements \renderable, \templatable
     /**
      * Get teh course image
      * @return string
+     * @param \renderer_base $output
      * @throws \coding_exception
      */
-    private function get_course_image()
+    private function get_course_image($output)
     {
         global $COURSE, $CFG;
         $url = '';
@@ -429,12 +430,13 @@ class course_output implements \renderable, \templatable
      * with data which is specific to multiple section pages, then return
      * the amalgamated data
      * @param array $data the common data
+     * @param \renderer_base $output the renderer for this format
      * @return array the amalgamated data
      * @throws \coding_exception
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    private function append_home_page_data($data)
+    private function append_home_page_data($data, $output)
     {
         global $CFG;
         $data['is_home_page'] = true;
@@ -475,6 +477,8 @@ class course_output implements \renderable, \templatable
                     $summary = $summary_object->text;
                     $image_count = $summary_object->image_count;
 
+                    $control_menu = new \core_courseformat\output\local\content\section\controlmenu($this->format, $section);
+
                     $section_card = array(
                         'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
                         'secid' => $section->id,
@@ -494,6 +498,8 @@ class course_output implements \renderable, \templatable
                         'progress' => false,
                         'isactive' => $this->course->marker == $section->section,
                         'extraclasses' => '',
+                        'editing' => $this->isediting,
+                        'controlmenu' => $control_menu->export_for_template($output)
                     );
 
                     // Include completion tracking data for each section (if used).
@@ -529,7 +535,6 @@ class course_output implements \renderable, \templatable
                     $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
                         $this->course, $section->section, 0
                     );
-
                     $section_cards[] = $section_card;
                 }
 
