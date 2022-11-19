@@ -238,13 +238,17 @@
     {{{completionhelp}}}
     <div class="row mb-1">
         <div class="col">
+            {{^course_image}} <!-- if there is no image add a card-->
+                <div class="card">
+                    <div class="card-body">
+            {{/course_image}}
             <div id="format_menutab_home_page_image" class="
             {{#top-left}}justify-content-start{{/top-left}}
-            {{#top-center}}justify-content-center{{/top-center}}
-            {{#top-right}}justify-content-end{{/top-right}}
-            {{#middle-left}}justify-content-start align-items-center{{/middle-left}}
-            {{#middle-center}}justify-content-center align-items-center{{/middle-center}}
-            {{#middle-right}}justify-content-end align-items-center{{/middle-right}}
+                {{#top-center}}justify-content-center{{/top-center}}
+                {{#top-right}}justify-content-end{{/top-right}}
+                {{#middle-left}}justify-content-start align-items-center{{/middle-left}}
+                {{#middle-center}}justify-content-center align-items-center{{/middle-center}}
+                {{#middle-right}}justify-content-end align-items-center{{/middle-right}}
                 {{#bottom-left}}d-flex align-items-start flex-column{{/bottom-left}}
                 {{#bottom-center}}d-flex align-items-center flex-column{{/bottom-center}}
                 {{#bottom-right}}d-flex align-items-end flex-column{{/bottom-right}}
@@ -252,11 +256,15 @@
 ">
 
                 <div class="
-                    {{#bottom-left}}mt-auto{{/bottom-left}}
+{{#bottom-left}}mt-auto{{/bottom-left}}
                     {{#bottom-center}}mt-auto{{/bottom-center}}
                     {{#bottom-right}}mt-auto{{/bottom-right}}
-"><h3>{{coursename}}</h3></div>
+            "><h3>{{coursename}}</h3></div>
             </div>
+            {{^course_image}}<!-- if there is no image add a card-->
+                    </div>
+                </div>
+            {{/course_image}}
         </div>
     </div>
     {{> format_menutab/section_zero}}

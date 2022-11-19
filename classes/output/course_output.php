@@ -200,7 +200,6 @@ class course_output implements \renderable, \templatable
         if (get_config('format_menutab', 'print_section_number')) {
             $print_section_number = true;
         }
-
         $data = [];
         $data['coursename'] = $this->course->fullname;
         $data['courseshortname'] = $this->course->shortname;
