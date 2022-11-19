@@ -390,13 +390,13 @@ class course_output implements \renderable, \templatable
 
         // get proper image key
         $image_count = 0;
-       for ($i = 0; $i < ($this->sectionnum - 1); $i++) {
-           $image_count++;
-           if ($image_count > 6) {
-               $image_count = 0;
-           }
-       }
-           // Split image and summary text
+        for ($i = 0; $i < ($this->sectionnum - 1); $i++) {
+            $image_count++;
+            if ($image_count > 6) {
+                $image_count = 0;
+            }
+        }
+        // Split image and summary text
         $summary_object = $this->split_section_summary(self::temp_format_summary_text($thissection), $image_count);
 
         $data['image'] = $summary_object->image;
@@ -442,10 +442,6 @@ class course_output implements \renderable, \templatable
             $data['overall_progress']['num_out_of'] = 0;
         }
         $data['hasNoSections'] = true;
-
-        // Before we start the section loop. get key vars for rows and columns
-        $number_of_sections = (count($this->format->get_sections()) - 1); // remove section zero
-        $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
 
         $maxallowedsections = $this->format->get_max_sections();
         $sectioncountwarningissued = false;
@@ -549,7 +545,25 @@ class course_output implements \renderable, \templatable
             $countincludedsections++;
         }
 
-        // Create rows for cards based on format number of rows
+        // If stretch columns is set to no add missing sections to $number of sections
+        // Always base the number of sections on the number of cards
+        $number_of_sections = count($section_cards);
+        $number_of_sections_to_add = 0;
+        if ($data['stretch_columns']) {
+            // Get the number of rows
+            $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
+        } else {
+            // Get the difference between number of sections and number of columns
+            $modulo_of_sections = $number_of_sections % $data['numcolumns'];
+            if ($modulo_of_sections) {
+                $number_of_sections_to_add = $data['numcolumns'] - $modulo_of_sections;
+            }
+            $number_of_sections = ($number_of_sections + $number_of_sections_to_add);
+            // Get number of rows based on new number of sections
+            $number_of_rows = ceil($number_of_sections / $data['numcolumns']);
+        }
+
+        // Create array for cards based on number of rows
         $y = 0; //sectioncards array count
         for ($i = 0; $i < $number_of_rows; $i++) { // Loop through all rows
             for ($x = 0; $x < $data['numcolumns']; $x++) {
@@ -557,6 +571,12 @@ class course_output implements \renderable, \templatable
                     if (isset($section_cards[$y])) {
                         $data['sectionrows'][$i]['sections'][] = $section_cards[$y];
                         $y++;
+                    } else {
+                        // Only add the column if stretch columns is false
+                        if (!$data['stretch_columns']) {
+                            $data['sectionrows'][$i]['sections'][] = [];
+                            $y++;
+                        }
                     }
                 }
             }
@@ -587,7 +607,8 @@ class course_output implements \renderable, \templatable
      * @param $image_count
      * @return \stdClass
      */
-    private function split_section_summary($summary, $image_count = 0) {
+    private function split_section_summary($summary, $image_count = 0)
+    {
         global $CFG;
         //Get image for top of card
         preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
@@ -704,7 +725,7 @@ class course_output implements \renderable, \templatable
         $cm_count = count($cmids);
         // Loop through tabs and add course modules
         for ($x = 0; $x < count($tabs); $x++) {
-            if ($x == 0 ) {
+            if ($x == 0) {
                 $tabs[$x]['class'] = 'show active';
                 $tabs[$x]['active'] = 'active';
             } else {

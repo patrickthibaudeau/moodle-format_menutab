@@ -200,6 +200,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 3,
                     'type' => PARAM_INT,
                 ),
+                'stretch_columns' => array(
+                    'default' => 1,
+                    'type' => PARAM_INT,
+                ),
                 'collapsed' => array(
                     'default' => 1,
                     'type' => PARAM_INT,
@@ -270,6 +274,18 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'numcolumns',
+                    'help_component' => 'format_menutab',
+                ),
+                'stretch_columns' => array(
+                    'label' => new lang_string('stretch_columns', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'stretch_columns',
                     'help_component' => 'format_menutab',
                 ),
                 'collapsed' => array(
