@@ -701,6 +701,7 @@ class course_output implements \renderable, \templatable
             if ($index == 0 && $mod->get_module_type_name()->get_component() != 'label') {
                 $tabs[$t]['title'] = get_String('content', 'format_menutab');
                 $tabs[$t]['tabid'] = $index;
+                $tabs[$t]['user_visible'] = true;
                 $tabs[$t]['cm_index_skip'] = -1;
                 $tabs[$t]['cm_index_start'] = $index;
             } else if ($mod->get_module_type_name()->get_component() == 'label') {
@@ -710,6 +711,7 @@ class course_output implements \renderable, \templatable
                     $title = strip_tags($matches[1]);
                     $tabs[$t]['title'] = $title;
                     $tabs[$t]['tabid'] = $index;
+                    $tabs[$t]['user_visible'] = $mod->get_user_visible();
                     // Because this mod is a label and contains a tab, get next module that follows to start the
                     // content list
                     $tabs[$t]['cm_index_skip'] = $index;
