@@ -200,6 +200,18 @@ class format_menutab extends core_courseformat\base
                     'default' => 3,
                     'type' => PARAM_INT,
                 ),
+                'course_title_position' => array(
+                    'default' => 'middle-center',
+                    'type' => PARAM_TEXT,
+                ),
+                'course_title_color' => array(
+                    'default' => '#000000',
+                    'type' => PARAM_TEXT,
+                ),
+                'darken_background_image' => array(
+                    'default' => false,
+                    'type' => PARAM_BOOL,
+                ),
                 'stretch_columns' => array(
                     'default' => 1,
                     'type' => PARAM_INT,
@@ -221,7 +233,7 @@ class format_menutab extends core_courseformat\base
                     'type' => PARAM_INT,
                 ),
                 'print_section_number' => array(
-                    'default' => 0,
+                    'default' => 1,
                     'type' => PARAM_INT,
                 ),
                 'tab_background_color' => array(
@@ -274,6 +286,51 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'numcolumns',
+                    'help_component' => 'format_menutab',
+                ),
+                'course_title_position' => array(
+                    'label' => new lang_string('course_title_position', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            'top-left' => get_string('top_left', 'format_menutab'),
+                            'top-center' => get_string('top_center', 'format_menutab'),
+                            'top-right' => get_string('top_right', 'format_menutab'),
+                            'middle-left' => get_string('middle_left', 'format_menutab'),
+                            'middle-center' => get_string('middle_center', 'format_menutab'),
+                            'middle-right' => get_string('middle_right', 'format_menutab'),
+                            'bottom-left' => get_string('bottom_left', 'format_menutab'),
+                            'bottom-center' => get_string('bottom_center', 'format_menutab'),
+                            'bottom-right' => get_string('bottom_right', 'format_menutab'),
+
+                        )
+                    ),
+                    'help' => 'course_title_position',
+                    'help_component' => 'format_menutab',
+                ),
+                'course_title_color' => array(
+                    'label' => new lang_string('course_title_color', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            '#ffffff' => get_string('white', 'format_menutab'),
+                            '#000000' => get_string('black', 'format_menutab'),
+                            '#ffcc00' => get_string('yellow', 'format_menutab')
+                        )
+                    ),
+                    'help' => 'course_title_color',
+                    'help_component' => 'format_menutab',
+                ),
+                'darken_background_image' => array(
+                    'label' => new lang_string('darken_background_image', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            true => get_string('yes'),
+                            false => get_string('no'),
+                        )
+                    ),
+                    'help' => 'darken_background_image',
                     'help_component' => 'format_menutab',
                 ),
                 'stretch_columns' => array(

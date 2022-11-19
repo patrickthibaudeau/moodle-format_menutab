@@ -202,6 +202,8 @@ class course_output implements \renderable, \templatable
         }
 
         $data = [];
+        $data['coursename'] = $this->course->fullname;
+        $data['courseshortname'] = $this->course->shortname;
         $data['canedit'] = has_capability('moodle/course:update', $this->coursecontext);
         $data['canviewhidden'] = $this->canviewhidden;
         $data['courseid'] = $this->course->id;
@@ -212,6 +214,7 @@ class course_output implements \renderable, \templatable
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
         $data['course_image'] = $this->get_course_image();
+        $data[$this->course->course_title_position] = true;
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;
