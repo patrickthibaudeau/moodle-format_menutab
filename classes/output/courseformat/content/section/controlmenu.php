@@ -17,35 +17,24 @@
 /**
  * Contains the default section controls output class.
  *
- * @package   core_courseformat
+ * @package   format_topics
  * @copyright 2020 Ferran Recio <ferran@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_menutab\output\courseformat\content\section;
 
-use action_menu;
-use action_menu_link_secondary;
 use context_course;
-use core\output\named_templatable;
-use core_courseformat\base as course_format;
-use core_courseformat\output\local\courseformat_named_templatable;
-use moodle_url;
-use pix_icon;
-use renderable;
-use section_info;
-use stdClass;
+use core_courseformat\output\local\content\section\controlmenu as controlmenu_base;
 
 /**
- * Base class to render section controls.
+ * Base class to render a course section menu.
  *
- * @package   core_courseformat
+ * @package   format_topics
  * @copyright 2020 Ferran Recio <ferran@moodle.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class controlmenu implements named_templatable, renderable {
-
-    use courseformat_named_templatable;
+class controlmenu extends controlmenu_base {
 
     /** @var course_format the course format class */
     protected $format;
@@ -54,226 +43,77 @@ class controlmenu implements named_templatable, renderable {
     protected $section;
 
     /**
-     * Constructor.
-     *
-     * @param course_format $format the course format
-     * @param section_info $section the section info
-     */
-    public function __construct(course_format $format, section_info $section) {
-        $this->format = $format;
-        $this->section = $section;
-    }
-
-    /**
-     * Export this data so it can be used as the context for a mustache template.
-     *
-     * @param renderer_base $output typically, the renderer that's calling this function
-     * @return array data context for a mustache template
-     */
-    public function export_for_template(\renderer_base $output): stdClass {
-
-        $section = $this->section;
-
-        $controls = $this->section_control_items();
-
-        if (empty($controls)) {
-            return new stdClass();
-        }
-
-        // Convert control array into an action_menu.
-        $menu = new action_menu();
-        $icon = $output->pix_icon('i/menu', get_string('edit'));
-        $menu->set_menu_trigger($icon, 'btn btn-icon d-flex align-items-center justify-content-center');
-        $menu->attributes['class'] .= ' section-actions';
-        foreach ($controls as $value) {
-            $url = empty($value['url']) ? '' : $value['url'];
-            $icon = empty($value['icon']) ? '' : $value['icon'];
-            $name = empty($value['name']) ? '' : $value['name'];
-            $attr = empty($value['attr']) ? [] : $value['attr'];
-            $class = empty($value['pixattr']['class']) ? '' : $value['pixattr']['class'];
-            $al = new action_menu_link_secondary(
-                new moodle_url($url),
-                new pix_icon($icon, '', null, ['class' => "smallicon " . $class]),
-                $name,
-                $attr
-            );
-            $menu->add($al);
-        }
-
-        $data = (object)[
-            'menu' => $output->render($menu),
-            'hasmenu' => true,
-            'id' => $section->id,
-        ];
-
-        return $data;
-    }
-
-    /**
      * Generate the edit control items of a section.
-     *
-     * It is not clear this kind of controls are still available in 4.0 so, for now, this
-     * method is almost a clone of the previous section_control_items from the course/renderer.php.
      *
      * This method must remain public until the final deprecation of section_edit_control_items.
      *
      * @return array of edit control items
      */
     public function section_control_items() {
-        global $USER;
 
         $format = $this->format;
         $section = $this->section;
         $course = $format->get_course();
         $sectionreturn = $format->get_section_number();
-        $user = $USER;
 
-        $usecomponents = $format->supports_components();
         $coursecontext = context_course::instance($course->id);
-        $numsections = $format->get_last_section_number();
-        $isstealth = $section->section > $numsections;
 
-        $baseurl = course_get_url($course, $sectionreturn);
-        $baseurl->param('sesskey', sesskey());
+        if ($sectionreturn) {
+            $url = course_get_url($course, $section->section);
+        } else {
+            $url = course_get_url($course);
+        }
+        $url->param('sesskey', sesskey());
 
         $controls = [];
-
-        if (!$isstealth && has_capability('moodle/course:update', $coursecontext, $user)) {
-            if ($section->section > 0
-                && get_string_manager()->string_exists('editsection', 'format_'.$format->get_format())) {
-                $streditsection = get_string('editsection', 'format_'.$format->get_format());
-            } else {
-                $streditsection = get_string('editsection');
-            }
-
-            $controls['edit'] = [
-                'url'   => new moodle_url('/course/editsection.php', ['id' => $section->id, 'sr' => $sectionreturn]),
-                'icon' => 'i/settings',
-                'name' => $streditsection,
-                'pixattr' => ['class' => ''],
-                'attr' => ['class' => 'icon edit'],
-            ];
-        }
-
-        if ($section->section) {
-            $url = clone($baseurl);
-            if (!$isstealth) {
-                if (has_capability('moodle/course:sectionvisibility', $coursecontext, $user)) {
-                    $strhidefromothers = get_string('hidefromothers', 'format_' . $course->format);
-                    $strshowfromothers = get_string('showfromothers', 'format_' . $course->format);
-                    if ($section->visible) { // Show the hide/show eye.
-                        $url->param('hide', $section->section);
-                        $controls['visiblity'] = [
-                            'url' => $url,
-                            'icon' => 'i/hide',
-                            'name' => $strhidefromothers,
-                            'pixattr' => ['class' => ''],
-                            'attr' => [
-                                'class' => 'icon editing_showhide',
-                                'data-sectionreturn' => $sectionreturn,
-                                'data-action' => ($usecomponents) ? 'sectionHide' : 'hide',
-                                'data-id' => $section->id,
-                                'data-swapname' => $strshowfromothers,
-                                'data-swapicon' => 'i/show',
-                            ],
-                        ];
-                    } else {
-                        $url->param('show',  $section->section);
-                        $controls['visiblity'] = [
-                            'url' => $url,
-                            'icon' => 'i/show',
-                            'name' => $strshowfromothers,
-                            'pixattr' => ['class' => ''],
-                            'attr' => [
-                                'class' => 'icon editing_showhide',
-                                'data-sectionreturn' => $sectionreturn,
-                                'data-action' => ($usecomponents) ? 'sectionShow' : 'show',
-                                'data-id' => $section->id,
-                                'data-swapname' => $strhidefromothers,
-                                'data-swapicon' => 'i/hide',
-                            ],
-                        ];
-                    }
-                }
-
-                if (!$sectionreturn && has_capability('moodle/course:movesections', $coursecontext, $user)) {
-                    if ($usecomponents) {
-                        // This tool will appear only when the state is ready.
-                        $url = clone ($baseurl);
-                        $url->param('movesection', $section->section);
-                        $url->param('section', $section->section);
-                        $controls['movesection'] = [
-                            'url' => $url,
-                            'icon' => 'i/dragdrop',
-                            'name' => get_string('move', 'moodle'),
-                            'pixattr' => ['class' => ''],
-                            'attr' => [
-                                'class' => 'icon move waitstate',
-                                'data-action' => 'moveSection',
-                                'data-id' => $section->id,
-                            ],
-                        ];
-                    }
-                    // Legacy move up and down links for non component-based formats.
-                    $url = clone($baseurl);
-                    if ($section->section > 1) { // Add a arrow to move section up.
-                        $url->param('section', $section->section);
-                        $url->param('move', -1);
-                        $strmoveup = get_string('moveup');
-                        $controls['moveup'] = [
-                            'url' => $url,
-                            'icon' => 'i/up',
-                            'name' => $strmoveup,
-                            'pixattr' => ['class' => ''],
-                            'attr' => ['class' => 'icon moveup whilenostate'],
-                        ];
-                    }
-
-                    $url = clone($baseurl);
-                    if ($section->section < $numsections) { // Add a arrow to move section down.
-                        $url->param('section', $section->section);
-                        $url->param('move', 1);
-                        $strmovedown = get_string('movedown');
-                        $controls['movedown'] = [
-                            'url' => $url,
-                            'icon' => 'i/down',
-                            'name' => $strmovedown,
-                            'pixattr' => ['class' => ''],
-                            'attr' => ['class' => 'icon movedown whilenostate'],
-                        ];
-                    }
-                }
-            }
-
-            if (course_can_delete_section($course, $section)) {
-                if (get_string_manager()->string_exists('deletesection', 'format_'.$course->format)) {
-                    $strdelete = get_string('deletesection', 'format_'.$course->format);
-                } else {
-                    $strdelete = get_string('deletesection');
-                }
-                $url = new moodle_url(
-                    '/course/editsection.php',
-                    [
-                        'id' => $section->id,
-                        'sr' => $sectionreturn,
-                        'delete' => 1,
-                        'sesskey' => sesskey(),
-                    ]
-                );
-                $controls['delete'] = [
+        if ($section->section && has_capability('moodle/course:setcurrentsection', $coursecontext)) {
+            if ($course->marker == $section->section) {  // Show the "light globe" on/off.
+                $url->param('marker', 0);
+                $highlightoff = get_string('highlightoff');
+                $controls['highlight'] = [
                     'url' => $url,
-                    'icon' => 'i/delete',
-                    'name' => $strdelete,
+                    'icon' => 'i/marked',
+                    'name' => $highlightoff,
                     'pixattr' => ['class' => ''],
                     'attr' => [
-                        'class' => 'icon editing_delete',
-                        'data-action' => 'deleteSection',
-                        'data-id' => $section->id,
+                        'class' => 'editing_highlight',
+                        'data-action' => 'removemarker'
+                    ],
+                ];
+            } else {
+                $url->param('marker', $section->section);
+                $highlight = get_string('highlight');
+                $controls['highlight'] = [
+                    'url' => $url,
+                    'icon' => 'i/marker',
+                    'name' => $highlight,
+                    'pixattr' => ['class' => ''],
+                    'attr' => [
+                        'class' => 'editing_highlight',
+                        'data-action' => 'setmarker'
                     ],
                 ];
             }
         }
 
-        return $controls;
+        $parentcontrols = parent::section_control_items();
+
+        // If the edit key exists, we are going to insert our controls after it.
+        if (array_key_exists("edit", $parentcontrols)) {
+            $merged = [];
+            // We can't use splice because we are using associative arrays.
+            // Step through the array and merge the arrays.
+            foreach ($parentcontrols as $key => $action) {
+                $merged[$key] = $action;
+                if ($key == "edit") {
+                    // If we have come to the edit key, merge these controls here.
+                    $merged = array_merge($merged, $controls);
+                }
+            }
+
+            return $merged;
+        } else {
+            return array_merge($controls, $parentcontrols);
+        }
     }
 }
