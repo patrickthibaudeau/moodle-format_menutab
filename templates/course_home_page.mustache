@@ -232,6 +232,12 @@
         background-position-y: center;
         color: {{course_title_color}};
     }
+
+    .marker {
+        border-style: solid !important;
+        border-width: 2px !important;
+        border-color: red !important;
+    }
 </style>
 <div id="{{uniqid}}-course-format">
     <h2 class="accesshide">{{{title}}}</h2>
@@ -251,9 +257,7 @@
                 {{#middle-right}}justify-content-end align-items-center{{/middle-right}}
                 {{#bottom-left}}d-flex align-items-start flex-column{{/bottom-left}}
                 {{#bottom-center}}d-flex align-items-center flex-column{{/bottom-center}}
-                {{#bottom-right}}d-flex align-items-end flex-column{{/bottom-right}}
-
-">
+                {{#bottom-right}}d-flex align-items-end flex-column{{/bottom-right}}">
 
                 <div class="
                     {{#bottom-left}}mt-auto{{/bottom-left}}
@@ -266,78 +270,110 @@
             </div>
             {{/course_image}}
             {{#editing}}
-                <div class="alert alert-danger text-center">
+                <div class="alert alert-warning text-center mt-2">
                     <h4>{{#str}}currently_editing, format_menutab{{/str}}</h4>
                 </div>
             {{/editing}}
         </div>
     </div>
-    {{> format_menutab/section_zero}}
-    {{#sectionrows}}
-        <div class="row mb-2">
-            <div class="col">
-                <div class="card-deck">
-                    {{#sections}}
-                        <div class="card">
-                            <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"
-                            title="{{title}}">
-                            <div class="format_menutab_image_container">
-                                {{{image}}}
+    <div class="menutab" data-for="course_sectionlist">
+        {{> format_menutab/section_zero}}
+        {{#sectionrows}}
+            <div class="row mb-2">
+                <div class="col">
+                    <div class="card-deck">
+                        {{#sections}}
+                            <div id="section-{{sectionnumber}}" class="card section course-section
+                                {{#editing}}dropready{{/editing}} {{#marker}}marker{{/marker}}"
+                                 data-sectionid="{{sectionnumber}}" data-sectionreturnid="{{sectionreturn}}"
+                                 data-for="section"
+                                 data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-indexed="true">
+                                <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"
+                                title="{{title}}">
+                                <div class="format_menutab_image_container">
+                                    {{{image}}}
 
-                                {{#print_section_number}}
-                                    <div class="format_menutab_section_number"
-                                         style="color: {{section_number_text_color}};">{{cardid}}</div>
-                                {{/print_section_number}}
-                            </div>
-                            </a>
+                                    {{#print_section_number}}
+                                        <div class="format_menutab_section_number"
+                                             style="color: {{section_number_text_color}};">{{cardid}}</div>
+                                    {{/print_section_number}}
+                                </div>
+                                </a>
 
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"
-                                    title="{{title}}">
-                                    {{title}}
-                                    </a>
+                                <div class="card-body course-section-header {{#editing}}dropready draggable{{/editing}}"
+                                     data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-for="section_title"
+                                     {{#editing}}draggable="true"{{/editing}}>
+                                    <h5 class="card-title">
+                                        {{^editing}}
+                                            <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}
+                                            &section={{cardid}}"
+                                            title="{{title}}">
+                                            {{title}}
+                                            </a>
+                                        {{/editing}}
+                                        {{#editing}}
+
+                                            <span class="inplaceeditable inplaceeditable-text float-left"
+                                                  data-inplaceeditable="1"
+                                                  data-component="format_menutab" data-itemtype="sectionnamenl"
+                                                  data-itemid="{{sectionid}}" data-value=""
+                                                  data-editlabel="New name for {{title}}" data-type="text"
+                                                  data-options="">
+                                                    <a href="#" class="quickeditlink aalink"
+                                                       data-inplaceeditablelink="1" title="Edit topic name">
+                                                        {{title}}
+                                                        <span class="quickediticon visibleifjs">
+                                                            <i class="icon fa fa-pencil fa-fw "
+                                                               title="Edit topic name"
+                                                               role="img" aria-label="Edit topic name"></i>
+                                                         </span>
+                                                    </a>
+                                                </span>
+
+
+                                            {{#controlmenu}}
+                                                <span class="float-right">
+                                                    {{> core_courseformat/local/content/section/controlmenu }}
+                                                </span>
+                                            {{/controlmenu}}
+                                        {{/editing}}
+                                    </h5>
                                     {{#editing}}
-                                        {{#controlmenu}}
-                                            <span class="float-right">
-                                                {{> core_courseformat/local/content/section/controlmenu }}
-                                            </span>
-                                        {{/controlmenu}}
+                                        <div class="clearfixt">&nbsp;<br></div>
                                     {{/editing}}
-                                </h5>
-                                </h5>
-                                <p class="card-text">
-                                    {{{summary}}}
-                                </p>
-                                {{#progress}}
-                                    <div class="progress"
-                                         title="{{#str}}your_section_progress, format_menutab{{/str}}{{percent}}%">
-                                        <div class="progress-bar {{backgroundColor}}" role="progressbar"
-                                             style="width: {{percent}}%;" aria-valuenow="{{percent}}" aria-valuemin="0"
-                                             aria-valuemax="100">{{percent}}%
+                                    <p class="card-text">
+                                            {{{summary}}}
+                                    </p>
+                                    {{#progress}}
+                                        <div class="progress"
+                                             title="{{#str}}your_section_progress, format_menutab{{/str}}{{percent}}%">
+                                            <div class="progress-bar {{backgroundColor}}" role="progressbar"
+                                                 style="width: {{percent}}%;" aria-valuenow="{{percent}}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">{{percent}}%
+                                            </div>
                                         </div>
-                                    </div>
-                                {{/progress}}
-                                {{#canedit}}
+                                    {{/progress}}
+                                    {{#canedit}}
 
                                         {{^visible}}
                                             <div>
-                                                <span class="badge badge-danger font-weight-bolder">
+                                                <span class="badge badge-warning font-weight-bolder">
                                                     {{#str}}hiddenfromstudents, core{{/str}}
                                                 </span>
                                             </div>
                                         {{/visible}}
 
-                                {{/canedit}}
-                            </div>
+                                    {{/canedit}}
+                                </div>
 
-                        </div>
-                    {{/sections}}
+                            </div>
+                        {{/sections}}
+                    </div>
                 </div>
             </div>
-        </div>
-    {{/sectionrows}}
-
+        {{/sectionrows}}
+    </div>
 </div>
 {{#js}}
     require(['core_courseformat/local/content'], function(component) {

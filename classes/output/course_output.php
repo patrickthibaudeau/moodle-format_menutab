@@ -213,6 +213,7 @@ class course_output implements \renderable, \templatable
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
         $data['course_image'] = $this->get_course_image($output);
+        $data['sectionreturn'] = 0;
         $data[$this->course->course_title_position] = true;
 
         foreach ($this->courseformatoptions as $k => $v) {
@@ -337,7 +338,7 @@ class course_output implements \renderable, \templatable
         }
         $data['section_zero']['summary'] = self::temp_format_summary_text($seczero);
         $data['section_zero']['content']['course_modules'] = $this->section_course_mods($seczero, $output);
-        $data['section_zero']['secid'] = $this->modinfo->get_section_info(0)->id;
+        $data['section_zero']['sectionid'] = $this->modinfo->get_section_info(0)->id;
         $data['section_zero']['title'] = $title;
         $data['section_zero']['is_section_zero'] = true;
         $data['section_zero']['visible'] = true;
@@ -461,8 +462,7 @@ class course_output implements \renderable, \templatable
                 ($section->visible && !$section->available && !empty($section->availableinfo));
             if ($sectionnum != 0 && $showsection) {
                 $longtitlelength = 65;
-                // Only add if section is visible to user
-                if ($section->uservisible) {
+
                     if ($section->name) {
                         $title = $section->name;
                     } else {
@@ -477,11 +477,12 @@ class course_output implements \renderable, \templatable
                     $summary = $summary_object->text;
                     $image_count = $summary_object->image_count;
 
-                    $control_menu = new \core_courseformat\output\local\content\section\controlmenu($this->format, $section);
+                    $control_menu = new \format_menutab\output\courseformat\content\section\controlmenu($this->format, $section);
 
                     $section_card = array(
                         'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
-                        'secid' => $section->id,
+                        'sectionnumber' => $section->section,
+                        'sectionid' => $section->id,
                         'courseid' => $section->course,
                         'available' => $section->available,
                         'availability' => $section->availability,
@@ -499,9 +500,12 @@ class course_output implements \renderable, \templatable
                         'isactive' => $this->course->marker == $section->section,
                         'extraclasses' => '',
                         'editing' => $this->isediting,
+                        'marker' => ($section->section == $this->course->marker) ? true : false,
                         'controlmenu' => $control_menu->export_for_template($output)
                     );
-
+//if ($section->section ==1) {
+//    print_object($section_card);
+//}
                     // Include completion tracking data for each section (if used).
                     if ($section->visible && $this->completionenabled) {
                         if (isset($this->modinfo->sections[$sectionnum])) {
@@ -536,7 +540,7 @@ class course_output implements \renderable, \templatable
                         $this->course, $section->section, 0
                     );
                     $section_cards[] = $section_card;
-                }
+
 
             } else if ($sectionnum == 0) {
                 // Add in section zero completion data to overall completion count.
@@ -604,7 +608,7 @@ class course_output implements \renderable, \templatable
             }
         }
         $data['moodlefiltersconfig'] = $this->get_filters_config();
-
+//print_object($data);
         return $data;
     }
 
