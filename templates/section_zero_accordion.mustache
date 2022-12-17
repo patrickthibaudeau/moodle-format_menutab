@@ -3,8 +3,8 @@
     <div class="card format_menu_tab_card">
         <div class="card-header section-zero-header" id="format-menutab-heading-one">
             <h5 class="mb-0">
-                <button class="btn btn-outline-menutab" type="button" data-toggle="collapse"
-                        data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <button class="btn btn-outline-menutab btn-menutab-lg" type="button" data-toggle="collapse"
+                        data-target="#collapseOne" aria-expanded="{{^collapsed}}true{{/collapsed}}{{#collapsed}}false{{/collapsed}}" aria-controls="collapseOne">
                     {{title}}
                 </button>
             </h5>
@@ -26,6 +26,15 @@
                             {{>format_menutab/course_module}}
                         {{/course_modules}}
                     {{/content}}
+                    {{#editing}}
+                        <button class="btn btn-link text-decoration-none section-modchooser section-modchooser-link activity-add d-flex align-items-center p-3 mb-3"
+                                data-action="open-chooser" data-sectionid="0" data-sectionreturnid="0">
+    <span class="pluscontainer icon-no-margin icon-size-3 d-flex p-2 mr-3">
+        <i class="icon fa fa-plus fa-fw " aria-hidden="true"></i>
+    </span>
+                            <span class="activity-add-text">{{#str}}addresourceoractivity, core{{/str}}</span>
+                        </button>
+                    {{/editing}}
                 </ul>
             </div>
         </div>

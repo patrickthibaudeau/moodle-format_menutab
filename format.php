@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/completionlib.php');
 
+$table_contents = optional_param('table_contents', 0, PARAM_INT);
+
 // Retrieve course format option fields and add them to the $course object.
 $format = core_courseformat\base::instance($course);
 $course = $format->get_course();
@@ -57,9 +59,16 @@ $renderer =  $format->get_renderer($PAGE);
 if ($isediting) {
 
     if ($section_number == 0) {
-        $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
-        $data = $templateable->export_for_template($renderer);
-        echo $renderer->render_from_template('format_menutab/course_home_page', $data);
+        if ($table_contents) {
+            // If user is editing, we render the page the old way.
+            $outputclass = $format->get_output_classname('content');
+            $widget = new $outputclass($format);
+            echo $renderer->render($widget);
+        } else {
+            $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
+            $data = $templateable->export_for_template($renderer);
+            echo $renderer->render_from_template('format_menutab/course_home_page', $data);
+        }
     } else {
         // If user is editing, we render the page the old way.
         $outputclass = $format->get_output_classname('content');
@@ -69,9 +78,17 @@ if ($isediting) {
 
 } else {
     if ($section_number == 0) {
-        $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
-        $data = $templateable->export_for_template($renderer);
-        echo $renderer->render_from_template('format_menutab/course_home_page', $data);
+        if ($table_contents) {
+            // Render the page as topic
+            $outputclass = $format->get_output_classname('content');
+            $widget = new $outputclass($format);
+            echo $renderer->render($widget);
+        } else {
+            $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
+            $data = $templateable->export_for_template($renderer);
+            echo $renderer->render_from_template('format_menutab/course_home_page', $data);
+        }
+
     } else {
         $templateable = new \format_menutab\output\course_output($course, false, $section_number, $renderer);
         $data = $templateable->export_for_template($renderer);

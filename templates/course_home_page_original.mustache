@@ -283,8 +283,10 @@
                 <div class="col">
                     <div class="card-deck">
                         {{#sections}}
-                            <div id="section-{{sectionnumber}}" class="card section course-section
-                                 {{#marker}}marker{{/marker}}"
+                            <div id="section-{{sectionnumber}}" class="card section course-section main
+                            {{#ishidden}} hidden {{/ishidden}} {{#iscurrent}} current {{/iscurrent}}
+                                {{#isstealth}} orphaned {{/isstealth}}
+                                {{#editing}}dropready{{/editing}} {{#marker}}marker{{/marker}}"
                                  data-sectionid="{{sectionnumber}}" data-sectionreturnid="{{sectionreturn}}"
                                  data-for="section"
                                  data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-indexed="true">
@@ -300,9 +302,9 @@
                                 </div>
                                 </a>
 
-                                <div class="card-body course-section-header"
+                                <div class="card-body course-section-header {{#editing}}dropready draggable{{/editing}}"
                                      data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-for="section_title"
-                                >
+                                     {{#editing}}draggable="true"{{/editing}}>
                                     <h5 class="card-title">
                                         {{^editing}}
                                             <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}
@@ -342,7 +344,7 @@
                                         <div class="clearfixt">&nbsp;<br></div>
                                     {{/editing}}
                                     <p class="card-text">
-                                        {{{summary}}}
+                                            {{{summary}}}
                                     </p>
                                     {{#progress}}
                                         <div class="progress"
@@ -356,14 +358,11 @@
                                     {{/progress}}
                                     {{#canedit}}
 
-                                        <div data-region="sectionbadges"
-                                             class="sectionbadges d-flex align-items-center">
-                                        <span class="badge badge-pill badge-primary order-1 d-none"
-                                              data-type="iscurrent">
+                                        <div data-region="sectionbadges" class="sectionbadges d-flex align-items-center">
+                                        <span class="badge badge-pill badge-primary order-1 d-none" data-type="iscurrent">
                                             Highlighted
                                         </span>
-                                            <span class="badge badge-pill badge-warning order-2 d-none"
-                                                  data-type="hiddenfromstudents">
+                                            <span class="badge badge-pill badge-warning order-2 d-none" data-type="hiddenfromstudents">
                                             Hidden from students
                                         </span>
                                             <span class="badge badge-pill badge-secondary order-3 d-none">
@@ -389,20 +388,6 @@
             </div>
         {{/sectionrows}}
     </div>
-    {{#editing}}
-        <div class="mdl-left py-2 changenumsections">
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&increase=1&sesskey={{sesskey}}"
-            class="increase-sections">
-            <i class="icon fa fa-plus fa-fw " title="{{#str}}increasesections, core{{/str}}" role="img"
-               aria-label="{{#str}}increasesections, core{{/str}}"></i>
-            </a>
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&increase&sesskey={{sesskey}}"
-            class="reduce-sections">
-            <i class="icon fa fa-minus fa-fw " title="{{#str}}reducesections, core{{/str}}" role="img"
-               aria-label="{{#str}}reducesections, core{{/str}}"></i>
-            </a>
-        </div>
-    {{/editing}}
 </div>
 {{#js}}
     require(['core_courseformat/local/content'], function(component) {

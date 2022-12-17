@@ -26,6 +26,19 @@
     border-color: #fff !important;
 }
 
+.btn-menutab-lg {
+    font-size: 1.1em !important;
+    font-weight: 900 !important;
+}
+
+.btn-outline-menutab[aria-expanded="true"]:after {
+    content: "\25b4";
+}
+
+.btn-outline-menutab[aria-expanded="false"]:after {
+    content: "\25be";
+}
+
 .format_menu_tab_card {
     -moz-border-radius-topright: 0px !important;
     border-top-right-radius: 0px !important;
