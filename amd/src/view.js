@@ -57,9 +57,13 @@ define(["jquery", "core/config"],
                         let course = $(this).data('course');
 
                         if (view == 'grid') {
-                            $.post(mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=0');
+                            $.ajax({
+                                url: mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=0'
+                            });
                         } else {
-                            $.post(mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=1');
+                            $.ajax({
+                                url: mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=1'
+                            });
                         }
                         location.reload();
                     });
