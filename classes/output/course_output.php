@@ -213,7 +213,7 @@ class course_output implements \renderable, \templatable
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
         $data['course_image'] = $this->get_course_image($output);
-        $data['sectionreturn'] = 0;
+        $data['sectionreturn'] = $this->format->get_section_number();
         $data[$this->course->course_title_position] = true;
 
         foreach ($this->courseformatoptions as $k => $v) {
@@ -485,6 +485,7 @@ class course_output implements \renderable, \templatable
                         'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
                         'sectionnumber' => $section->section,
                         'sectionid' => $section->id,
+                        'sectionreturn' => 0,
                         'courseid' => $section->course,
                         'available' => $section->available,
                         'availability' => $section->availability,

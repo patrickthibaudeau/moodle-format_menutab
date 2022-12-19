@@ -4,9 +4,20 @@
         <div class="card-header section-zero-header" id="format-menutab-heading-one">
             <h5 class="mb-0">
                 <button class="btn btn-outline-menutab btn-menutab-lg" type="button" data-toggle="collapse"
-                        data-target="#collapseOne" aria-expanded="{{^collapsed}}true{{/collapsed}}{{#collapsed}}false{{/collapsed}}" aria-controls="collapseOne">
+                        data-target="#collapseOne"
+                        aria-expanded="{{^collapsed}}true{{/collapsed}}{{#collapsed}}false{{/collapsed}}"
+                        aria-controls="collapseOne">
                     {{title}}
                 </button>
+                <span class="float-right">
+                    <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}"
+                    title="{{#str}}grid_view, format_menutab{{/str}}" class="text-white">
+                        <i class="fa fa-th"></i></a>
+                    <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&table_contents=1"
+                    title="{{#str}}list_view, format_menutab{{/str}}" class="ml-2 text-white">
+                        <i class="fa fa-list"></i>
+                    </a>
+                </span>
             </h5>
         </div>
     </div>
