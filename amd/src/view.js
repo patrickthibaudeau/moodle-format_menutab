@@ -58,14 +58,19 @@ define(["jquery", "core/config"],
 
                         if (view == 'grid') {
                             $.ajax({
-                                url: mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=0'
+                                url: mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=0',
+                                success: function () {
+                                    location.reload();
+                                }
                             });
                         } else {
                             $.ajax({
-                                url: mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=1'
+                                url: mdlcfg.wwwroot + '/course/format/menutab/update_view.php?course=' + course + '&table_contents=1',
+                                success: function () {
+                                    location.reload();
+                                }
                             });
                         }
-                        location.reload();
                     });
 
                 }); // document.ready
