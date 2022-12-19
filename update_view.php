@@ -10,5 +10,3 @@ if (!isset($_SESSION['format_mentuab_view_' . $course])) {
 } else {
     $_SESSION['format_mentuab_view_' . $course] = $table_contents;
 }
-
-print_object('Session = ' . $_SESSION['format_mentuab_view_' . $course]);
