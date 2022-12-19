@@ -88,3 +88,8 @@
 .card-footer:last-child {
     border-radius: 0 0 0 !important;
 }
+
+.local_menutab_gid_list_view {
+    font-size: 0.9em;
+    font-weight: lighter !important;
+}

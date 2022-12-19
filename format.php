@@ -27,13 +27,19 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/completionlib.php');
 
-$table_contents = optional_param('table_contents', 0, PARAM_INT);
+
 
 // Retrieve course format option fields and add them to the $course object.
 $format = core_courseformat\base::instance($course);
 $course = $format->get_course();
 $context = context_course::instance($course->id);
 $isediting = $format->show_editor();
+
+if (!isset($_SESSION['format_mentuab_view_' . $course->id])) {
+    $_SESSION['format_mentuab_view_' . $course->id] = 0;
+}
+
+$table_contents = $_SESSION['format_mentuab_view_' . $course->id] ;
 
 $section_number = optional_param('section', 0, PARAM_INT);
 // Set section number
@@ -56,6 +62,7 @@ if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context
 // Setup the format base instance.
 $renderer =  $format->get_renderer($PAGE);
 
+$PAGE->requires->js_call_amd('format_menutab/view', 'init');
 if ($isediting) {
 
     if ($section_number == 0) {
@@ -75,7 +82,6 @@ if ($isediting) {
         $widget = new $outputclass($format);
         echo $renderer->render($widget);
     }
-
 } else {
     if ($section_number == 0) {
         if ($table_contents) {
