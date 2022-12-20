@@ -44,15 +44,15 @@ define(["jquery", "core/config"],
                             course = course.replace('#', '');
                             let html = '<div style="float: right;">&nbsp;&nbsp;\n' +
                                 '                    <a href="#"\n' +
-                                '                    title="Grid view" data-view="grid" data-course="' + course + '" class="local_menutab_grid_list_view">\n' +
-                                '                        <i class="fa fa-th" style="font-size:0.5em"></i></a>\n' +
+                                '                    title="Grid view" data-view="grid" data-course="' + course + '" class="btn_grid_list_view">\n' +
+                                '                        <i class="fa fa-th" style="font-size:0.9em"></i></a>\n' +
                                 '                </div>';
                             $(".page-header-headings").closest('div').find('h1').append(html);
                         }
                     }
 
 
-                    $('.local_menutab_grid_list_view').on('click', function () {
+                    $('.btn_grid_list_view').on('click', function () {
                         let view = $(this).data('view');
                         let course = $(this).data('course');
 
