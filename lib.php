@@ -271,6 +271,7 @@ class format_menutab extends core_courseformat\base
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
+                            2 => '2',
                             3 => '3',
                             4 => '4',
                         )
