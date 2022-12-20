@@ -389,15 +389,10 @@
     </div>
     {{#editing}}
         <div class="mdl-left py-2 changenumsections">
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&increase=1&sesskey={{sesskey}}"
+            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&insertsection=0&sesskey={{sesskey}}"
             class="increase-sections">
             <i class="icon fa fa-plus fa-fw " title="{{#str}}increasesections, core{{/str}}" role="img"
                aria-label="{{#str}}increasesections, core{{/str}}"></i>
-            </a>
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&increase&sesskey={{sesskey}}"
-            class="reduce-sections">
-            <i class="icon fa fa-minus fa-fw " title="{{#str}}reducesections, core{{/str}}" role="img"
-               aria-label="{{#str}}reducesections, core{{/str}}"></i>
             </a>
         </div>
     {{/editing}}
