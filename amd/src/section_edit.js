@@ -38,11 +38,14 @@ define(["jquery", "core/config"],
                 setTimeout(function () {
                         // targets from the index nav drawer
                         const targets = document.getElementsByClassName('dropready');
+                        // move Items from the card update menu
                         const moveItems = document.getElementsByClassName('move');
+                        // Capture the Hide show section button
+                        const showHide = document.getElementsByClassName(' editing_showhide');
+                        // Capture delete section
+                        const deleteItem = document.getElementsByClassName(' editing_delete');
 
-                        console.log('Sources length = ' + targets.length);
-                    console.log('Move items = ' + moveItems.length);
-
+                        // Drag N Drop nav index
                         for (let i = 0; i < targets.length; i++) {
                             targets[i].addEventListener('drop', (event) => {
                                 // Reload page if section has been dropped
@@ -51,6 +54,43 @@ define(["jquery", "core/config"],
                         }
                         ;
 
+                        // Move button from section edit menu
+                        for (let x = 0; x < moveItems.length; x++) {
+                            moveItems[x].addEventListener('click', (event) => {
+                                // Wait for modal to open before getting list items
+                                setTimeout(function () {
+                                    let listItems = document.getElementsByClassName('collapse-list-link');
+                                    // Reload page if lsit item clicked
+                                    for (let y = 0; y < listItems.length; y++) {
+                                        listItems[y].addEventListener('click', (event) => {
+                                            location.reload();
+                                        });
+                                    }
+                                    ;
+                                }, 1000);
+                            });
+                        }
+                        ;
+
+                        //  SHow/Hide button from edit menu
+                        for (let j = 0; j < showHide.length; j++) {
+                            showHide[j].addEventListener('click', (event) => {
+                                // Reload page if section has been dropped
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 100);
+                            });
+                        }
+                        ;
+
+                        // Delete button from edit menu
+                        for (let k = 0; k < deleteItem.length; k++) {
+                            deleteItem[k].addEventListener('click', (event) => {
+                                // Reload page if section has been dropped
+                                location.reload();
+                            });
+                        }
+                        ;
 
                     }, 1000
                 );
