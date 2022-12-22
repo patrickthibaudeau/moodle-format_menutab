@@ -63,6 +63,8 @@ if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context
 $renderer =  $format->get_renderer($PAGE);
 
 $PAGE->requires->js_call_amd('format_menutab/view', 'init');
+$PAGE->requires->js_call_amd('format_menutab/section_edit', 'init');
+
 if ($isediting) {
 
     if ($section_number == 0) {
