@@ -168,6 +168,7 @@ class course_output implements \renderable, \templatable
      */
     public function export_for_template(\renderer_base $output)
     {
+        global $PAGE;
         if (!$this->courserenderer) {
             $this->courserenderer = $output;
         }
@@ -179,6 +180,7 @@ class course_output implements \renderable, \templatable
             return $this->append_single_section_page_data($output, $data);
         } else {
             // We are outputting multi section page.
+            $PAGE->requires->js_call_amd('format_menutab/section_edit', 'init');
             // Add section Zero. We only use section zero on the home page.
             $data = $this->append_section_zero_data($data, $output);
             return $this->append_home_page_data($data, $output);
@@ -730,6 +732,12 @@ class course_output implements \renderable, \templatable
                     // content list
                     $tabs[$t]['cm_index_skip'] = $index;
                     $tabs[$t]['cm_index_start'] = $index + 1;
+                } else {
+                    $tabs[$t]['title'] = get_String('content', 'format_menutab');
+                    $tabs[$t]['tabid'] = $index;
+                    $tabs[$t]['user_visible'] = true;
+                    $tabs[$t]['cm_index_skip'] = -1;
+                    $tabs[$t]['cm_index_start'] = $index;
                 }
             }
 
@@ -780,7 +788,6 @@ class course_output implements \renderable, \templatable
 
                 }
             }
-
         }
         return $tabs;
     }

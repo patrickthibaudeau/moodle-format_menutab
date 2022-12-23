@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['collapsed'] = 'Top section collapsed?';
 $string['collapsed_help'] = 'Should top section (in regular Moodle courses know as Section 0) be collapsed when students enter the course? Default Yes';
 $string['course_title_color'] = 'Course name color';
+$string['content'] = 'Contents';
 $string['course_title_color_help'] = 'Select a color for the course name on the home page. This is important if you add an image.';
 $string['course_title_position'] = 'Coure name position';
 $string['course_title_position_help'] = 'Select the postion the course name should be in.';
