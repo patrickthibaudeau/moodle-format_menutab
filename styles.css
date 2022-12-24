@@ -15,6 +15,12 @@
     transform: translate(-50%, -50%);
 }
 
+.format_menutab_progress {
+    position: absolute;
+    width: 90%;
+    bottom: 5px;
+}
+
 .btn-outline-menutab {
     color: #fff !important;
     border-color: #fff !important;

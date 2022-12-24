@@ -283,7 +283,7 @@
                 <div class="col">
                     <div class="card-deck">
                         {{#sections}}
-                            <div id="section-{{sectionnumber}}" class="card section course-section
+                            <div id="section-{{sectionnumber}}" class="card section course-section border-secondary
                                  {{#marker}}marker{{/marker}}"
                                  data-sectionid="{{sectionnumber}}" data-sectionreturnid="{{sectionreturn}}"
                                  data-for="section"
@@ -339,45 +339,59 @@
                                     {{#editing}}
                                         <div class="clearfixt">&nbsp;<br></div>
                                     {{/editing}}
-                                    <p class="card-text">
-                                        {{{summary}}}
-                                    </p>
-                                    {{#progress}}
-                                        <div class="progress"
-                                             title="{{#str}}your_section_progress, format_menutab{{/str}}{{percent}}%">
-                                            <div class="progress-bar {{backgroundColor}}" role="progressbar"
-                                                 style="width: {{percent}}%;" aria-valuenow="{{percent}}"
-                                                 aria-valuemin="0"
-                                                 aria-valuemax="100">{{percent}}%
-                                            </div>
-                                        </div>
-                                    {{/progress}}
-                                    {{#canedit}}
 
-                                        <div data-region="sectionbadges"
-                                             class="sectionbadges d-flex align-items-center">
+                                    <div class="format_mentutab_summary_text">
+                                        <p class="card-text">
+                                            {{{summary}}}
+                                        </p>
+                                    </div>
+
+                                    {{#canedit}}
+                                        <div class="format_menuttab_badges">
+                                            <div data-region="sectionbadges"
+                                                 class="sectionbadges d-flex align-items-center">
                                         <span class="badge badge-pill badge-primary order-1 d-none"
                                               data-type="iscurrent">
                                             Highlighted
                                         </span>
-                                            <span class="badge badge-pill badge-warning order-2 d-none"
-                                                  data-type="hiddenfromstudents">
+                                                <span class="badge badge-pill badge-warning order-2 d-none"
+                                                      data-type="hiddenfromstudents">
                                             Hidden from students
                                         </span>
-                                            <span class="badge badge-pill badge-secondary order-3 d-none">
+                                                <span class="badge badge-pill badge-secondary order-3 d-none">
                                             Not available
                                         </span>
-                                        </div>
+                                            </div>
 
-                                        {{^visible}}
-                                            <div>
+
+                                            {{^visible}}
+                                                <div>
                                                 <span class="badge badge-warning font-weight-bolder">
                                                     {{#str}}hiddenfromstudents, core{{/str}}
                                                 </span>
-                                            </div>
-                                        {{/visible}}
-
+                                                </div>
+                                            {{/visible}}
+                                        </div>
                                     {{/canedit}}
+
+                                    <div class="format_menutab_progress">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{#progress}}
+                                                    <div class="progress"
+                                                         title="{{#str}}your_section_progress, format_menutab{{/str}}{{percent}}%">
+                                                        <div class="progress-bar {{backgroundColor}}" role="progressbar"
+                                                             style="width: {{percent}}%"
+                                                             aria-valuenow="{{percent}}"
+                                                             aria-valuemin="0"
+                                                             aria-valuemax="100">{{percent}}%
+                                                        </div>
+                                                    </div>
+                                                {{/progress}}
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -389,7 +403,8 @@
     </div>
     {{#editing}}
         <div class="mdl-left py-2 changenumsections">
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&insertsection=0&sesskey={{sesskey}}"
+            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}
+            &insertsection=0&sesskey={{sesskey}}"
             class="increase-sections">
             <i class="icon fa fa-plus fa-fw " title="{{#str}}increasesections, core{{/str}}" role="img"
                aria-label="{{#str}}increasesections, core{{/str}}"></i>

@@ -508,9 +508,7 @@ class course_output implements \renderable, \templatable
                         'marker' => ($section->section == $this->course->marker) ? true : false,
                         'controlmenu' => $control_menu->export_for_template($output)
                     );
-//if ($section->section ==1) {
-//    print_object($section_card);
-//}
+
                     // Include completion tracking data for each section (if used).
                     if ($section->visible && $this->completionenabled) {
                         if (isset($this->modinfo->sections[$sectionnum])) {
@@ -534,6 +532,10 @@ class course_output implements \renderable, \templatable
 
                         }
                     }
+
+//                if ($section->section == 1) {
+//                    print_object($section_card);
+//                }
 
                     // If item is restricted, user needs to know why.
                     $section_card['availabilitymessage'] = $section->availableinfo || !$section->visible
@@ -641,6 +643,8 @@ class course_output implements \renderable, \templatable
         }
         // Remove image from summary
         $summary = preg_replace("/<img[^>]+\>/i", "", $summary);
+        // Remove empty paragraphs
+        $summary = preg_replace("/<p[^>]*><\\/p[^>]*>/", "", $summary);
 
         $results = new \stdClass();
         $results->image = $image;
