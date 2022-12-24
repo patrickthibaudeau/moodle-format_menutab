@@ -68,6 +68,8 @@ if ($isediting) {
 
     if ($section_number == 0) {
         if ($table_contents) {
+            // Load javascript to resize images
+            $PAGE->requires->js_call_amd('format_menutab/image_resize', 'init');
             // If user is editing, we render the page the old way.
             $outputclass = $format->get_output_classname('content');
             $widget = new $outputclass($format);
@@ -88,6 +90,8 @@ if ($isediting) {
 } else {
     if ($section_number == 0) {
         if ($table_contents) {
+            // Load javascript to resize images
+            $PAGE->requires->js_call_amd('format_menutab/image_resize', 'init');
             // Render the page as topic
             $outputclass = $format->get_output_classname('content');
             $widget = new $outputclass($format);
