@@ -78,6 +78,8 @@ if ($isediting) {
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
     } else {
+        // Load javascript to resize images
+        $PAGE->requires->js_call_amd('format_menutab/image_resize', 'init');
         // If user is editing, we render the page the old way.
         $outputclass = $format->get_output_classname('content');
         $widget = new $outputclass($format);
