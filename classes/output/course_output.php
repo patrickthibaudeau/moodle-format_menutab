@@ -198,10 +198,16 @@ class course_output implements \renderable, \templatable
         global $SESSION;
 
         $print_section_number = false;
+        $print_overall_progress = false;
 
         if (get_config('format_menutab', 'print_section_number')) {
             $print_section_number = true;
         }
+
+        if (get_config('format_menutab', 'print_overall_progress')) {
+            $print_overall_progress = true;
+        }
+
         $data = [];
         $data['coursename'] = $this->course->fullname;
         $data['courseshortname'] = $this->course->shortname;
@@ -214,6 +220,7 @@ class course_output implements \renderable, \templatable
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
+        $data['print_overall_progress'] = $print_overall_progress;
         $data['course_image'] = $this->get_course_image($output);
         $data['sectionreturn'] = $this->format->get_section_number();
         $data[$this->course->course_title_position] = true;
@@ -228,8 +235,8 @@ class course_output implements \renderable, \templatable
 
     /**
      * Get teh course image
-     * @return string
      * @param \renderer_base $output
+     * @return string
      * @throws \coding_exception
      */
     private function get_course_image($output)
@@ -467,86 +474,89 @@ class course_output implements \renderable, \templatable
             if ($sectionnum != 0 && $showsection) {
                 $longtitlelength = 65;
 
-                    if ($section->name) {
-                        $title = $section->name;
-                    } else {
-                        $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
-                    }
+                if ($section->name) {
+                    $title = $section->name;
+                } else {
+                    $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
+                }
 
-                    $summary = self::temp_format_summary_text($section);
-                    // Split image and summary text
-                    $summary_object = $this->split_section_summary($summary, $image_count);
+                $summary = self::temp_format_summary_text($section);
+                // Split image and summary text
+                $summary_object = $this->split_section_summary($summary, $image_count);
 
-                    $image = $summary_object->image;
-                    $summary = $summary_object->text;
-                    $image_count = $summary_object->image_count;
+                $image = $summary_object->image;
+                $summary = $summary_object->text;
+                $image_count = $summary_object->image_count;
 
-                    $control_menu = new \format_menutab\output\courseformat\content\section\controlmenu($this->format, $section);
+                $control_menu = new \format_menutab\output\courseformat\content\section\controlmenu($this->format, $section);
 
-                    $section_card = array(
-                        'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
-                        'sectionnumber' => $section->section,
-                        'sectionid' => $section->id,
-                        'sectionreturn' => 0,
-                        'courseid' => $section->course,
-                        'available' => $section->available,
-                        'availability' => $section->availability,
-                        'title' => $title,
-                        'summary' => $summary,
-                        'image' => $image,
-                        'current' => course_get_format($this->course)->is_section_current($section),
-                        'uservisible' => $section->uservisible,
-                        'visible' => $section->visible,
-                        'restricted' => !($section->available),
-                        'userclickable' => $section->available || $section->uservisible,
-                        'activity_summary' => self::temp_section_activity_summary($section),
-                        'titleclass' => strlen($title) >= $longtitlelength ? ' longtitle' : '',
-                        'progress' => false,
-                        'isactive' => $this->course->marker == $section->section,
-                        'extraclasses' => '',
-                        'editing' => $this->isediting,
-                        'marker' => ($section->section == $this->course->marker) ? true : false,
-                        'controlmenu' => $control_menu->export_for_template($output)
-                    );
+                $section_card = array(
+                    'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
+                    'sectionnumber' => $section->section,
+                    'sectionid' => $section->id,
+                    'sectionreturn' => 0,
+                    'courseid' => $section->course,
+                    'available' => $section->available,
+                    'availability' => $section->availability,
+                    'title' => $title,
+                    'summary' => $summary,
+                    'image' => $image,
+                    'current' => course_get_format($this->course)->is_section_current($section),
+                    'uservisible' => $section->uservisible,
+                    'visible' => $section->visible,
+                    'restricted' => !($section->available),
+                    'userclickable' => $section->available || $section->uservisible,
+                    'activity_summary' => self::temp_section_activity_summary($section),
+                    'titleclass' => strlen($title) >= $longtitlelength ? ' longtitle' : '',
+                    'progress' => false,
+                    'isactive' => $this->course->marker == $section->section,
+                    'extraclasses' => '',
+                    'editing' => $this->isediting,
+                    'marker' => ($section->section == $this->course->marker) ? true : false,
+                    'controlmenu' => $control_menu->export_for_template($output)
+                );
 
-                    // Include completion tracking data for each section (if used).
-                    if ($section->visible && $this->completionenabled) {
-                        if (isset($this->modinfo->sections[$sectionnum])) {
-                            $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
-                            // Keep track of overall progress so we can show this too - add this section's completion to the totals.
-                            $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
-                            $data['overall_progress']['num_complete'] += $completionthissection['completed'];
+                // Include completion tracking data for each section (if used).
+                if ($section->visible && $this->completionenabled) {
+                    if (isset($this->modinfo->sections[$sectionnum])) {
+                        $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
+                        // Keep track of overall progress so we can show this too - add this section's completion to the totals.
+                        $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
+                        $data['overall_progress']['num_complete'] += $completionthissection['completed'];
 
-                            // We only add the section values to the individual sections if courseshowsectionprogress is true.
-                            // (Otherwise we only retain overall completion as above, not for each section).
+                        // We only add the section values to the individual sections if courseshowsectionprogress is true.
+                        // (Otherwise we only retain overall completion as above, not for each section).
 
-                            $showaspercent = true;
-                            if ($this->courseformatoptions['print_progress'] && $completionthissection['outof'] > 0) {
-                                $section_card['progress'] = $this->completion_indicator(
-                                    $completionthissection['completed'],
-                                    $completionthissection['outof'],
-                                    $showaspercent,
-                                    false
-                                );
-                            }
-
+                        $showaspercent = true;
+                        if ($this->courseformatoptions['print_progress'] && $completionthissection['outof'] > 0) {
+                            $section_card['progress'] = $this->completion_indicator(
+                                $completionthissection['completed'],
+                                $completionthissection['outof'],
+                                $showaspercent,
+                                false
+                            );
                         }
-                    }
 
+                    }
+                }
+
+                // calculate overall percentage
+                $completion_percentage = floor(($data['overall_progress']['num_complete']  / $data['overall_progress']['num_out_of']) * 100);
+                $data['overall_progress']['percent'] = $completion_percentage;
 //                if ($section->section == 1) {
 //                    print_object($section_card);
 //                }
 
-                    // If item is restricted, user needs to know why.
-                    $section_card['availabilitymessage'] = $section->availableinfo || !$section->visible
-                        ? self::temp_section_availability_message($section) : '';
+                // If item is restricted, user needs to know why.
+                $section_card['availabilitymessage'] = $section->availableinfo || !$section->visible
+                    ? self::temp_section_availability_message($section) : '';
 
-                    // See below about when "hide add cm control" is true.
-                    $section_card['hideaddcmcontrol'] = false;
-                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
-                        $this->course, $section->section, 0
-                    );
-                    $section_cards[] = $section_card;
+                // See below about when "hide add cm control" is true.
+                $section_card['hideaddcmcontrol'] = false;
+                $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
+                    $this->course, $section->section, 0
+                );
+                $section_cards[] = $section_card;
 
 
             } else if ($sectionnum == 0) {
@@ -615,7 +625,7 @@ class course_output implements \renderable, \templatable
             }
         }
         $data['moodlefiltersconfig'] = $this->get_filters_config();
-//print_object($data);
+//        print_object($data);
         return $data;
     }
 

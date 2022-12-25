@@ -2,21 +2,36 @@
      data-id="{{sectionid}}" data-number="0" data-indexed="true" role="tablist" aria-multiselectable="true">
     <div class="card format_menu_tab_card">
         <div class="card-header section-zero-header" id="format-menutab-heading-one">
-            <h5 class="mb-0">
-                <button class="btn btn-outline-menutab btn-menutab-lg" type="button" data-toggle="collapse"
-                        data-target="#collapseOne"
-                        aria-expanded="{{^collapsed}}true{{/collapsed}}{{#collapsed}}false{{/collapsed}}"
-                        aria-controls="collapseOne">
-                    {{title}}
-                </button>
-                <span class="float-right">
-                    <input type="hidden" id="format_menutab_grid" value="1">
-                    <a href="#"
-                    title="{{#str}}list_view, format_menutab{{/str}}" data-view="list" data-course="{{courseid}}" class="local_menutab_grid_list_view btn_grid_list_view ml-2 text-white">
-                        <i class="fa fa-list"></i>
-                    </a>
-                </span>
-            </h5>
+            <div class="h5 mb-0">
+                <div class="row">
+                    <div class="col d-flex justify-content-start align-items-center">
+                        <button class="btn btn-outline-menutab btn-menutab-lg" type="button" data-toggle="collapse"
+                                data-target="#collapseOne"
+                                aria-expanded="{{^collapsed}}true{{/collapsed}}{{#collapsed}}false{{/collapsed}}"
+                                aria-controls="collapseOne">
+                            {{title}}
+                        </button>
+                    </div>
+                    <div class="col d-flex justify-content-center align-items-center">
+                        {{#print_overall_progress}}
+                            {{#overall_progress}}
+                                <h1><span class="badge badge-secondary"
+                                          title="{{#str}}coursecompletion, core{{/str}}">{{percent}}%</span></h1>
+                                <br/>
+                            {{/overall_progress}}
+                        {{/print_overall_progress}}
+                    </div>
+
+                    <div class="col d-flex justify-content-end align-items-center">
+                        <input type="hidden" id="format_menutab_grid" value="1">
+                        <a href="#"
+                           title="{{#str}}list_view, format_menutab{{/str}}" data-view="list" data-course="{{courseid}}"
+                           class="local_menutab_grid_list_view btn_grid_list_view ml-2 text-white">
+                            <i class="fa fa-list"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div id="collapseOne" class="collapse {{^collapsed}}show in{{/collapsed}}"
