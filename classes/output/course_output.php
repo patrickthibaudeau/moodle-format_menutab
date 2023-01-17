@@ -541,8 +541,11 @@ class course_output implements \renderable, \templatable
                 }
 
                 // calculate overall percentage
-                $completion_percentage = floor(($data['overall_progress']['num_complete']  / $data['overall_progress']['num_out_of']) * 100);
-                $data['overall_progress']['percent'] = $completion_percentage;
+                if ($data['overall_progress']['num_out_of'] > 0) {
+                    $completion_percentage = floor(($data['overall_progress']['num_complete']  / $data['overall_progress']['num_out_of']) * 100);
+                    $data['overall_progress']['percent'] = $completion_percentage;
+                }
+
 //                if ($section->section == 1) {
 //                    print_object($section_card);
 //                }
