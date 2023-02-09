@@ -541,7 +541,7 @@ class course_output implements \renderable, \templatable
                 }
 
                 // calculate overall percentage
-                if ($data['overall_progress']['num_out_of'] > 0) {
+                if (isset($data['overall_progress']) && $data['overall_progress']['num_out_of'] > 0) {
                     $completion_percentage = floor(($data['overall_progress']['num_complete']  / $data['overall_progress']['num_out_of']) * 100);
                     $data['overall_progress']['percent'] = $completion_percentage;
                 }
@@ -721,6 +721,7 @@ class course_output implements \renderable, \templatable
         }
         $previouswaslabel = false;
         $sectioncontent = [];
+        $a_tab_exists = false; // Used so that default content tab does not create itself if a label is used after a tab.
         $tabs = [];
         $t = 0;
         // Create all tab objects
@@ -749,12 +750,15 @@ class course_output implements \renderable, \templatable
                     // content list
                     $tabs[$t]['cm_index_skip'] = $index;
                     $tabs[$t]['cm_index_start'] = $index + 1;
+                    $a_tab_exists = true;
                 } else {
-                    $tabs[$t]['title'] = get_String('content', 'format_menutab');
-                    $tabs[$t]['tabid'] = $index;
-                    $tabs[$t]['user_visible'] = true;
-                    $tabs[$t]['cm_index_skip'] = -1;
-                    $tabs[$t]['cm_index_start'] = $index;
+                    if (!$a_tab_exists) {
+                        $tabs[$t]['title'] = get_String('content', 'format_menutab');
+                        $tabs[$t]['tabid'] = $index;
+                        $tabs[$t]['user_visible'] = true;
+                        $tabs[$t]['cm_index_skip'] = -1;
+                        $tabs[$t]['cm_index_start'] = $index;
+                    }
                 }
             }
 
