@@ -28,6 +28,21 @@ class format_menutab extends core_courseformat\base
 {
 
     /**
+     * Creates a new instance of class
+     *
+     * Please use {@see course_get_format($courseorid)} to get an instance of the format class
+     *
+     * @param string $format
+     * @param int $courseid
+     */
+    protected function __construct($format, $courseid) {
+        if ($courseid === 0) {
+            global $COURSE;
+            $courseid = $COURSE->id;  // Save lots of global $COURSE as we will never be the site course.
+        }
+        parent::__construct($format, $courseid);
+    }
+    /**
      * Returns true if this course format uses sections.
      *
      * @return bool
@@ -47,7 +62,7 @@ class format_menutab extends core_courseformat\base
         return true;
     }
 
-    /**
+     /**
      * Returns the information about the ajax support in the given source format.
      *
      * The returned object's property (boolean)capable indicates that
@@ -163,6 +178,19 @@ class format_menutab extends core_courseformat\base
             $url->param('section', $sectionno);
         }
         return $url;
+    }
+
+    /**
+     * Returns the list of blocks to be automatically added for the newly created course
+     *
+     * @return array of default blocks, must contain two keys BLOCK_POS_LEFT and BLOCK_POS_RIGHT
+     *     each of values is an array of block names (for left and right side columns)
+     */
+    public function get_default_blocks() {
+        return array(
+            BLOCK_POS_LEFT => array(),
+            BLOCK_POS_RIGHT => array()
+        );
     }
 
     /**
@@ -509,7 +537,23 @@ class format_menutab extends core_courseformat\base
         }
         return $elements;
     }
+
+    /**
+     * Returns whether this course format allows the activity to
+     * have "triple visibility state" - visible always, hidden on course page but available, hidden.
+     * Copied from format_topics
+     *
+     * @param stdClass|cm_info $cm course module (may be null if we are displaying a form for adding a module)
+     * @param stdClass|section_info $section section where this module is located or will be added to
+     * @return bool
+     */
+    public function allow_stealth_module_visibility($cm, $section) {
+        // Allow the third visibility state inside visible sections or in section 0.
+        return !$section->section || $section->visible;
+    }
 }
+
+
 
 /**
  * Implements callback inplace_editable() allowing to edit values in-place.

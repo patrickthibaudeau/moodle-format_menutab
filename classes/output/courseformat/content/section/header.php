@@ -65,6 +65,11 @@ class header extends \core_courseformat\output\local\content\section\header {
             $data->title = $output->render(course_get_format($course)->inplace_editable_render_section_name($this->section));
         }
 
+        if ($this->section->section > $format->get_last_section_number()) {
+            // Stealth sections (orphaned) has special title.
+            $data->title = get_string('orphanedactivitiesinsectionno', '', $section->section);
+        }
+
         if (!$section->visible) {
             $data->ishidden = true;
         }
