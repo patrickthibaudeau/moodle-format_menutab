@@ -742,7 +742,7 @@ class course_output implements \renderable, \templatable
                 preg_match("#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s", $mod->get_formatted_content(), $matches);
 
                 if (isset($matches[1])) {
-                    $title = strip_tags($matches[1]);
+                    $title = $matches[1];
                     $tabs[$t]['title'] = $title;
                     $tabs[$t]['tabid'] = $index;
                     $tabs[$t]['user_visible'] = $mod->get_user_visible();
