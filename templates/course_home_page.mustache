@@ -14,7 +14,14 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
-
+{{!
+IMPORTANT NOTE ABOUT SECTIONS
+#sectionid is used so that certain certain features are "printed"for a card only if the section exists.
+This is especially important when you have an number of sections that does not equal the number of columns per row.
+For example if you have 10 sections with three sections per row, the fourth row will only display 1 section (Section 10)
+Two blank sections will be added to fill the void. However, because they are not "true" sections, ie; there is
+no sectionid, Links and badges will not be printed on the card.
+}}
 {{!
     @template format_menutab/multi_section_page
 
@@ -211,14 +218,6 @@
             }
         }
     }
-}}
-{{!
-IMPORTANT NOTE ABOUT SECTIONS
-{{#sectionid}} is used so that certain certain features are "printed"for a card only if the section exists.
-This is especially important when you have an number of sections that does not equal the number of columns per row.
-For example if you have 10 sections with three sections per row, the fourth row will only display 1 section (Section 10)
-Two blank sections will be added to fill the void. However, because they are not "true" sections, ie; there is
-no sectionid, Links and badges will not be printed on the card.
 }}
 <style>
     header#page-header {
