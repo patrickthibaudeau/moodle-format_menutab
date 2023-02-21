@@ -220,10 +220,6 @@ class format_menutab extends core_courseformat\base
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
                 ),
-                'numcolumns' => array(
-                    'default' => 3,
-                    'type' => PARAM_INT,
-                ),
                 'course_title_position' => array(
                     'default' => 'middle-center',
                     'type' => PARAM_TEXT,
@@ -236,8 +232,8 @@ class format_menutab extends core_courseformat\base
                     'default' => false,
                     'type' => PARAM_BOOL,
                 ),
-                'stretch_columns' => array(
-                    'default' => 1,
+                'print_overall_progress' => array(
+                    'default' => 0,
                     'type' => PARAM_INT,
                 ),
                 'collapsed' => array(
@@ -248,11 +244,11 @@ class format_menutab extends core_courseformat\base
                     'default' => '#1b4c88',
                     'type' => PARAM_TEXT,
                 ),
-                'show_summary' => array(
-                    'default' => 0,
+                'numcolumns' => array(
+                    'default' => 3,
                     'type' => PARAM_INT,
                 ),
-                'print_overall_progress' => array(
+                'stretch_columns' => array(
                     'default' => 0,
                     'type' => PARAM_INT,
                 ),
@@ -267,6 +263,10 @@ class format_menutab extends core_courseformat\base
                 'section_number_text_color' => array(
                     'default' => '#ffffff',
                     'type' => PARAM_TEXT,
+                ),
+                'show_summary' => array(
+                    'default' => 0,
+                    'type' => PARAM_INT,
                 ),
                 'tab_background_color' => array(
                     'default' => '#1b4c88',
@@ -297,19 +297,6 @@ class format_menutab extends core_courseformat\base
                     'label' => new lang_string('coursedisplay'),
                     'element_type' => 'hidden',
                     'element_attributes' => [[COURSE_DISPLAY_SINGLEPAGE => new \lang_string('coursedisplay_single')]]
-                ),
-                'numcolumns' => array(
-                    'label' => new lang_string('numcolumns', 'format_menutab'),
-                    'element_type' => 'select',
-                    'element_attributes' => array(
-                        array(
-                            2 => '2',
-                            3 => '3',
-                            4 => '4',
-                        )
-                    ),
-                    'help' => 'numcolumns',
-                    'help_component' => 'format_menutab',
                 ),
                 'course_title_position' => array(
                     'label' => new lang_string('course_title_position', 'format_menutab'),
@@ -356,8 +343,8 @@ class format_menutab extends core_courseformat\base
                     'help' => 'darken_background_image',
                     'help_component' => 'format_menutab',
                 ),
-                'stretch_columns' => array(
-                    'label' => new lang_string('stretch_columns', 'format_menutab'),
+                'print_overall_progress' => array(
+                    'label' => new lang_string('print_overall_progress', 'format_menutab'),
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
@@ -365,7 +352,7 @@ class format_menutab extends core_courseformat\base
                             0 => get_string('no'),
                         )
                     ),
-                    'help' => 'stretch_columns',
+                    'help' => 'print_overall_progress',
                     'help_component' => 'format_menutab',
                 ),
                 'collapsed' => array(
@@ -389,20 +376,21 @@ class format_menutab extends core_courseformat\base
                     'help' => 'section_zero_background_color',
                     'help_component' => 'format_menutab',
                 ),
-                'show_summary' => array(
-                    'label' => new lang_string('show_summary_single_section', 'format_menutab'),
+                'numcolumns' => array(
+                    'label' => new lang_string('numcolumns', 'format_menutab'),
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
-                            1 => get_string('yes'),
-                            0 => get_string('no'),
+                            2 => '2',
+                            3 => '3',
+                            4 => '4',
                         )
                     ),
-                    'help' => 'show_summary_single_section',
+                    'help' => 'numcolumns',
                     'help_component' => 'format_menutab',
                 ),
-                'print_overall_progress' => array(
-                    'label' => new lang_string('print_overall_progress', 'format_menutab'),
+                'stretch_columns' => array(
+                    'label' => new lang_string('stretch_columns', 'format_menutab'),
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
@@ -410,7 +398,7 @@ class format_menutab extends core_courseformat\base
                             0 => get_string('no'),
                         )
                     ),
-                    'help' => 'print_overall_progress',
+                    'help' => 'stretch_columns',
                     'help_component' => 'format_menutab',
                 ),
                 'print_progress' => array(
@@ -447,6 +435,18 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'section_number_text_color',
+                    'help_component' => 'format_menutab',
+                ),
+                'show_summary' => array(
+                    'label' => new lang_string('show_summary_single_section', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'show_summary_single_section',
                     'help_component' => 'format_menutab',
                 ),
                 'tab_background_color' => array(

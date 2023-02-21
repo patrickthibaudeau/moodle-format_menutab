@@ -82,6 +82,7 @@ if ($isediting) {
     } else {
         // Load javascript to resize images
         $PAGE->requires->js_call_amd('format_menutab/image_resize', 'init');
+        $PAGE->requires->js_call_amd('format_menutab/single_section_edit', 'init');
         // If user is editing, we render the page the old way.
         $outputclass = $format->get_output_classname('content');
         $widget = new $outputclass($format);
