@@ -73,6 +73,10 @@ define(["jquery", "core/config"],
                         }
                     });
 
+                    setTimeout(function(){
+                        remove_nav_drawer_sections();
+                    }, 1000)
+
                 }); // document.ready
             }
         };
@@ -88,6 +92,18 @@ define(["jquery", "core/config"],
                 vars[hash[0]] = hash[1];
             }
             return vars;
+        }
+
+        /**
+         * Remove nav drawer sections
+         */
+        function remove_nav_drawer_sections() {
+            let number_of_sections = $('#number-of-sections-to-show').val();
+            $('.courseindex-section').each(function(index, section){
+                if ($(this).data('number') > number_of_sections) {
+                    $(this).hide();
+                }
+            });
         }
     }
 );

@@ -451,6 +451,7 @@ class course_output implements \renderable, \templatable
     private function append_home_page_data($data, $output)
     {
         global $CFG;
+
         $data['is_home_page'] = true;
         // If using completion tracking, get the data.
         if ($this->completionenabled) {
@@ -461,6 +462,7 @@ class course_output implements \renderable, \templatable
 
         $maxallowedsections = $this->format->get_max_sections();
         $sectioncountwarningissued = false;
+        $number_of_sections_to_show = $data['numsections'];
 
         $countincludedsections = 0;
         $image_count = 0;
@@ -469,111 +471,114 @@ class course_output implements \renderable, \templatable
             // but there is some available info text which explains the reason & should display,
             // OR it is hidden but the course has a setting to display hidden sections as unavilable.
 
-            $showsection = $section->uservisible ||
-                ($section->visible && !$section->available && !empty($section->availableinfo));
-            if ($sectionnum != 0 && $showsection) {
-                $longtitlelength = 65;
+            // Only print according to the number of sections to show
+            if ($section->section <= $number_of_sections_to_show) {
+                $showsection = $section->uservisible ||
+                    ($section->visible && !$section->available && !empty($section->availableinfo));
+                if ($sectionnum != 0 && $showsection) {
+                    $longtitlelength = 65;
 
-                if ($section->name) {
-                    $title = $section->name;
-                } else {
-                    $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
-                }
-
-                $summary = self::temp_format_summary_text($section);
-                // Split image and summary text
-                $summary_object = $this->split_section_summary($summary, $image_count);
-
-                $image = $summary_object->image;
-                $summary = $summary_object->text;
-                $image_count = $summary_object->image_count;
-
-                $control_menu = new \format_menutab\output\courseformat\content\section\controlmenu($this->format, $section);
-
-                $section_card = array(
-                    'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
-                    'sectionnumber' => $section->section,
-                    'sectionid' => $section->id,
-                    'sectionreturn' => 0,
-                    'courseid' => $section->course,
-                    'available' => $section->available,
-                    'availability' => $section->availability,
-                    'title' => $title,
-                    'summary' => $summary,
-                    'image' => $image,
-                    'current' => course_get_format($this->course)->is_section_current($section),
-                    'uservisible' => $section->uservisible,
-                    'visible' => $section->visible,
-                    'restricted' => !($section->available),
-                    'userclickable' => $section->available || $section->uservisible,
-                    'activity_summary' => self::temp_section_activity_summary($section),
-                    'titleclass' => strlen($title) >= $longtitlelength ? ' longtitle' : '',
-                    'progress' => false,
-                    'isactive' => $this->course->marker == $section->section,
-                    'extraclasses' => '',
-                    'editing' => $this->isediting,
-                    'marker' => ($section->section == $this->course->marker) ? true : false,
-                    'controlmenu' => $control_menu->export_for_template($output)
-                );
-
-                // Include completion tracking data for each section (if used).
-                if ($section->visible && $this->completionenabled) {
-                    if (isset($this->modinfo->sections[$sectionnum])) {
-                        $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
-                        // Keep track of overall progress so we can show this too - add this section's completion to the totals.
-                        $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
-                        $data['overall_progress']['num_complete'] += $completionthissection['completed'];
-
-                        // We only add the section values to the individual sections if courseshowsectionprogress is true.
-                        // (Otherwise we only retain overall completion as above, not for each section).
-
-                        $showaspercent = true;
-                        if ($this->courseformatoptions['print_progress'] && $completionthissection['outof'] > 0) {
-                            $section_card['progress'] = $this->completion_indicator(
-                                $completionthissection['completed'],
-                                $completionthissection['outof'],
-                                $showaspercent,
-                                false
-                            );
-                        }
-
+                    if ($section->name) {
+                        $title = $section->name;
+                    } else {
+                        $title = get_string('sectionname', 'format_menutab') . ' ' . $section->section;
                     }
-                }
 
-                // calculate overall percentage
-                if (isset($data['overall_progress']) && $data['overall_progress']['num_out_of'] > 0) {
-                    $completion_percentage = floor(($data['overall_progress']['num_complete']  / $data['overall_progress']['num_out_of']) * 100);
-                    $data['overall_progress']['percent'] = $completion_percentage;
-                }
+                    $summary = self::temp_format_summary_text($section);
+                    // Split image and summary text
+                    $summary_object = $this->split_section_summary($summary, $image_count);
+
+                    $image = $summary_object->image;
+                    $summary = $summary_object->text;
+                    $image_count = $summary_object->image_count;
+
+                    $control_menu = new \format_menutab\output\courseformat\content\section\controlmenu($this->format, $section);
+
+                    $section_card = array(
+                        'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
+                        'sectionnumber' => $section->section,
+                        'sectionid' => $section->id,
+                        'sectionreturn' => 0,
+                        'courseid' => $section->course,
+                        'available' => $section->available,
+                        'availability' => $section->availability,
+                        'title' => $title,
+                        'summary' => $summary,
+                        'image' => $image,
+                        'current' => course_get_format($this->course)->is_section_current($section),
+                        'uservisible' => $section->uservisible,
+                        'visible' => $section->visible,
+                        'restricted' => !($section->available),
+                        'userclickable' => $section->available || $section->uservisible,
+                        'activity_summary' => self::temp_section_activity_summary($section),
+                        'titleclass' => strlen($title) >= $longtitlelength ? ' longtitle' : '',
+                        'progress' => false,
+                        'isactive' => $this->course->marker == $section->section,
+                        'extraclasses' => '',
+                        'editing' => $this->isediting,
+                        'marker' => ($section->section == $this->course->marker) ? true : false,
+                        'controlmenu' => $control_menu->export_for_template($output)
+                    );
+
+                    // Include completion tracking data for each section (if used).
+                    if ($section->visible && $this->completionenabled) {
+                        if (isset($this->modinfo->sections[$sectionnum])) {
+                            $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
+                            // Keep track of overall progress so we can show this too - add this section's completion to the totals.
+                            $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
+                            $data['overall_progress']['num_complete'] += $completionthissection['completed'];
+
+                            // We only add the section values to the individual sections if courseshowsectionprogress is true.
+                            // (Otherwise we only retain overall completion as above, not for each section).
+
+                            $showaspercent = true;
+                            if ($this->courseformatoptions['print_progress'] && $completionthissection['outof'] > 0) {
+                                $section_card['progress'] = $this->completion_indicator(
+                                    $completionthissection['completed'],
+                                    $completionthissection['outof'],
+                                    $showaspercent,
+                                    false
+                                );
+                            }
+
+                        }
+                    }
+
+                    // calculate overall percentage
+                    if (isset($data['overall_progress']) && $data['overall_progress']['num_out_of'] > 0) {
+                        $completion_percentage = floor(($data['overall_progress']['num_complete'] / $data['overall_progress']['num_out_of']) * 100);
+                        $data['overall_progress']['percent'] = $completion_percentage;
+                    }
 
 //                if ($section->section == 1) {
 //                    print_object($section_card);
 //                }
 
-                // If item is restricted, user needs to know why.
-                $section_card['availabilitymessage'] = $section->availableinfo || !$section->visible
-                    ? self::temp_section_availability_message($section) : '';
+                    // If item is restricted, user needs to know why.
+                    $section_card['availabilitymessage'] = $section->availableinfo || !$section->visible
+                        ? self::temp_section_availability_message($section) : '';
 
-                // See below about when "hide add cm control" is true.
-                $section_card['hideaddcmcontrol'] = false;
-                $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
-                    $this->course, $section->section, 0
-                );
-                $section_cards[] = $section_card;
+                    // See below about when "hide add cm control" is true.
+                    $section_card['hideaddcmcontrol'] = false;
+                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
+                        $this->course, $section->section, 0
+                    );
+                    $section_cards[] = $section_card;
 
 
-            } else if ($sectionnum == 0) {
-                // Add in section zero completion data to overall completion count.
-                if ($section->visible && $this->completionenabled) {
-                    if (isset($this->modinfo->sections[$sectionnum])) {
-                        $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
-                        // Keep track of overall progress so we can show this too - add this section's completion to the totals.
-                        $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
-                        $data['overall_progress']['num_complete'] += $completionthissection['completed'];
+                } else if ($sectionnum == 0) {
+                    // Add in section zero completion data to overall completion count.
+                    if ($section->visible && $this->completionenabled) {
+                        if (isset($this->modinfo->sections[$sectionnum])) {
+                            $completionthissection = $this->section_progress($this->modinfo->sections[$sectionnum], $this->modinfo->cms);
+                            // Keep track of overall progress so we can show this too - add this section's completion to the totals.
+                            $data['overall_progress']['num_out_of'] += $completionthissection['outof'];
+                            $data['overall_progress']['num_complete'] += $completionthissection['completed'];
+                        }
                     }
                 }
+                $countincludedsections++;
             }
-            $countincludedsections++;
         }
 
         // If stretch columns is set to no add missing sections to $number of sections

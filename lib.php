@@ -212,6 +212,10 @@ class format_menutab extends core_courseformat\base
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
             $courseformatoptions = array(
+                'numsections' => array(
+                    'default' => $courseconfig->numsections,
+                    'type' => PARAM_INT,
+                ),
                 'hiddensections' => array(
                     'default' => $courseconfig->hiddensections,
                     'type' => PARAM_INT,
@@ -280,7 +284,17 @@ class format_menutab extends core_courseformat\base
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
             $courseconfig = get_config('moodlecourse');
+            $max = (int)$courseconfig->maxsections;
+            $sectionmenu = [];
+            for ($i = 0; $i <= $max; $i++) {
+                $sectionmenu[$i] = "$i";
+            }
             $courseformatoptionsedit = array(
+                'numsections' => array(
+                    'label' => new \lang_string('numberweeks'),
+                    'element_type' => 'select',
+                    'element_attributes' => array($sectionmenu),
+                ),
                 'hiddensections' => array(
                     'label' => new \lang_string('hiddensections'),
                     'help' => 'hiddensections',
