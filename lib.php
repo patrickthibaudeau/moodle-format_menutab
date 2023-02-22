@@ -264,6 +264,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 1,
                     'type' => PARAM_INT,
                 ),
+                'start_section_number' => array(
+                    'default' => 1,
+                    'type' => PARAM_INT,
+                ),
                 'section_number_text_color' => array(
                     'default' => '#ffffff',
                     'type' => PARAM_TEXT,
@@ -437,6 +441,13 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'print_section_number',
+                    'help_component' => 'format_menutab',
+                ),
+                'start_section_number' => array(
+                    'label' => new lang_string('start_section_number', 'format_menutab'),
+                    'element_type' => 'text',
+                    'element_attributes' => '',
+                    'help' => 'start_section_number',
                     'help_component' => 'format_menutab',
                 ),
                 'section_number_text_color' => array(

@@ -451,7 +451,6 @@ class course_output implements \renderable, \templatable
     private function append_home_page_data($data, $output)
     {
         global $CFG;
-
         $data['is_home_page'] = true;
         // If using completion tracking, get the data.
         if ($this->completionenabled) {
@@ -466,6 +465,8 @@ class course_output implements \renderable, \templatable
 
         $countincludedsections = 0;
         $image_count = 0;
+        $card_number_count = 1;
+        $current_card_number = '';
         foreach ($this->modinfo->get_section_info_all() as $sectionnum => $section) {
             // Show the section if the user is permitted to access it, OR if it's not available
             // but there is some available info text which explains the reason & should display,
@@ -494,10 +495,17 @@ class course_output implements \renderable, \templatable
 
                     $control_menu = new \format_menutab\output\courseformat\content\section\controlmenu($this->format, $section);
 
+                    // Get the card
+                    if ($section->section >= $data['start_section_number']) {
+                        $current_card_number = $card_number_count;
+                        $card_number_count++;
+                    }
+
                     $section_card = array(
                         'cardid' => ($section->section < 10) ? "0" . $section->section : $section->section,
                         'sectionnumber' => $section->section,
                         'sectionid' => $section->id,
+                        'cardnumber' => $current_card_number,
                         'sectionreturn' => 0,
                         'courseid' => $section->course,
                         'available' => $section->available,

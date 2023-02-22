@@ -62,6 +62,10 @@ $string['section_number_text_color_help'] = 'Select the text color printed over 
 $string['selected'] = 'Selected';
 $string['show_summary_single_section'] = 'Show section summary';
 $string['show_summary_single_section_help'] = 'If yes, when viewing a section, the summary text for that section will be shown below the image.';
+$string['start_section_number'] = 'Start section number';
+$string['start_section_number_help'] = 'Enter the number of the section you wish the numbering to start. For example, ' .
+'if you have 13 sections and the first 3 sections are more information based (not actual course modules) you can enter 4' .
+' to have the section numbering being on card 4.';
 $string['stretch_columns'] = 'Stretch columns';
 $string['stretch_columns_help'] = 'If yes, when ever a row has less sections than the number of columns selected, the remaining columns will strech to fill the space. Otherwise, all columns will be the same size.';
 $string['tab_background_color'] = 'Tab background colour';
