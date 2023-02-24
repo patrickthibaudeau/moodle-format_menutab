@@ -737,6 +737,7 @@ class course_output implements \renderable, \templatable
         $a_tab_exists = false; // Used so that default content tab does not create itself if a label is used after a tab.
         $tabs = [];
         $t = 0;
+        $contents_tab_exists = false; // required so that if several labels exist within the section, only one contents tab get's printed
         // Create all tab objects
         foreach ($cmids as $index => $cmid) {
             $mod = $this->modinfo->get_cm($cmid);
@@ -751,6 +752,7 @@ class course_output implements \renderable, \templatable
                 $tabs[$t]['user_visible'] = true;
                 $tabs[$t]['cm_index_skip'] = -1;
                 $tabs[$t]['cm_index_start'] = $index;
+                $contents_tab_exists = true;
             } else if ($mod->get_module_type_name()->get_component() == 'label') {
                 preg_match("#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s", $mod->get_formatted_content(), $matches);
 
@@ -764,13 +766,15 @@ class course_output implements \renderable, \templatable
                     $tabs[$t]['cm_index_skip'] = $index;
                     $tabs[$t]['cm_index_start'] = $index + 1;
                     $a_tab_exists = true;
+                    print_object('Creating a contents tab 2');
                 } else {
-                    if (!$a_tab_exists) {
+                    if (!$a_tab_exists && !$contents_tab_exists) {
                         $tabs[$t]['title'] = get_String('content', 'format_menutab');
                         $tabs[$t]['tabid'] = $index;
                         $tabs[$t]['user_visible'] = true;
                         $tabs[$t]['cm_index_skip'] = -1;
                         $tabs[$t]['cm_index_start'] = $index;
+                        $contents_tab_exists = true;
                     }
                 }
             }
