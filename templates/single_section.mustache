@@ -78,6 +78,12 @@
         background-color: {{tab_background_color}};
         border-color: {{tab_background_color}} {{tab_background_color}} #fff;
     }
+
+    {{^canedit}}
+    .activity-item.hiddenactivity {
+        display: none !important;
+    }
+    {{/canedit}}
 </style>
 <div id="section-{{cardid}}" data-section="{{cardid}}" class="section main clearfix" role="region"
      aria-label="{{title}}">
