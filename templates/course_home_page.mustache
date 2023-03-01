@@ -314,8 +314,7 @@ no sectionid, Links and badges will not be printed on the card.
                                 >
                                     <h5 class="card-title">
                                         {{^editing}}
-                                            <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}
-                                            &section={{cardid}}"
+                                            <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"
                                             title="{{title}}">
                                             {{title}}
                                             </a>
@@ -414,8 +413,7 @@ no sectionid, Links and badges will not be printed on the card.
     </div>
     {{#editing}}
         <div class="mdl-left py-2 changenumsections">
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}
-            &insertsection=0&sesskey={{sesskey}}"
+            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}&insertsection=0&sesskey={{sesskey}}"
             class="increase-sections">
             {{#str}}addsection, format_menutab{{/str}}
             </a>
