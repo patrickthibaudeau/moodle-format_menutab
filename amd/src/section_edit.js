@@ -87,7 +87,7 @@ define(["jquery", "core/config"],
                         for (let k = 0; k < deleteItem.length; k++) {
                             deleteItem[k].addEventListener('click', (event) => {
                                 // Reload page if section has been dropped
-                                location.reload();
+                                // location.reload();
                             });
                         }
                         ;
