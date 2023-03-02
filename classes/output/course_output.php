@@ -198,10 +198,15 @@ class course_output implements \renderable, \templatable
         global $SESSION;
 
         $print_section_number = false;
+        $print_start_button = false;
         $print_overall_progress = false;
 
         if (get_config('format_menutab', 'print_section_number')) {
             $print_section_number = true;
+        }
+
+        if (get_config('format_menutab', 'print_start_button')) {
+            $print_start_button = true;
         }
 
         if (get_config('format_menutab', 'print_overall_progress')) {
@@ -220,6 +225,7 @@ class course_output implements \renderable, \templatable
         $data['editing'] = $this->isediting;
         $data['sesskey'] = sesskey();
         $data['print_section_number'] = $print_section_number;
+        $data['print_start_button'] = $print_start_button;
         $data['print_overall_progress'] = $print_overall_progress;
         $data['course_image'] = $this->get_course_image($output);
         $data['sectionreturn'] = $this->format->get_section_number();

@@ -240,6 +240,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 0,
                     'type' => PARAM_INT,
                 ),
+                'print_start_button' => array(
+                    'default' => 1,
+                    'type' => PARAM_INT,
+                ),
                 'collapsed' => array(
                     'default' => 1,
                     'type' => PARAM_INT,
@@ -371,6 +375,18 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'print_overall_progress',
+                    'help_component' => 'format_menutab',
+                ),
+                'print_start_button' => array(
+                    'label' => new lang_string('print_start_button', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'print_start_button',
                     'help_component' => 'format_menutab',
                 ),
                 'collapsed' => array(

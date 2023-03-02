@@ -5,12 +5,14 @@
             <div class="h5 mb-0">
                 <div class="row">
                     <div class="col d-flex justify-content-start align-items-center">
+                        {{#print_start_button}}
                         <button class="btn btn-outline-menutab btn-menutab-lg" type="button" data-toggle="collapse"
                                 data-target="#collapseOne"
                                 aria-expanded="{{^collapsed}}true{{/collapsed}}{{#collapsed}}false{{/collapsed}}"
                                 aria-controls="collapseOne">
                             {{title}}
                         </button>
+                        {{/print_start_button}}
                     </div>
                     <div class="col d-flex justify-content-center align-items-center">
                         {{#print_overall_progress}}
