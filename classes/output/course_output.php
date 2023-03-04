@@ -772,7 +772,6 @@ class course_output implements \renderable, \templatable
                     $tabs[$t]['cm_index_skip'] = $index;
                     $tabs[$t]['cm_index_start'] = $index + 1;
                     $a_tab_exists = true;
-                    print_object('Creating a contents tab 2');
                 } else {
                     if (!$a_tab_exists && !$contents_tab_exists) {
                         $tabs[$t]['title'] = get_String('content', 'format_menutab');
