@@ -230,6 +230,7 @@ class course_output implements \renderable, \templatable
         $data['course_image'] = $this->get_course_image($output);
         $data['sectionreturn'] = $this->format->get_section_number();
         $data[$this->course->course_title_position] = true;
+        $data['course_title_show'] = $this->course->course_title_show;
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;

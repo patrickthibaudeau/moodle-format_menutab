@@ -224,6 +224,10 @@ class format_menutab extends core_courseformat\base
                     'default' => $courseconfig->coursedisplay,
                     'type' => PARAM_INT,
                 ),
+                'course_title_show' => array(
+                    'default' => true,
+                    'type' => PARAM_INT,
+                ),
                 'course_title_position' => array(
                     'default' => 'middle-center',
                     'type' => PARAM_TEXT,
@@ -319,6 +323,18 @@ class format_menutab extends core_courseformat\base
                     'label' => new lang_string('coursedisplay'),
                     'element_type' => 'hidden',
                     'element_attributes' => [[COURSE_DISPLAY_SINGLEPAGE => new \lang_string('coursedisplay_single')]]
+                ),
+                'course_title_show' => array(
+                    'label' => new lang_string('course_title_show', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            true => get_string('yes'),
+                            false => get_string('no'),
+                        )
+                    ),
+                    'help' => 'course_title_show',
+                    'help_component' => 'format_menutab',
                 ),
                 'course_title_position' => array(
                     'label' => new lang_string('course_title_position', 'format_menutab'),

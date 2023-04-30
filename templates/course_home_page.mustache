@@ -271,7 +271,11 @@ no sectionid, Links and badges will not be printed on the card.
                     {{#bottom-left}}mt-auto{{/bottom-left}}
                     {{#bottom-center}}mt-auto{{/bottom-center}}
                     {{#bottom-right}}mt-auto{{/bottom-right}}
-            "><h3>{{coursename}}</h3></div>
+            ">
+                    {{#course_title_show}}
+                    <h3>{{coursename}}</h3>
+                    {{/course_title_show}}
+                </div>
             </div>
             {{^course_image}}<!-- if there is no image add a card-->
             </div>
