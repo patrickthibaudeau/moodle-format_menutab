@@ -54,7 +54,7 @@ class format_menutab extends core_courseformat\base
 
     public function uses_indentation(): bool
     {
-        return false;
+        return true;
     }
 
     public function uses_course_index()
