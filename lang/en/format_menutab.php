@@ -82,9 +82,9 @@ $string['tab_background_colors_help'] = 'Enter a color per line. Each color must
 $string['tab_text_color'] = 'Tab text colour';
 $string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
 $string['use_image_css'] = 'Use default image CSS within sections';
-$string['use_image_css_help'] = 'By default, the top image in a section has a max heigth of 160px, positioned center 
-and set to cover the div. If you have images that can fill the space and you don\'t want it modified by css, 
-select no for this option. Make sure you have images for all sections if you select no.';
+$string['use_image_css_help'] = 'This option controls how the top image in each section is displayed. If you choose yes, 
+the image will be resized to fit the div height of 160px, centered and cropped if necessary. If you choose no, 
+the image will keep its original size and shape, but you must provide images for all sections.';
 $string['your_section_progress'] = 'Your progress in this section is currently at ';
 //New tag
 $string['access'] = 'Access';
