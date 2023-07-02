@@ -419,7 +419,13 @@ class course_output implements \renderable, \templatable
             }
         }
         // Split image and summary text
-        $summary_object = $this->split_section_summary(self::temp_format_summary_text($thissection), $image_count, $data['print_default_section_image']);
+        $summary_object = $this->split_section_summary
+        (
+            self::temp_format_summary_text($thissection),
+            $image_count,
+            $data['print_default_section_image'],
+            $data['use_image_css']
+        );
 
         $data['image'] = $summary_object->image;
         $data['summary'] = $summary_object->text;
@@ -658,17 +664,22 @@ class course_output implements \renderable, \templatable
      * @param $image_count
      * @return \stdClass
      */
-    private function split_section_summary($summary, $image_count = 0, $print_default_section_image = 1)
+    private function split_section_summary($summary, $image_count = 0, $print_default_section_image = 1, $use_image_css = 1)
     {
         global $CFG;
+
+        $style = '';
+        if ($use_image_css) {
+            $style = 'style="height: 160px; width: 100%; object-position: center; object-fit: cover"';
+        }
         //Get image for top of card
         preg_match('/<img(.*)src(.*)=(.*)"(.*)"/U', $summary, $result);
         if (isset($result[0])) {
-            $image = $result[0] . ' class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
+            $image = $result[0] . ' class="card-image-top img-fluid" ' . $style . ' alt="Image"/>';
         } else {
             if ($print_default_section_image) {
                 // Use a default image
-                $image = '<img src="' . $CFG->wwwroot . '/course/format/menutab/images/' . $image_count . '.png" class="card-image-top"  style="height: 160px; width: 100%; object-position: center; object-fit: cover" alt="Image"/>';
+                $image = '<img src="' . $CFG->wwwroot . '/course/format/menutab/images/' . $image_count . '.png" class="card-image-top" ' . $style . ' alt="Image"/>';
                 $image_count++;
                 // Reset image count
                 if ($image_count > 6) {

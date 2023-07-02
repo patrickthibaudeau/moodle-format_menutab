@@ -272,6 +272,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 1,
                     'type' => PARAM_INT,
                 ),
+                'use_image_css' => array(
+                    'default' => 1,
+                    'type' => PARAM_INT,
+                ),
                 'print_section_number' => array(
                     'default' => 1,
                     'type' => PARAM_INT,
@@ -477,6 +481,18 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'print_default_section_image',
+                    'help_component' => 'format_menutab',
+                ),
+                'use_image_css' => array(
+                    'label' => new lang_string('use_image_css', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'use_image_css',
                     'help_component' => 'format_menutab',
                 ),
                 'print_section_number' => array(
