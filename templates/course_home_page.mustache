@@ -301,6 +301,7 @@ no sectionid, Links and badges will not be printed on the card.
                                  data-for="section"
                                  data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-indexed="true">
                                 {{#sectionid}}
+                                    {{#image}}
                                     <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}&section={{cardid}}"
                                     title="{{title}}">
                                         <div class="format_menutab_image_container">
@@ -312,6 +313,7 @@ no sectionid, Links and badges will not be printed on the card.
                                             {{/print_section_number}}
                                         </div>
                                     </a>
+                                    {{/image}}
                                 {{/sectionid}}
                                 <div class="card-body course-section-header"
                                      data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-for="section_title"
