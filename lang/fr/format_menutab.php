@@ -46,6 +46,8 @@ $string['numcolumns_help'] = 'Select the number of columns you would like per ro
 $string['return'] = 'Course home';
 $string['start_here'] = 'Start here';
 $string['pluginname'] = 'Menu/Onglet';
+$string['print_default_section_image'] = 'Utiliser une image par défaut pour les sections sans image';
+$string['print_default_section_image_help'] = 'S\'il n\'y a pas d\'image pour une section, une image par défaut sera utilisée.';
 $string['print_progress'] = 'Afficher la progression de l\'achèvement sur la carte';
 $string['print_progress_help'] = 'If yes, and completion tracking is enabled, a progress bar will be displayed at the bottom of the section card on the course front page.';
 $string['print_section_number'] = 'Afficher le numéro de section en haut de l\'image de la carte';
@@ -68,6 +70,11 @@ $string['tab_background_colors'] = 'Tab background colors';
 $string['tab_background_colors_help'] = 'Enter a color per line. Each color must use the hex value of the color seperated by a pipe (|) followed by the name of the color.';
 $string['tab_text_color'] = 'Couleur du texte de l\'onglet';
 $string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
+$string['use_image_css'] = 'Utiliser le CSS d\'image par défaut dans les sections';
+$string['use_image_css_help'] = 'Cette option contrôle l\'affichage de l\'image du haut de chaque section. Si vous choisissez oui,
+l\'image sera redimensionnée pour s\'adapter à la hauteur div de 160px, centrée et recadrée si nécessaire. Si vous choisissez non,
+l\'image conservera sa taille et sa forme d\'origine, mais vous devez fournir des images pour toutes les sections.';
+$string['your_section_progress'] = 'Your progress in this section is currently at ';
 $string['your_section_progress'] = 'Your progress in this section is currently at ';
 //New tag
 $string['access'] = 'Access';
