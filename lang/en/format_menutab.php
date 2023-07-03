@@ -36,6 +36,9 @@ $string['course_title_show'] = 'Display course name';
 $string['course_title_show_help'] = 'Select whether or not you want the name of your course displayed. For example, if you are using an image with the title in it, you may want to remove the course name.';
 $string['currently_editing'] = 'You are currently editing your course';
 $string['currentsection'] = 'This topic';
+$string['custom_css'] = 'Custom CSS';
+$string['custom_css_help'] = '<h4>Warning!</h4>You can add custom CSS for this course format here. This will override any 
+other CSS within these course. If you are not familiar with CSS, please do not use this feature. You can break your course.';
 $string['darken_background_image'] = 'Darken course image';
 $string['darken_background_image_help'] = 'Set to yes if the course name does not meat accessibility contrast ratios.';
 $string['grid_view'] = 'Grid view';

@@ -304,6 +304,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 0,
                     'type' => PARAM_INT,
                 ),
+                'custom_css' => array(
+                    'default' => '',
+                    'type' => PARAM_TEXT,
+                ),
             );
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
@@ -573,6 +577,14 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'hidden_sections_in_container',
+                    'help_component' => 'format_menutab',
+                ),
+                'custom_css' => array(
+                    'label' => new lang_string('custom_css', 'format_menutab'),
+                    'element_type' => 'textarea',
+                    'element_attributes' => array(
+                    ),
+                    'help' => 'custom_css',
                     'help_component' => 'format_menutab',
                 ),
             );
