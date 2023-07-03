@@ -304,6 +304,10 @@ class format_menutab extends core_courseformat\base
                     'default' => 0,
                     'type' => PARAM_INT,
                 ),
+                'use_edit_mode_reminder' => array(
+                    'default' => 1,
+                    'type' => PARAM_INT,
+                ),
                 'custom_css' => array(
                     'default' => '',
                     'type' => PARAM_TEXT,
@@ -577,6 +581,18 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'hidden_sections_in_container',
+                    'help_component' => 'format_menutab',
+                ),
+                'use_edit_mode_reminder' => array(
+                    'label' => new lang_string('use_edit_mode_reminder', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'use_edit_mode_reminder',
                     'help_component' => 'format_menutab',
                 ),
                 'custom_css' => array(
