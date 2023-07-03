@@ -246,10 +246,29 @@ no sectionid, Links and badges will not be printed on the card.
         border-color: red !important;
     }
 
-    {{{custom_css}}}
+    .in-editing-mode {
+        position: sticky;
+        top: 50px;
+        z-index: 9999;
+    }
+
+
+        {{{custom_css}}}
 </style>
 <div id="{{uniqid}}-course-format">
+    {{#editing}}
+        <div id="in-edit-mode-container" class="alert alert-danger text-center mt-2 in-editing-mode">
+            <div class="float-right"><button type="button" id="format-menutab-close-editing-help" class="btn btn-outline-secondary btn-sm">X</button> </div>
+            <h4>{{#str}}currently_editing, format_menutab{{/str}}</h4>
+            {{#hidden_sections_exist}}
+                <a href="#format-menutab-hidden-sections" class="btn btn-outline-info">
+                    {{#str}}jump_to_hidden_sections, format_menutab{{/str}}
+                </a>
+            {{/hidden_sections_exist}}
+        </div>
+    {{/editing}}
     <input type="hidden" id="number-of-sections-to-show" value="{{numsections}}">
+    <input type="hidden" id="format-menutab-courseid" value="{{courseid}}">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
     <div class="row mb-1">
@@ -283,16 +302,6 @@ no sectionid, Links and badges will not be printed on the card.
             </div>
             </div>
             {{/course_image}}
-            {{#editing}}
-                <div class="alert alert-warning text-center mt-2">
-                    <h4>{{#str}}currently_editing, format_menutab{{/str}}</h4>
-                    {{#hidden_sections_exist}}
-                    <a href="#format-menutab-hidden-sections" class="btn btn-outline-info">
-                        {{#str}}jump_to_hidden_sections, format_menutab{{/str}}
-                    </a>
-                    {{/hidden_sections_exist}}
-                </div>
-            {{/editing}}
         </div>
     </div>
     <div class="menutab" data-for="course_sectionlist">
@@ -426,53 +435,55 @@ no sectionid, Links and badges will not be printed on the card.
         {{/sectionrows}}
         <!--        Hidden sections-->
         {{#hidden_sections_exist}}
-            <div id="format-menutab-hidden-sections" class="mb-2 format-menutab-hidden-sections">
-                <h4>{{#str}}hidden_sections, format_menutab{{/str}}</h4>
-                <div class="row">
-                    <div class="col">
-                        <div class="card-deck">
-                            {{#hiddensections}}
-                                <div id="section-{{sectionnumber}}" class="card section course-section border-secondary
+            {{#editing}}
+                <div id="format-menutab-hidden-sections" class="mb-2 format-menutab-hidden-sections">
+                    <h4>{{#str}}hidden_sections, format_menutab{{/str}}</h4>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card-deck">
+                                {{#hiddensections}}
+                                    <div id="section-{{sectionnumber}}" class="card section course-section border-secondary
                                  {{#marker}}marker{{/marker}}"
-                                     data-sectionid="{{sectionnumber}}" data-sectionreturnid="{{sectionreturn}}"
-                                     data-for="section"
-                                     data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-indexed="true">
-                                    {{#sectionid}}
-                                        {{#image}}
-                                            <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}
-                                            &section={{cardid}}"
-                                            title="{{title}}">
-                                            <div class="format_menutab_image_container">
-                                                {{{image}}}
-
-                                                {{#print_section_number}}
-                                                    <div class="format_menutab_section_number"
-                                                         style="color: {{section_number_text_color}};">{{cardnumber}}</div>
-                                                {{/print_section_number}}
-                                            </div>
-                                            </a>
-                                        {{/image}}
-                                    {{/sectionid}}
-                                    <div class="card-body course-section-header"
-                                         data-id="{{sectionid}}" data-number="{{sectionnumber}}"
-                                         data-for="section_title"
-                                    >
-                                        <h5 class="card-title">
-                                            {{^editing}}
+                                         data-sectionid="{{sectionnumber}}" data-sectionreturnid="{{sectionreturn}}"
+                                         data-for="section"
+                                         data-id="{{sectionid}}" data-number="{{sectionnumber}}" data-indexed="true">
+                                        {{#sectionid}}
+                                            {{#image}}
                                                 <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}
                                                 &section={{cardid}}"
                                                 title="{{title}}">
-                                                {{title}}
+                                                <div class="format_menutab_image_container">
+                                                    {{{image}}}
+
+                                                    {{#print_section_number}}
+                                                        <div class="format_menutab_section_number"
+                                                             style="color: {{section_number_text_color}};">{{cardnumber}}</div>
+                                                    {{/print_section_number}}
+                                                </div>
                                                 </a>
-                                            {{/editing}}
-                                            {{#editing}}
-                                                {{#sectionid}}
-                                                    <span class="inplaceeditable inplaceeditable-text float-left"
-                                                          data-inplaceeditable="1"
-                                                          data-component="format_menutab" data-itemtype="sectionnamenl"
-                                                          data-itemid="{{sectionid}}" data-value=""
-                                                          data-editlabel="New name for {{title}}" data-type="text"
-                                                          data-options="">
+                                            {{/image}}
+                                        {{/sectionid}}
+                                        <div class="card-body course-section-header"
+                                             data-id="{{sectionid}}" data-number="{{sectionnumber}}"
+                                             data-for="section_title"
+                                        >
+                                            <h5 class="card-title">
+                                                {{^editing}}
+                                                    <a href="{{config.wwwroot}}/course/view.php?id={{courseid}}
+                                                    &section={{cardid}}"
+                                                    title="{{title}}">
+                                                    {{title}}
+                                                    </a>
+                                                {{/editing}}
+                                                {{#editing}}
+                                                    {{#sectionid}}
+                                                        <span class="inplaceeditable inplaceeditable-text float-left"
+                                                              data-inplaceeditable="1"
+                                                              data-component="format_menutab"
+                                                              data-itemtype="sectionnamenl"
+                                                              data-itemid="{{sectionid}}" data-value=""
+                                                              data-editlabel="New name for {{title}}" data-type="text"
+                                                              data-options="">
                                                         <a href="#" class="quickeditlink aalink"
                                                            data-inplaceeditablelink="1" title="Edit topic name">
                                                             {{title}}
@@ -483,80 +494,81 @@ no sectionid, Links and badges will not be printed on the card.
                                                              </span>
                                                         </a>
                                                     </span>
-                                                    {{#controlmenu}}
-                                                        <span class="float-right">
-                                                            {{> core_courseformat/local/content/section/controlmenu }}
-                                                        </span>
-                                                    {{/controlmenu}}
-                                                {{/sectionid}}
+                                                        {{#controlmenu}}
+                                                            <span class="float-right">
+                                                                {{> core_courseformat/local/content/section/controlmenu }}
+                                                            </span>
+                                                        {{/controlmenu}}
+                                                    {{/sectionid}}
+                                                {{/editing}}
+                                            </h5>
+                                            {{#editing}}
+                                                <div class="clearfixt">&nbsp;<br></div>
                                             {{/editing}}
-                                        </h5>
-                                        {{#editing}}
-                                            <div class="clearfixt">&nbsp;<br></div>
-                                        {{/editing}}
 
-                                        <div class="format_mentutab_summary_text">
-                                            <p class="card-text">
-                                                {{{summary}}}
-                                            </p>
-                                        </div>
+                                            <div class="format_mentutab_summary_text">
+                                                <p class="card-text">
+                                                    {{{summary}}}
+                                                </p>
+                                            </div>
 
-                                        {{#canedit}}
-                                            <div class="format_menuttab_badges">
-                                                <div data-region="sectionbadges"
-                                                     class="sectionbadges d-flex align-items-center">
+                                            {{#canedit}}
+                                                <div class="format_menuttab_badges">
+                                                    <div data-region="sectionbadges"
+                                                         class="sectionbadges d-flex align-items-center">
                                                 <span class="badge badge-pill badge-primary order-1 d-none"
                                                       data-type="iscurrent">
                                                     Highlighted
                                                 </span>
-                                                    <span class="badge badge-pill badge-warning order-2 d-none"
-                                                          data-type="hiddenfromstudents">
+                                                        <span class="badge badge-pill badge-warning order-2 d-none"
+                                                              data-type="hiddenfromstudents">
                                                     Hidden from students
                                                 </span>
-                                                    <span class="badge badge-pill badge-secondary order-3 d-none">
+                                                        <span class="badge badge-pill badge-secondary order-3 d-none">
                                                     Not available
                                                 </span>
-                                                </div>
+                                                    </div>
 
-                                                {{#sectionid}}
-                                                    {{^visible}}
-                                                        <div>
+                                                    {{#sectionid}}
+                                                        {{^visible}}
+                                                            <div>
                                                     <span class="badge badge-warning font-weight-bolder">
                                                         {{#str}}hiddenfromstudents, core{{/str}}
                                                     </span>
-                                                        </div>
-                                                    {{/visible}}
-                                                {{/sectionid}}
-                                            </div>
-                                        {{/canedit}}
-
-                                        <div class="format_menutab_progress">
-                                            <div class="row">
-                                                <div class="col">
-                                                    {{#progress}}
-                                                        <div class="progress"
-                                                             title="{{#str}}your_section_progress, format_menutab{{/str}}{{percent}}%">
-                                                            <div class="progress-bar {{backgroundColor}}"
-                                                                 role="progressbar"
-                                                                 style="width: {{percent}}%"
-                                                                 aria-valuenow="{{percent}}"
-                                                                 aria-valuemin="0"
-                                                                 aria-valuemax="100">{{percent}}%
                                                             </div>
-                                                        </div>
-                                                    {{/progress}}
+                                                        {{/visible}}
+                                                    {{/sectionid}}
+                                                </div>
+                                            {{/canedit}}
+
+                                            <div class="format_menutab_progress">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        {{#progress}}
+                                                            <div class="progress"
+                                                                 title="{{#str}}your_section_progress, format_menutab{{/str}}{{percent}}%">
+                                                                <div class="progress-bar {{backgroundColor}}"
+                                                                     role="progressbar"
+                                                                     style="width: {{percent}}%"
+                                                                     aria-valuenow="{{percent}}"
+                                                                     aria-valuemin="0"
+                                                                     aria-valuemax="100">{{percent}}%
+                                                                </div>
+                                                            </div>
+                                                        {{/progress}}
+                                                    </div>
                                                 </div>
                                             </div>
+
                                         </div>
 
                                     </div>
-
-                                </div>
-                            {{/hiddensections}}
+                                {{/hiddensections}}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            {{/editing}}
         {{/hidden_sections_exist}}
     </div>
     {{#editing}}
@@ -572,5 +584,8 @@ no sectionid, Links and badges will not be printed on the card.
 {{#js}}
     require(['core_courseformat/local/content'], function(component) {
     component.init('{{uniqid}}-course-format', {}, {{sectionreturn}});
+    });
+    require(['format_menutab/home-page'], function(HomePage) {
+    HomePage.init();
     });
 {{/js}}

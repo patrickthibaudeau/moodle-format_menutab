@@ -45,7 +45,8 @@ $string['grid_view'] = 'Grid view';
 $string['hidden'] = 'Unavailable for students';
 $string['hidden_sections'] = 'Hidden sections/modules';
 $string['hidden_sections_in_container'] = 'Group hidden sections';
-$string['hidden_sections_in_container_help'] = 'Select whether or not you want to group hidden sections in a container. If yes, hidden sections will be grouped in a container at the bottom of the course page.';
+$string['hidden_sections_in_container_help'] = 'Select whether or not you want to group hidden sections in a container. 
+If yes, hidden sections will be grouped in a container at the bottom of the course page and only visible when in edit mode.';
 $string['hidefromothers'] = 'Hide from others';
 $string['jump_to_hidden_sections'] = 'Jump to hidden sections';
 $string['showfromothers'] = 'Show from others';
