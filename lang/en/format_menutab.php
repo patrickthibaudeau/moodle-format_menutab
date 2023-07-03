@@ -89,6 +89,9 @@ $string['tab_background_colors'] = 'Tab background colors';
 $string['tab_background_colors_help'] = 'Enter a color per line. Each color must use the hex value of the color seperated by a pipe (|) followed by the name of the color.';
 $string['tab_text_color'] = 'Tab text colour';
 $string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
+$string['use_edit_mode_reminder'] = 'Use edit mode reminder';
+$string['use_edit_mode_reminder_help'] = 'If yes, a reminder will be displayed at the top of the course page when in edit mode.
+Note, this will be true for all instrctors.';
 $string['use_image_css'] = 'Use default image CSS within sections';
 $string['use_image_css_help'] = 'This option controls how the top image in each section is displayed. If you choose yes, 
 the image will be resized to fit the div height of 160px, centered and cropped if necessary. If you choose no, 

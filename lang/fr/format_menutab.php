@@ -33,11 +33,20 @@ $string['course_title_position'] = 'Position du nom du cours';
 $string['course_title_position_help'] = 'Select the postion the course name should be in.';
 $string['currently_editing'] = 'You are currently editing your course';
 $string['currentsection'] = 'This topic';
+$string['custom_css'] = 'CSS personnalisé';
+$string['custom_css_help'] = '<h4>Avertissement!</h4>Vous pouvez ajouter un CSS personnalisé pour ce format de cours ici. 
+Cela remplacera tout autre CSS de ce cours. Si vous n\'êtes pas familier avec CSS, veuillez ne pas utiliser cette fonctionnalité. 
+Vous pouvez casser votre cours.';
 $string['darken_background_image'] = 'Foncer l\'image du cours';
 $string['darken_background_image_help'] = 'Set to yes if the course name does not meat accessibility contrast ratios.';
 $string['grid_view'] = 'Grid view';
 $string['hidden'] = 'Unavailable for students';
+$string['hidden_sections'] = 'Sections/modules cachés';
+$string['hidden_sections_in_container'] = 'Regrouper les sections masquées';
+$string['hidden_sections_in_container_help'] = 'Sélectionnez si vous souhaitez ou non regrouper les sections masquées dans un conteneur.
+Si oui, les sections masquées seront regroupées dans un conteneur au bas de la page du cours et visibles uniquement en mode édition.';
 $string['hidefromothers'] = 'Hide from others';
+$string['jump_to_hidden_sections'] = 'Accéder aux sections masquées';
 $string['showfromothers'] = 'Show from others';
 $string['list_view'] = 'List view';
 $string['main_menu'] = 'Course menu';
@@ -70,6 +79,9 @@ $string['tab_background_colors'] = 'Tab background colors';
 $string['tab_background_colors_help'] = 'Enter a color per line. Each color must use the hex value of the color seperated by a pipe (|) followed by the name of the color.';
 $string['tab_text_color'] = 'Couleur du texte de l\'onglet';
 $string['tab_text_color_help'] = 'Select a color for the text. Make sure that based on the above color, the contrast will be high enough.';
+$string['use_edit_mode_reminder'] = 'Utiliser le rappel du mode d\'édition';
+$string['use_edit_mode_reminder_help'] = 'Si oui, un rappel s\'affichera en haut de la page du cours en mode édition.
+Notez que cela sera vrai pour tous les instructeurs.';
 $string['use_image_css'] = 'Utiliser le CSS d\'image par défaut dans les sections';
 $string['use_image_css_help'] = 'Cette option contrôle l\'affichage de l\'image du haut de chaque section. Si vous choisissez oui,
 l\'image sera redimensionnée pour s\'adapter à la hauteur div de 160px, centrée et recadrée si nécessaire. Si vous choisissez non,
