@@ -300,6 +300,10 @@ class format_menutab extends core_courseformat\base
                     'default' => '#ffffff',
                     'type' => PARAM_TEXT,
                 ),
+                'hidden_sections_in_container' => array(
+                    'default' => 0,
+                    'type' => PARAM_INT,
+                ),
             );
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
@@ -557,6 +561,18 @@ class format_menutab extends core_courseformat\base
                         )
                     ),
                     'help' => 'tab_text_color',
+                    'help_component' => 'format_menutab',
+                ),
+                'hidden_sections_in_container' => array(
+                    'label' => new lang_string('hidden_sections_in_container', 'format_menutab'),
+                    'element_type' => 'select',
+                    'element_attributes' => array(
+                        array(
+                            1 => get_string('yes'),
+                            0 => get_string('no'),
+                        )
+                    ),
+                    'help' => 'hidden_sections_in_container',
                     'help_component' => 'format_menutab',
                 ),
             );

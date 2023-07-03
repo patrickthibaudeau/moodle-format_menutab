@@ -601,6 +601,25 @@ class course_output implements \renderable, \templatable
                 $countincludedsections++;
             }
         }
+        $hidden_sections_exist = false;
+        $data['hiddensections'] = array();
+        // Split sections into hidden and visible
+        if ($data['hidden_sections_in_container']) {
+            $hidden_sections = [];
+            foreach ($section_cards as $key => $section_card) {
+                if ($section_card['visible'] == true && $section_card['uservisible'] == true) {
+                    continue;
+                } else {
+                    $hidden_sections_exist = true;
+                    $hidden_sections[] = $section_card;
+                    // Remove from section_cards
+                    unset($section_cards[$key]);
+                }
+            }
+        }
+
+        $section_cards = array_values($section_cards);
+        $data['hiddensections'] = $hidden_sections;
 
         // If stretch columns is set to no add missing sections to $number of sections
         // Always base the number of sections on the number of cards
@@ -640,6 +659,7 @@ class course_output implements \renderable, \templatable
 
         }
 
+        $data['hidden_sections_exist'] = $hidden_sections_exist;
         $data['sectioncards'] = $data['sectionrows'];
         $data['section_zero_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control($this->course, 0, 0);
         if ($this->completionenabled && $data['overall_progress']['num_out_of'] > 0) {

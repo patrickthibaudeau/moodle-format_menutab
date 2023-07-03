@@ -99,3 +99,10 @@
     font-size: 1.4em !important;
     font-weight: lighter !important;
 }
+
+.format-menutab-hidden-sections {
+    border-style: dotted;
+    border-width: 3px;
+    border-color: darkblue;
+    padding: 10px;
+}
