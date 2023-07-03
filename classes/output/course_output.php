@@ -195,7 +195,7 @@ class course_output implements \renderable, \templatable
      */
     private function get_basic_data($output)
     {
-        global $SESSION;
+        global $SESSION, $USER;
 
         $print_section_number = false;
         $print_start_button = false;
@@ -231,6 +231,7 @@ class course_output implements \renderable, \templatable
         $data['sectionreturn'] = $this->format->get_section_number();
         $data[$this->course->course_title_position] = true;
         $data['course_title_show'] = $this->course->course_title_show;
+        $data['userid'] = $USER->id;
 
         foreach ($this->courseformatoptions as $k => $v) {
             $data[$k] = $v;
