@@ -106,3 +106,20 @@
     border-color: darkblue;
     padding: 10px;
 }
+
+body[theme-mode='dark'] button.nav-link {
+    color: inherit;
+}
+
+body[theme-mode='dark'] button.nav-link.active {
+    background-color: black !important;
+}
+
+/*noinspection CssUnresolvedCustomProperty*/
+body[theme-mode='dark'] .section-zero-header {
+    background-color: var(--secondary-menu-color) !important;
+}
+
+body[theme-mode='dark'] #format_menutab_home_page_image {
+    color: inherit !important;
+}
