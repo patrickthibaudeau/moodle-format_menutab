@@ -61,6 +61,7 @@ $string['print_progress'] = 'Afficher la progression de l\'achèvement sur la ca
 $string['print_progress_help'] = 'If yes, and completion tracking is enabled, a progress bar will be displayed at the bottom of the section card on the course front page.';
 $string['print_section_number'] = 'Afficher le numéro de section en haut de l\'image de la carte';
 $string['print_section_number_help'] = 'If yes, the section number will be displayed on top of the image wihtin each section card on the front page';
+$string['privacy:metadata'] = 'Le plugin de format de cours Menutab ne stocke aucune donnée personnelle.';
 $string['section0name'] = 'Commencer ici';
 $string['section_zero_background_color'] = 'Couleur de fond de l\'en-tête de la section zéro';
 $string['section_zero_background_color_help'] = 'Select a color for the section zero header color.';
