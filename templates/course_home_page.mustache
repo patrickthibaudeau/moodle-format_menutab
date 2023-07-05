@@ -220,8 +220,21 @@ no sectionid, Links and badges will not be printed on the card.
     }
 }}
 <style>
+
+    @media (max-width: 768px) {
+        header#page-header {
+            display: none !important;
+        }
+    }
+
+    div[role='main'] {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
     header#page-header {
-        display: none !important;
+        height: 0;
+        opacity: 0;
     }
 
     #format_menutab_home_page_image {
@@ -234,7 +247,7 @@ no sectionid, Links and badges will not be printed on the card.
                 rgba(0, 0, 0, 0.5)
         ),{{/darken_background_image}}
         url({{course_image}});
-        background-size: 100%;
+        background-size: cover;
         background-repeat: no-repeat;
         background-position-y: center;
         color: {{course_title_color}};
@@ -275,7 +288,6 @@ no sectionid, Links and badges will not be printed on the card.
     {{/use_edit_mode_reminder}}
     <input type="hidden" id="number-of-sections-to-show" value="{{numsections}}">
     <input type="hidden" id="format-menutab-courseid" value="{{courseid}}">
-    <input type="hidden" id="format-menutab-userid" value="{{userid}}">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
     <div class="row mb-1">
