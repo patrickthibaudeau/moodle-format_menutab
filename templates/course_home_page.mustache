@@ -221,12 +221,6 @@ no sectionid, Links and badges will not be printed on the card.
 }}
 <style>
 
-    @media (max-width: 768px) {
-        header#page-header {
-            display: none !important;
-        }
-    }
-
     div[role='main'] {
         padding-left: 0 !important;
         padding-right: 0 !important;
@@ -235,6 +229,10 @@ no sectionid, Links and badges will not be printed on the card.
     header#page-header {
         height: 0;
         opacity: 0;
+    }
+
+    #page-content {
+        padding-top: 0 !important;
     }
 
     #format_menutab_home_page_image {
@@ -290,7 +288,7 @@ no sectionid, Links and badges will not be printed on the card.
     <input type="hidden" id="format-menutab-courseid" value="{{courseid}}">
     <h2 class="accesshide">{{{title}}}</h2>
     {{{completionhelp}}}
-    <div class="row mb-1">
+    <div class="row mb-3">
         <div class="col">
             {{^course_image}} <!-- if there is no image add a card-->
             <div class="card">

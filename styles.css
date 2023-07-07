@@ -101,10 +101,11 @@
     font-weight: lighter !important;
 }
 
+/*noinspection CssUnresolvedCustomProperty*/
 .format-menutab-hidden-sections {
     border-style: dotted;
     border-width: 3px;
-    border-color: darkblue;
+    border-color: var(--primary);
     padding: 10px;
 }
 
@@ -145,8 +146,8 @@ When small screen, don't show the "filler sections" (#section-) <-- null
     body[theme-mode='dark'] #section- {
         display: none;
     }
-}
 
-.section-zero-header button.btn-outline-menutab.btn-menutab-lg::after {
-    content: "" !important;
+    .section-zero-header button.btn-outline-menutab.btn-menutab-lg::after {
+        content: "" !important;
+    }
 }
