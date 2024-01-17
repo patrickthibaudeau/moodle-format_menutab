@@ -488,8 +488,12 @@ class course_output implements \renderable, \templatable
 
             // Only print according to the number of sections to show
             if ($section->section <= $number_of_sections_to_show) {
+            	// CK JAN17_2023: replaced code to deal with sections showing for students see MDL-66780
+            	/* $showsection = $section->uservisible ||
+                    ($section->visible && !$section->available && !empty($section->availableinfo)); */
                 $showsection = $section->uservisible ||
-                    ($section->visible && !$section->available && !empty($section->availableinfo));
+					($section->visible || !$course->hiddensections) && 
+					($section->available || !empty($section->availableinfo));
                 if ($sectionnum != 0 && $showsection) {
                     $longtitlelength = 65;
 
