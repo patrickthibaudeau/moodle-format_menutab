@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/completionlib.php');
 
-
+GLOBAL $PAGE, $USER;
 
 // Retrieve course format option fields and add them to the $course object.
 $format = core_courseformat\base::instance($course);
@@ -77,6 +77,7 @@ if ($isediting) {
         } else {
             $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
             $data = $templateable->export_for_template($renderer);
+            $data->userid = $USER->id;
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
     } else {
@@ -100,6 +101,7 @@ if ($isediting) {
         } else {
             $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
             $data = $templateable->export_for_template($renderer);
+            $data->userid = $USER->id;
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
 

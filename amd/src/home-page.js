@@ -4,9 +4,8 @@ export const init = () => {
     let userId = document.getElementById('format-menutab-userid').value;
     let sessionItemVariable = userId + '-' + courseId + '-EditingHelp';
     let hideEditingHelp = sessionStorage.getItem(sessionItemVariable);
-    console.log("hideEditingHelp: " + hideEditingHelp);
     // Hide element if session variable is set
-    if (hideEditingHelp == 'true') {
+    if (hideEditingHelp === 'true') {
         let container = document.getElementById('in-edit-mode-container');
         container.style.display = 'none';
     }

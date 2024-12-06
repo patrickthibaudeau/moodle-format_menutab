@@ -488,7 +488,7 @@ class course_output implements \renderable, \templatable
 
             // Only print according to the number of sections to show
             if ($section->section <= $number_of_sections_to_show) {
-                $showsection = $section->uservisible ||
+            	$showsection = $section->uservisible ||
                     ($section->visible && !$section->available && !empty($section->availableinfo));
                 if ($sectionnum != 0 && $showsection) {
                     $longtitlelength = 65;
