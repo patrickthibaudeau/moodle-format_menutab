@@ -29,48 +29,44 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *  */
 
-define(["jquery", "core/config"],
-    function ($, mdlcfg) {
-        "use strict";
-        return {
-            init: function () {
-                // get images on page
-                const summary = document.getElementsByClassName('course-description-item summarytext');
-                // loop through all sectin summaries
-                for (let i = 0; i < summary.length; i++) {
-                    const image = summary[i].getElementsByTagName('img')[0];
-                    // only make changes if there is an image
-                    if (image)  {
-                        // remove image from summary
-                        image.parentNode.removeChild(image);
-                        let summaryText = summary[i].innerHTML;
-                        let imageSrc = image.currentSrc;
-                        // Remove image form source code
-                        summaryText = summaryText.replace(/<img[^>]*>/gi,"");
-                        // Delete summary
-                        summary[i].innerHTML = '';
-                        // Create style
-                        let style = '<style>';
-                        style += '.format_menuttab_section_summary_' + i + ' {';
-                        style += 'width: 100%;';
-                        style += 'height: 150px;';
-                        style += 'background-image: url("' + imageSrc + '");';
-                        style += 'background-repeat:no-repeat;';
-                        style += 'background-position: center center;';
-                        style += 'background-size: cover;';
-                        style += '}';
-                        style += '</style>';
-                        // Create html element
-                        let html = '<div class="format_menuttab_section_summary_' + i + '"></div>';
-                        // Add sumamry text to html
-                        html += summaryText;
-                        // Add style to head
-                        document.head.innerHTML += style;
-                        // Add html
-                        summary[i].innerHTML = html;
-                    }
-                };
-            }
-        };
+import mdlcfg from 'core/config';
+
+export const init = () => {
+    "use strict";
+    // get images on page
+    const summary = document.getElementsByClassName('summarytext');
+    // loop through all section summaries
+    for (let i = 0; i < summary.length; i++) {
+        const image = summary[i].getElementsByTagName('img')[0];
+        // only make changes if there is an image
+        if (image) {
+            // remove image from summary
+            image.parentNode.removeChild(image);
+            let summaryText = summary[i].innerHTML;
+            let imageSrc = image.currentSrc;
+            // Remove image from source code
+            summaryText = summaryText.replace(/<img[^>]*>/gi, "");
+            // Delete summary
+            summary[i].innerHTML = '';
+            // Create style
+            let style = '<style>';
+            style += '.format_menuttab_section_summary_' + i + ' {';
+            style += 'width: 100%;';
+            style += 'height: 150px;';
+            style += 'background-image: url("' + imageSrc + '");';
+            style += 'background-repeat:no-repeat;';
+            style += 'background-position: center center;';
+            style += 'background-size: cover;';
+            style += '}';
+            style += '</style>';
+            // Create html element
+            let html = '<div class="format_menuttab_section_summary_' + i + '"></div>';
+            // Add summary text to html
+            html += summaryText;
+            // Add style to head
+            document.head.innerHTML += style;
+            // Add html
+            summary[i].innerHTML = html;
+        }
     }
-);
+};
