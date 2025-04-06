@@ -54,6 +54,8 @@ $string['numcolumns'] = 'Number of columns';
 $string['numcolumns_help'] = 'Select the number of columns you would like per row on the course front page.';
 $string['return'] = 'Course home';
 $string['start_here'] = 'Start here';
+$string['plugin_description'] = 'Le cours est divisé en sections de grille. Chaque section peut ensuite être divisée en onglets.' .
+    ' <b>Évitez d\'utiliser des sous-sections</b> car elles ne s\'afficheront pas correctement.';
 $string['pluginname'] = 'Menu/Onglet';
 $string['print_default_section_image'] = 'Utiliser une image par défaut pour les sections sans image';
 $string['print_default_section_image_help'] = 'S\'il n\'y a pas d\'image pour une section, une image par défaut sera utilisée.';

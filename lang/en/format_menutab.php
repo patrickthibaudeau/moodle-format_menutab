@@ -56,6 +56,8 @@ $string['numcolumns'] = 'Number of columns';
 $string['numcolumns_help'] = 'Select the number of columns you would like per row on the course front page.';
 $string['return'] = 'Course home';
 $string['start_here'] = 'Start here';
+$string['plugin_description'] = 'The course is divided into grid sections. Each section can then be divided into tabs.' .
+' <b>Avoid using sub-sections</b> as they will not display properly.';
 $string['pluginname'] = 'Menu/Tab';
 $string['print_default_section_image'] = 'Use a default image for sections without an image';
 $string['print_default_section_image_help'] = 'If there is no image for a section, a default image will be used.';
