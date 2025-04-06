@@ -35,8 +35,8 @@ $course = $format->get_course();
 $context = context_course::instance($course->id);
 $isediting = $format->show_editor();
 
-if (!isset($_SESSION['format_mentuab_view_' . $course->id])) {
-    $_SESSION['format_mentuab_view_' . $course->id] = 0;
+if (!isset($_SESSION['format_menutab_view_' . $course->id])) {
+    $_SESSION['format_menutab_view_' . $course->id] = 0;
 }
 
 $table_contents = $_SESSION['format_mentuab_view_' . $course->id] ;
@@ -44,7 +44,7 @@ $table_contents = $_SESSION['format_mentuab_view_' . $course->id] ;
 $section_number = optional_param('section', 0, PARAM_INT);
 // Set section number
 if (!empty($section_number)) {
-    $format->set_section_number($section_number);
+    $format->set_sectionnum($section_number);
 }
 
 // Get format config
@@ -77,7 +77,7 @@ if ($isediting) {
         } else {
             $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
             $data = $templateable->export_for_template($renderer);
-            $data->userid = $USER->id;
+            $data['userid'] = $USER->id;
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
     } else {
@@ -101,7 +101,7 @@ if ($isediting) {
         } else {
             $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
             $data = $templateable->export_for_template($renderer);
-            $data->userid = $USER->id;
+            $data['userid'] = $USER->id;
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
 

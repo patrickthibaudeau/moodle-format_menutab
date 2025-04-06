@@ -228,7 +228,7 @@ class course_output implements \renderable, \templatable
         $data['print_start_button'] = $print_start_button;
         $data['print_overall_progress'] = $print_overall_progress;
         $data['course_image'] = $this->get_course_image($output);
-        $data['sectionreturn'] = $this->format->get_section_number();
+        $data['sectionreturn'] = $this->format->get_sectionnum();
         $data[$this->course->course_title_position] = true;
         $data['course_title_show'] = $this->course->course_title_show;
         $data['userid'] = $USER->id;
@@ -448,6 +448,7 @@ class course_output implements \renderable, \templatable
         if ($this->canviewhidden) {
             $data['availabilitymessage'] = self::temp_section_availability_message($thissection);
         }
+
         return $data;
     }
 
@@ -605,8 +606,8 @@ class course_output implements \renderable, \templatable
         $hidden_sections_exist = false;
         $data['hiddensections'] = array();
         // Split sections into hidden and visible
+        $hidden_sections = [];
         if ($data['hidden_sections_in_container']) {
-            $hidden_sections = [];
             foreach ($section_cards as $key => $section_card) {
                 if ($section_card['visible'] == true && $section_card['uservisible'] == true) {
                     continue;
@@ -781,15 +782,29 @@ class course_output implements \renderable, \templatable
         $tabs = [];
         $t = 0;
         $contents_tab_exists = false; // required so that if several labels exist within the section, only one contents tab get's printed
-        // Create all tab objects
+
+        $section_has_labels = false;
+        // Find out if there is a lable within this section
         foreach ($cmids as $index => $cmid) {
             $mod = $this->modinfo->get_cm($cmid);
             if ($mod->deletioninprogress) {
                 continue;
             }
+            if ($mod->get_module_type_name()->get_component() == 'label') {
+                $section_has_labels = true;
+            }
+        }
+
+        // Create all tab objects
+        foreach ($cmids as $index => $cmid) {
+            $mod = $this->modinfo->get_cm($cmid);
+
+            if ($mod->deletioninprogress) {
+                continue;
+            }
 
             // If no tab available, create a default tab
-            if ($index == 0 && $mod->get_module_type_name()->get_component() != 'label') {
+            if ($section_has_labels == false && $contents_tab_exists == false && $mod->get_module_type_name()->get_component() != 'label') {
                 $tabs[$t]['title'] = get_String('content', 'format_menutab');
                 $tabs[$t]['tabid'] = $index;
                 $tabs[$t]['user_visible'] = true;
