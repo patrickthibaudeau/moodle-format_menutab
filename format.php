@@ -39,7 +39,7 @@ if (!isset($_SESSION['format_menutab_view_' . $course->id])) {
     $_SESSION['format_menutab_view_' . $course->id] = 0;
 }
 
-$table_contents = $_SESSION['format_mentuab_view_' . $course->id] ;
+$table_contents = $_SESSION['format_menutab_view_' . $course->id] ;
 
 $section_number = optional_param('section', 0, PARAM_INT);
 // Set section number
