@@ -208,12 +208,14 @@ class format_menutab extends core_courseformat\base
     {
         global $COURSE;
         static $courseformatoptions = false;
+        $number_of_sections = count($this->get_sections()) - 1;
+
         $context = context_course::instance($COURSE->id);
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
             $courseformatoptions = array(
                 'numsections' => array(
-                    'default' => $courseconfig->numsections,
+                    'default' => $number_of_sections,
                     'type' => PARAM_INT,
                 ),
                 'hiddensections' => array(
