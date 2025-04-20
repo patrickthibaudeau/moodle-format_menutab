@@ -1,8 +1,8 @@
 # Menu/Tab #
 
-TODO Describe the plugin shortly here.
+This plugin displays your course in a grid format. Furthermore, it allows you to create tabs
+within each section to seperate the content.
 
-TODO Provide more detailed description here.
 
 ## Installing via uploaded ZIP file ##
 
@@ -26,6 +26,11 @@ Alternatively, you can run
     $ php admin/cli/upgrade.php
 
 to complete the installation from the command line.
+
+## Requirements ##
+In order to create tabs, please install the TinyMCE plugin tiny_menutab found on github.
+https://github.com/patrickthibaudeau/moodle-tiny_menutab . Make sure to use the proper branch
+for the version of Moodle that you have.
 
 ## License ##
 
