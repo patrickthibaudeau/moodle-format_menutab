@@ -605,8 +605,8 @@ class course_output implements \renderable, \templatable
         $hidden_sections_exist = false;
         $data['hiddensections'] = array();
         // Split sections into hidden and visible
+        $hidden_sections = [];
         if ($data['hidden_sections_in_container']) {
-            $hidden_sections = [];
             foreach ($section_cards as $key => $section_card) {
                 if ($section_card['visible'] == true && $section_card['uservisible'] == true) {
                     continue;

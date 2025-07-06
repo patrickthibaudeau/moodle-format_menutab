@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->libdir . '/completionlib.php');
 
-GLOBAL $PAGE, $USER;
+global $PAGE, $USER;
 
 // Retrieve course format option fields and add them to the $course object.
 $format = core_courseformat\base::instance($course);
@@ -39,7 +39,7 @@ if (!isset($_SESSION['format_mentuab_view_' . $course->id])) {
     $_SESSION['format_mentuab_view_' . $course->id] = 0;
 }
 
-$table_contents = $_SESSION['format_mentuab_view_' . $course->id] ;
+$table_contents = $_SESSION['format_mentuab_view_' . $course->id];
 
 $section_number = optional_param('section', 0, PARAM_INT);
 // Set section number
@@ -60,7 +60,7 @@ if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context
 }
 
 // Setup the format base instance.
-$renderer =  $format->get_renderer($PAGE);
+$renderer = $format->get_renderer($PAGE);
 
 $PAGE->requires->js_call_amd('format_menutab/view', 'init');
 
@@ -77,6 +77,10 @@ if ($isediting) {
         } else {
             $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
             $data = $templateable->export_for_template($renderer);
+            // Check to see if $data is a sdtClass object or an array.
+            if (!is_object($data)) {
+                $data = (object)$data;
+            }
             $data->userid = $USER->id;
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
@@ -101,6 +105,9 @@ if ($isediting) {
         } else {
             $templateable = new \format_menutab\output\course_output($course, false, null, $renderer);
             $data = $templateable->export_for_template($renderer);
+            if (!is_object($data)) {
+                $data = (object)$data;
+            }
             $data->userid = $USER->id;
             echo $renderer->render_from_template('format_menutab/course_home_page', $data);
         }
