@@ -474,8 +474,6 @@ class course_output implements \renderable, \templatable
         }
         $data['hasNoSections'] = true;
 
-        $maxallowedsections = $this->format->get_max_sections();
-        $sectioncountwarningissued = false;
         $number_of_sections_to_show = $data['numsections'];
 
         $countincludedsections = 0;
@@ -583,8 +581,8 @@ class course_output implements \renderable, \templatable
 
                     // See below about when "hide add cm control" is true.
                     $section_card['hideaddcmcontrol'] = false;
-                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
-                        $this->course, $section->section, 0
+                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->section_add_cm_controls(
+                        $this->format, $section
                     );
                     $section_cards[] = $section_card;
 
@@ -663,7 +661,8 @@ class course_output implements \renderable, \templatable
 
         $data['hidden_sections_exist'] = $hidden_sections_exist;
         $data['sectioncards'] = $data['sectionrows'];
-        $data['section_zero_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control($this->course, 0, 0);
+        $seczero = $this->modinfo->get_section_info(0);
+        $data['section_zero_add_cm_control_html'] = $this->courserenderer->section_add_cm_controls($this->format, $seczero);
         if ($this->completionenabled && $data['overall_progress']['num_out_of'] > 0) {
             if (get_config('format_menutab', 'print_progress')) {
                 $data['overall_progress_indicator'] = $this->completion_indicator(
