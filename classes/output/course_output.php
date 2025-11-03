@@ -481,6 +481,12 @@ class course_output implements \renderable, \templatable
         $card_number_count = 1;
         $current_card_number = '';
         foreach ($this->modinfo->get_section_info_all() as $sectionnum => $section) {
+            // Skip subsections (delegated sections) - they should not appear on the course homepage.
+            // Subsections have a component set (e.g., 'mod_subsection').
+            if (!empty($section->component)) {
+                continue;
+            }
+
             // Show the section if the user is permitted to access it, OR if it's not available
             // but there is some available info text which explains the reason & should display,
             // OR it is hidden but the course has a setting to display hidden sections as unavilable.
