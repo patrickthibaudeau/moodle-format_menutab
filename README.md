@@ -1,7 +1,25 @@
 # Menu/Tab #
 
 This plugin displays your course in a grid format. Furthermore, it allows you to create tabs
-within each section to seperate the content.
+within each section using Moodle 5's native subsection feature.
+
+## Version 3.0.0 - Major Update for Moodle 5 ##
+
+**Important Changes:**
+- **Subsection-based tabs**: Tabs are now created using Moodle 5's native subsection feature instead of labels with `<h2>` tags.
+- **Automatic migration**: When upgrading from version 2.x to 3.0, existing courses will automatically migrate labels with `<h2>` tags to subsections. The original labels will be deleted, and activities will be moved to the appropriate subsections.
+- **Enhanced compatibility**: This approach aligns with Moodle 5's core architecture and provides better maintainability.
+
+## Creating Tabs ##
+
+To create tabs within a section:
+1. Navigate to your course and turn editing on.
+2. In the section where you want tabs, add a subsection (use the "Add subsection" option).
+3. Give the subsection a name - this will become the tab title.
+4. Add your activities/resources to the subsection.
+5. Repeat for additional tabs.
+
+Each subsection within a parent section will appear as a separate tab when viewing the course.
 
 
 ## Installing via uploaded ZIP file ##
@@ -27,10 +45,16 @@ Alternatively, you can run
 
 to complete the installation from the command line.
 
-## Requirements ##
-In order to create tabs, please install the TinyMCE plugin tiny_menutab found on github.
-https://github.com/patrickthibaudeau/moodle-tiny_menutab . Make sure to use the proper branch
-for the version of Moodle that you have.
+## Migrating from Version 2.x ##
+
+If you are upgrading from version 2.x:
+- The upgrade will automatically convert any labels containing `<h2>` tags into subsections.
+- Activities that were grouped under these labels will be moved to the new subsections.
+- The original label activities will be deleted after migration.
+- This process runs automatically during the plugin upgrade.
+- No manual intervention is required.
+
+**Backup Recommendation**: As with any major upgrade, it's recommended to backup your course before upgrading.
 
 ## License ##
 

@@ -1,3 +1,3 @@
 - The code is always working within a container. Do not run PHP tests locally.
 - All code must be updated for Moodle 5.1
-- The stubs folder contains core Moodle 5.1 files for course formats. Use these files as reference. Never update these files.
+- The stubs folder contains all core Moodle 5.1 files. Use these files as reference. Never update these files.

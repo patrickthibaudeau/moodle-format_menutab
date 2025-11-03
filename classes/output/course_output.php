@@ -754,6 +754,8 @@ class course_output implements \renderable, \templatable
     }
 
     /**
+     * Get tabs for a section based on mod_subsection modules (Moodle 5.1+ approach).
+     *
      * @param $section
      * @param $output
      * @return array
@@ -763,126 +765,113 @@ class course_output implements \renderable, \templatable
      */
     private function get_section_tab_list($section, $output)
     {
+        global $DB;
+
         if (!isset($section->section)) {
             debugging("section->section is not set", DEBUG_DEVELOPER);
+            return [];
         }
 
+        // Get course modules for this section.
         if (!isset($this->modinfo->sections[$section->section]) || !$cmids = $this->modinfo->sections[$section->section]) {
             // There are no CMs for the section (i.e. section is empty) so we silently return.
             return [];
         }
+
         if (empty($cmids)) {
-            // There are no CMs for the section (i.e. section is empty) so we silently return.
             return [];
         }
-        $previouswaslabel = false;
-        $sectioncontent = [];
-        $a_tab_exists = false; // Used so that default content tab does not create itself if a label is used after a tab.
+
         $tabs = [];
-        $t = 0;
-        $contents_tab_exists = false; // required so that if several labels exist within the section, only one contents tab get's printed
+        $tabindex = 0;
+        $non_subsection_modules = [];
+        $subsection_modules = [];
 
-        $section_has_labels = false;
-        // Find out if there is a lable within this section
-        foreach ($cmids as $index => $cmid) {
+        // First pass: identify subsections and regular activities.
+        foreach ($cmids as $cmid) {
             $mod = $this->modinfo->get_cm($cmid);
             if ($mod->deletioninprogress) {
                 continue;
             }
-            if ($mod->get_module_type_name()->get_component() == 'label') {
-                $section_has_labels = true;
+
+            // Check if this is a subsection module.
+            if ($mod->modname === 'subsection') {
+                $subsection_modules[] = $mod;
+            } else {
+                // Regular activity (not a subsection).
+                $non_subsection_modules[] = $mod;
             }
         }
 
-        // Create all tab objects
-        foreach ($cmids as $index => $cmid) {
-            $mod = $this->modinfo->get_cm($cmid);
+        // If there are regular activities (non-subsection), create a "Content" tab.
+        if (!empty($non_subsection_modules)) {
+            $tabs[0] = [
+                'title' => get_string('content', 'format_menutab'),
+                'tabid' => 0,
+                'user_visible' => true,
+                'class' => 'show active',
+                'active' => 'active',
+                'course_modules' => []
+            ];
 
-            if ($mod->deletioninprogress) {
+            foreach ($non_subsection_modules as $mod) {
+                $moduledata = $this->course_module_data(
+                    $mod,
+                    $section,
+                    false,
+                    false,
+                    $output
+                );
+                $tabs[0]['course_modules'][] = $moduledata;
+            }
+
+            $tabindex = 1;
+        }
+
+        // Process subsection modules as tabs.
+        foreach ($subsection_modules as $subsection_mod) {
+            // Get the delegated section for this subsection.
+            $delegated_section = $subsection_mod->get_delegated_section_info();
+
+            if (!$delegated_section) {
+                // If no delegated section found, skip this subsection.
                 continue;
             }
 
-            // If no tab available, create a default tab
-            if ($section_has_labels == false && $contents_tab_exists == false && $mod->get_module_type_name()->get_component() != 'label') {
-                $tabs[$t]['title'] = get_String('content', 'format_menutab');
-                $tabs[$t]['tabid'] = $index;
-                $tabs[$t]['user_visible'] = true;
-                $tabs[$t]['cm_index_skip'] = -1;
-                $tabs[$t]['cm_index_start'] = $index;
-                $contents_tab_exists = true;
-            } else if ($mod->get_module_type_name()->get_component() == 'label') {
-                preg_match("#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s", $mod->get_formatted_content(), $matches);
+            // Create tab with subsection name.
+            $tabs[$tabindex] = [
+                'title' => format_string($subsection_mod->name),
+                'tabid' => $tabindex,
+                'user_visible' => $subsection_mod->uservisible,
+                'class' => $tabindex == 0 ? 'show active' : '',
+                'active' => $tabindex == 0 ? 'active' : '',
+                'course_modules' => []
+            ];
 
-                if (isset($matches[1])) {
-                    $title = $matches[1];
-                    $tabs[$t]['title'] = $title;
-                    $tabs[$t]['tabid'] = $index;
-                    $tabs[$t]['user_visible'] = $mod->get_user_visible();
-                    // Because this mod is a label and contains a tab, get next module that follows to start the
-                    // content list
-                    $tabs[$t]['cm_index_skip'] = $index;
-                    $tabs[$t]['cm_index_start'] = $index + 1;
-                    $a_tab_exists = true;
-                } else {
-                    if (!$a_tab_exists && !$contents_tab_exists) {
-                        $tabs[$t]['title'] = get_String('content', 'format_menutab');
-                        $tabs[$t]['tabid'] = $index;
-                        $tabs[$t]['user_visible'] = true;
-                        $tabs[$t]['cm_index_skip'] = -1;
-                        $tabs[$t]['cm_index_start'] = $index;
-                        $contents_tab_exists = true;
+            // Get modules from the delegated section.
+            if (isset($this->modinfo->sections[$delegated_section->section])) {
+                $delegated_cmids = $this->modinfo->sections[$delegated_section->section];
+
+                foreach ($delegated_cmids as $delegated_cmid) {
+                    $delegated_mod = $this->modinfo->get_cm($delegated_cmid);
+                    if ($delegated_mod->deletioninprogress) {
+                        continue;
                     }
+
+                    $moduledata = $this->course_module_data(
+                        $delegated_mod,
+                        $delegated_section,
+                        false,
+                        false,
+                        $output
+                    );
+                    $tabs[$tabindex]['course_modules'][] = $moduledata;
                 }
             }
 
-            $t++;
+            $tabindex++;
         }
-        // reset tabs index
-        $tabs = array_values($tabs);
-        // get number of course modules
-        $cm_count = count($cmids);
-        // Loop through tabs and add course modules
-        for ($x = 0; $x < count($tabs); $x++) {
-            if ($x == 0) {
-                $tabs[$x]['class'] = 'show active';
-                $tabs[$x]['active'] = 'active';
-            } else {
-                $tabs[$x]['class'] = '';
-                $tabs[$x]['active'] = '';
-            }
-            // If there is an tab after this one, only print the modules for that tab
-            if (isset($tabs[$x + 1])) {
-                for ($i = $tabs[$x]['cm_index_start']; $i < $tabs[$x + 1]['cm_index_skip']; $i++) {
-                    $mod = $this->modinfo->get_cm($cmids[$i]);
-                    if (!$mod->deletioninprogress) {
-                        $moduledata = $this->course_module_data(
-                            $mod,
-                            $section,
-                            $previouswaslabel,
-                            $index == 0,
-                            $output
-                        );
-                        $tabs[$x]['course_modules'][] = $moduledata;
-                    }
 
-                }
-            } else {
-                for ($i = $tabs[$x]['cm_index_start']; $i < $cm_count; $i++) {
-                    $mod = $this->modinfo->get_cm($cmids[$i]);
-                    if (!$mod->deletioninprogress) {
-                        $moduledata = $this->course_module_data(
-                            $mod,
-                            $section,
-                            $previouswaslabel,
-                            $index == 0,
-                            $output
-                        );
-                        $tabs[$x]['course_modules'][] = $moduledata;
-                    }
-
-                }
-            }
-        }
         return $tabs;
     }
 

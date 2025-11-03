@@ -43,5 +43,12 @@ function xmldb_format_menutab_upgrade($oldversion) {
     // You will also have to create the db/install.xml file by using the XMLDB Editor.
     // Documentation for the XMLDB Editor can be found at {@link https://docs.moodle.org/dev/XMLDB_editor}.
 
+    if ($oldversion < 2025110300) {
+        // Migrate h2 labels to subsections.
+        format_menutab_migrate_labels_to_subsections();
+
+        upgrade_plugin_savepoint(true, 2025110300, 'format', 'menutab');
+    }
+
     return true;
 }
