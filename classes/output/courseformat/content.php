@@ -40,8 +40,9 @@ class content extends content_base
      * @var bool Topic format has add section after each topic.
      *
      * The responsible for the buttons is core_courseformat\output\local\content\section.
+     * Disabled in Moodle 5.1+ as the increase/decrease section buttons are deprecated (MDL-85284).
      */
-    protected $hasaddsection = true;
+    protected $hasaddsection = false;
 
     /**
      * Export this data so it can be used as the context for a mustache template (core/inplace_editable).
