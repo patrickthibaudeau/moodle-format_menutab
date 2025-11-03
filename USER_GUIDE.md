@@ -14,8 +14,9 @@ The Menu/Tab course format displays your course in a beautiful grid layout on th
 4. [Adding Content to Tabs](#adding-content-to-tabs)
 5. [Creating Multiple Tabs](#creating-multiple-tabs)
 6. [Managing Tabs](#managing-tabs)
-7. [Best Practices](#best-practices)
-8. [Troubleshooting](#troubleshooting)
+7. [Converting from Legacy Labels (Imported Courses)](#converting-from-legacy-labels-imported-courses)
+8. [Best Practices](#best-practices)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -260,6 +261,232 @@ Tabs appear in the order the subsections were created.
 4. Confirm the deletion
 
 **Tip:** Before deleting, move any activities you want to keep to another location.
+
+---
+
+## Converting from Legacy Labels (Imported Courses)
+
+If you've imported a course from an older version or from another course that used the old method (labels with `<h2>` tags), you can easily convert it to use the modern subsection-based tabs.
+
+### What is the Legacy Method?
+
+In older versions, tabs were created by:
+1. Adding a label activity
+2. Editing the HTML to include `<h2>Tab Name</h2>`
+3. Adding activities after the label
+
+This method worked but was difficult to maintain and required HTML knowledge.
+
+### How to Tell if Your Course Uses the Legacy Method
+
+When you visit your course homepage and turn editing on, you'll see a **yellow warning banner** at the top that says:
+
+```
+⚠️ This course contains legacy labels with <h2> tags.
+   [Convert legacy labels to tabs]
+```
+
+If you see this banner, your course can be converted.
+
+### Converting Your Course: Step-by-Step
+
+#### Step 1: Backup Your Course (Important!)
+
+Before converting, **always create a backup**:
+
+1. Go to **Course Administration** (⚙️ gear icon)
+2. Click **Backup**
+3. Follow the backup wizard
+4. Download and save the backup file
+
+⚠️ **Why?** The conversion cannot be undone automatically. If something goes wrong, you can restore from backup.
+
+#### Step 2: Click the Conversion Button
+
+1. Go to your course homepage
+2. Turn editing on (if not already on)
+3. Look for the yellow warning banner at the top
+4. Click the **"Convert legacy labels to tabs"** button
+
+#### Step 3: Review What Will Be Converted
+
+You'll see a confirmation page showing:
+
+**Warning Section:**
+- Explains that this action cannot be undone
+- Reminds you to backup first
+
+**What Will Happen:**
+1. Labels with `<h2>` tags will be identified
+2. New subsection tabs will be created
+3. Activities will be moved into tabs
+4. Original `<h2>` labels will be deleted
+5. Course cache will be rebuilt
+
+**Labels to Convert:**
+A list showing all the `<h2>` labels found in your course, organized by section.
+
+Example:
+```
+Week 1: Getting Started: Introduction
+Week 1: Getting Started: Resources  
+Week 2: Core Concepts: Learning Materials
+Week 2: Core Concepts: Assessment
+```
+
+#### Step 4: Confirm and Convert
+
+1. **Review the list carefully** to make sure everything looks correct
+2. **Verify you've backed up** your course
+3. Click the **"Yes, Convert to Subsection Tabs"** button
+
+   OR
+
+   Click **"Cancel"** if you're not ready
+
+#### Step 5: Wait for Conversion
+
+- The conversion runs automatically
+- Usually takes 5-30 seconds (depending on course size)
+- **Don't close your browser** during this time
+
+#### Step 6: Verify the Results
+
+After conversion, you'll be redirected back to your course with a success message.
+
+**Check that everything worked:**
+
+1. ✅ Turn editing OFF
+2. ✅ Click on a section that had `<h2>` labels
+3. ✅ Verify tabs appear at the top
+4. ✅ Check that activities are under the correct tabs
+5. ✅ Test clicking between tabs
+6. ✅ Verify the yellow warning banner is gone
+
+### What Gets Changed During Conversion?
+
+**Before Conversion:**
+```
+Section 1: Week 1
+├── 📄 Label: <h2>Introduction</h2>     ← Will be converted
+├── 📹 Video: Welcome                   ← Will move to tab
+├── 📖 Page: Syllabus                   ← Will move to tab
+├── 📄 Label: <h2>Assessment</h2>       ← Will be converted
+└── 📝 Quiz: Week 1 Quiz                ← Will move to tab
+```
+
+**After Conversion:**
+```
+Section 1: Week 1
+├── 📂 Subsection: Introduction         ← New tab
+│   ├── 📹 Video: Welcome
+│   └── 📖 Page: Syllabus
+└── 📂 Subsection: Assessment           ← New tab
+    └── 📝 Quiz: Week 1 Quiz
+```
+
+**What Stays the Same:**
+- ✅ All your content (videos, assignments, quizzes, etc.)
+- ✅ Section names and descriptions
+- ✅ Student submissions and grades
+- ✅ Activity order
+- ✅ Regular labels (without `<h2>` tags)
+
+**What Gets Deleted:**
+- 🗑️ Label activities containing `<h2>` tags (no longer needed)
+
+### Troubleshooting Conversion
+
+#### The Convert Button Doesn't Appear
+
+**Possible reasons:**
+1. You don't have editing rights
+2. Your course doesn't have any `<h2>` labels
+3. Your course was already converted
+
+**What to do:**
+- Make sure editing is turned on
+- Check with your administrator if you should have editing rights
+- If you imported the course recently, check the original for `<h2>` labels
+
+#### Conversion Shows an Error
+
+**What to do:**
+1. Don't panic - your course is still intact
+2. Check with your Moodle administrator
+3. Provide them with:
+   - Course ID
+   - Time you attempted conversion
+   - Any error messages
+
+#### Activities Seem Missing After Conversion
+
+**Check these places:**
+1. Turn editing ON
+2. Look inside the subsections (they expand when editing)
+3. Check if there's a "Content" tab with remaining activities
+4. Activities before the first `<h2>` stay in the parent section
+
+**If still missing:**
+- Restore from your backup
+- Contact your administrator
+
+#### Want to Undo the Conversion
+
+Unfortunately, there's no automatic undo button.
+
+**Your options:**
+1. **Restore from backup** (recommended if you made one)
+   - Go to Course Administration → Restore
+   - Upload your backup file
+2. **Contact administrator** (they may have automatic backups)
+3. **Manual recreation** (last resort)
+   - Create new labels with `<h2>` tags
+   - Move activities back
+
+### After Conversion: Next Steps
+
+Once conversion is complete:
+
+1. ✅ **Test everything** - Click through all sections and tabs
+2. ✅ **Check with a student view** - See what students will see
+3. ✅ **Update course documentation** if needed
+4. ✅ **Keep your backup** for at least a few weeks
+5. ✅ **Inform teaching assistants** about the new structure
+
+### Should You Convert?
+
+**Convert if:**
+- ✅ You want easier course maintenance
+- ✅ You plan to make major course updates
+- ✅ You want better accessibility
+- ✅ You want to use modern Moodle features
+
+**Don't need to convert if:**
+- ✅ Your old method is working fine
+- ✅ You rarely update the course
+- ✅ The course will be retired soon
+- ✅ You're uncomfortable with the process
+
+**Remember:** The old method still works! There's no pressure to convert immediately.
+
+### Getting Help with Conversion
+
+Need assistance? Contact:
+
+1. **Your Moodle Administrator** - Can help with:
+   - Running the conversion for you
+   - Troubleshooting issues
+   - Restoring from backups
+
+2. **Instructional Support** - Can help with:
+   - Deciding whether to convert
+   - Reorganizing your course structure
+   - Testing the converted course
+
+3. **Documentation** - Also available:
+   - LEGACY_CONVERSION_GUIDE.md - Detailed guide
+   - UNDERSTANDING_THE_CHANGES.md - Explains the differences
 
 ---
 
