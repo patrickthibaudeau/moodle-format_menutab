@@ -331,8 +331,6 @@ class format_menutab extends core_courseformat\base
                 ),
                 'hiddensections' => array(
                     'label' => new \lang_string('hiddensections'),
-                    'help' => 'hiddensections',
-                    'help_component' => 'moodle',
                     'element_type' => 'select',
                     'element_attributes' => array(
                         array(
