@@ -128,6 +128,8 @@ function format_menutab_migrate_labels_to_subsections() {
 
             // Only process if we found h2 labels.
             if (!empty($subsections_data)) {
+                $subsection_cms_to_add = []; // Track subsection CMs we create
+
                 // Create subsection modules and their delegated sections.
                 foreach ($subsections_data as $subsection_data) {
                     // 1. Create the subsection instance record.
@@ -154,13 +156,10 @@ function format_menutab_migrate_labels_to_subsections() {
                     $newcm->id = add_course_module($newcm);
                     mtrace("    Created course module ID: {$newcm->id}");
 
-                    // 3. Create the delegated section via subsection_add_instance logic.
-                    // Get the module instance that was created.
-                    $moduleinstance = $DB->get_record('subsection', ['id' => $subsection_instance->id]);
-                    $moduleinstance->visible = $subsection_data['visible'];
-                    $moduleinstance->availability = $subsection_data['availability'];
+                    // Track this subsection CM to add to parent sequence later
+                    $subsection_cms_to_add[] = $newcm->id;
 
-                    // Create delegated section using core API.
+                    // 3. Create the delegated section using core API.
                     $cmavailability = $subsection_data['availability'] ?? null;
                     if (empty($cmavailability)) {
                         $cmavailability = null;
@@ -178,12 +177,7 @@ function format_menutab_migrate_labels_to_subsections() {
 
                     mtrace("    Created delegated section ID: {$delegated_section->id}");
 
-                    // 4. Add the subsection CM to parent section's sequence.
-                    $parent_sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
-                    $parent_sequence[] = $newcm->id;
-                    $section->sequence = implode(',', $parent_sequence);
-
-                    // 5. Move activities to the delegated section.
+                    // 4. Move activities to the delegated section.
                     if (!empty($subsection_data['modules'])) {
                         $delegated_sequence = [];
                         foreach ($subsection_data['modules'] as $cmid) {
@@ -204,7 +198,7 @@ function format_menutab_migrate_labels_to_subsections() {
                     }
                 }
 
-                // Delete the h2 labels.
+                // 5. Delete the h2 labels.
                 foreach ($labels_to_delete as $cmid) {
                     $cm = $DB->get_record('course_modules', ['id' => $cmid]);
                     if ($cm) {
@@ -214,9 +208,13 @@ function format_menutab_migrate_labels_to_subsections() {
                     }
                 }
 
-                // Update parent section's sequence (remove moved activities, keep subsection modules).
-                $updated_sequence = array_diff(explode(',', $section->sequence), $modules_to_remove_from_parent);
-                $section->sequence = implode(',', $updated_sequence);
+                // 6. Update parent section's sequence:
+                // - Remove moved activities and deleted labels
+                // - Add the new subsection modules
+                $parent_sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
+                $parent_sequence = array_diff($parent_sequence, $modules_to_remove_from_parent);
+                $parent_sequence = array_merge($parent_sequence, $subsection_cms_to_add);
+                $section->sequence = implode(',', $parent_sequence);
                 $DB->update_record('course_sections', $section);
 
                 mtrace("  Updated parent section sequence");
