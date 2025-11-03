@@ -64,6 +64,28 @@ $renderer =  $format->get_renderer($PAGE);
 
 $PAGE->requires->js_call_amd('format_menutab/view', 'init');
 
+// Check if we should show the legacy conversion button.
+$show_conversion_button = false;
+if ($section_number == 0 && has_capability('moodle/course:update', $context)) {
+    require_once($CFG->dirroot . '/course/format/menutab/db/upgradelib.php');
+    if (format_menutab_check_for_h2_labels($course->id)) {
+        $show_conversion_button = true;
+    }
+}
+
+// Display legacy conversion button if needed.
+if ($show_conversion_button) {
+    $convert_url = new moodle_url('/course/format/menutab/convert_legacy.php', ['courseid' => $course->id]);
+    echo $OUTPUT->notification(
+        get_string('convert_legacy_warning', 'format_menutab') . '<br><br>' .
+        html_writer::link($convert_url, get_string('convert_legacy', 'format_menutab'), [
+            'class' => 'btn btn-warning',
+            'style' => 'color: white;'
+        ]),
+        \core\output\notification::NOTIFY_WARNING
+    );
+}
+
 if ($isediting) {
 
     if ($section_number == 0) {

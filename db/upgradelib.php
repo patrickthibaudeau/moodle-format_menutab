@@ -36,6 +36,267 @@ function format_menutab_helper_function() {
 }
 
 /**
+ * Check if a course has any labels with h2 tags.
+ *
+ * @param int $courseid The course ID
+ * @return bool True if h2 labels exist
+ */
+function format_menutab_check_for_h2_labels($courseid) {
+    global $DB;
+
+    // Get all sections for this course (excluding section 0).
+    $sections = $DB->get_records_select('course_sections',
+        'course = ? AND section > 0 AND component IS NULL',
+        [$courseid],
+        'section ASC'
+    );
+
+    foreach ($sections as $section) {
+        $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
+
+        foreach ($sequence as $cmid) {
+            $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+            if (!$cm) {
+                continue;
+            }
+
+            $module = $DB->get_record('modules', ['id' => $cm->module]);
+            if ($module && $module->name == 'label') {
+                $label = $DB->get_record('label', ['id' => $cm->instance]);
+                if ($label && preg_match('#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s', $label->intro)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Get information about h2 labels in a course.
+ *
+ * @param int $courseid The course ID
+ * @return array Array of label information
+ */
+function format_menutab_get_h2_labels_info($courseid) {
+    global $DB;
+
+    $labels_info = [];
+
+    $sections = $DB->get_records_select('course_sections',
+        'course = ? AND section > 0 AND component IS NULL',
+        [$courseid],
+        'section ASC'
+    );
+
+    foreach ($sections as $section) {
+        $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
+
+        foreach ($sequence as $cmid) {
+            $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+            if (!$cm) {
+                continue;
+            }
+
+            $module = $DB->get_record('modules', ['id' => $cm->module]);
+            if ($module && $module->name == 'label') {
+                $label = $DB->get_record('label', ['id' => $cm->instance]);
+                if ($label && preg_match('#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s', $label->intro, $matches)) {
+                    $h2_text = strip_tags($matches[1]);
+                    $labels_info[] = [
+                        'section_name' => $section->name ? $section->name : get_string('section') . ' ' . $section->section,
+                        'h2_text' => $h2_text,
+                        'section_num' => $section->section
+                    ];
+                }
+            }
+        }
+    }
+
+    return $labels_info;
+}
+
+/**
+ * Convert h2 labels to subsections for a single course.
+ *
+ * @param int $courseid The course ID
+ * @return bool True on success, false on failure
+ */
+function format_menutab_convert_course_labels_to_subsections($courseid) {
+    global $DB, $CFG;
+    require_once($CFG->dirroot . '/course/lib.php');
+    require_once($CFG->dirroot . '/mod/subsection/lib.php');
+
+    try {
+        // Get subsection module id.
+        $subsection_module = $DB->get_record('modules', ['name' => 'subsection']);
+        if (!$subsection_module) {
+            debugging('mod_subsection not found. Cannot convert.', DEBUG_DEVELOPER);
+            return false;
+        }
+
+        $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
+
+        // Get all sections for this course (excluding section 0).
+        $sections = $DB->get_records_select('course_sections',
+            'course = ? AND section > 0 AND component IS NULL',
+            [$courseid],
+            'section ASC'
+        );
+
+        foreach ($sections as $section) {
+            // Get course modules for this section.
+            $sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
+
+            if (empty($sequence)) {
+                continue;
+            }
+
+            $subsections_data = [];
+            $labels_to_delete = [];
+            $modules_to_remove_from_parent = [];
+
+            // First pass: identify h2 labels and group activities.
+            $current_subsection = null;
+            foreach ($sequence as $cmid) {
+                $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+                if (!$cm) {
+                    continue;
+                }
+
+                $module = $DB->get_record('modules', ['id' => $cm->module]);
+
+                // Check if this is a label module with h2.
+                if ($module && $module->name == 'label') {
+                    $label = $DB->get_record('label', ['id' => $cm->instance]);
+
+                    if ($label && preg_match('#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s', $label->intro, $matches)) {
+                        $h2_content = strip_tags($matches[1]);
+
+                        // Start a new subsection.
+                        $current_subsection = [
+                            'name' => $h2_content,
+                            'visible' => $cm->visible,
+                            'availability' => $cm->availability,
+                            'modules' => []
+                        ];
+                        $subsections_data[] = $current_subsection;
+
+                        $labels_to_delete[] = $cmid;
+                        $modules_to_remove_from_parent[] = $cmid;
+                    } else {
+                        // Regular label, keep in current context.
+                        if ($current_subsection !== null) {
+                            $subsections_data[count($subsections_data) - 1]['modules'][] = $cmid;
+                            $modules_to_remove_from_parent[] = $cmid;
+                        }
+                    }
+                } else {
+                    // Regular activity.
+                    if ($current_subsection !== null) {
+                        $subsections_data[count($subsections_data) - 1]['modules'][] = $cmid;
+                        $modules_to_remove_from_parent[] = $cmid;
+                    }
+                }
+            }
+
+            // Only process if we found h2 labels.
+            if (!empty($subsections_data)) {
+                $subsection_cms_to_add = [];
+
+                // Create subsection modules and their delegated sections.
+                foreach ($subsections_data as $subsection_data) {
+                    // 1. Create the subsection instance record.
+                    $subsection_instance = new stdClass();
+                    $subsection_instance->course = $courseid;
+                    $subsection_instance->name = $subsection_data['name'];
+                    $subsection_instance->timecreated = time();
+                    $subsection_instance->timemodified = time();
+
+                    $subsection_instance->id = $DB->insert_record('subsection', $subsection_instance);
+
+                    // 2. Create the course module for this subsection.
+                    $newcm = new stdClass();
+                    $newcm->course = $courseid;
+                    $newcm->module = $subsection_module->id;
+                    $newcm->instance = $subsection_instance->id;
+                    $newcm->section = $section->id;
+                    $newcm->visible = $subsection_data['visible'];
+                    $newcm->visibleoncoursepage = $subsection_data['visible'];
+                    $newcm->availability = $subsection_data['availability'];
+                    $newcm->added = time();
+
+                    $newcm->id = add_course_module($newcm);
+
+                    // Track this subsection CM to add to parent sequence later.
+                    $subsection_cms_to_add[] = $newcm->id;
+
+                    // 3. Manually create the delegated section record.
+                    // We do this manually to avoid cache refresh during conversion.
+                    $delegated_section = new stdClass();
+                    $delegated_section->course = $courseid;
+                    $delegated_section->section = $DB->get_field_sql(
+                        "SELECT MAX(section) + 1 FROM {course_sections} WHERE course = ?",
+                        [$courseid]
+                    );
+                    $delegated_section->name = $subsection_data['name'];
+                    $delegated_section->summary = '';
+                    $delegated_section->summaryformat = FORMAT_HTML;
+                    $delegated_section->visible = $subsection_data['visible'];
+                    $delegated_section->availability = $subsection_data['availability'] ?? null;
+                    $delegated_section->timemodified = time();
+                    $delegated_section->component = 'mod_subsection';
+                    $delegated_section->itemid = $subsection_instance->id;
+                    $delegated_section->sequence = '';
+
+                    $delegated_section->id = $DB->insert_record('course_sections', $delegated_section);
+
+                    // 4. Move activities to the delegated section.
+                    if (!empty($subsection_data['modules'])) {
+                        $delegated_sequence = [];
+                        foreach ($subsection_data['modules'] as $cmid) {
+                            $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+                            if ($cm) {
+                                $cm->section = $delegated_section->id;
+                                $DB->update_record('course_modules', $cm);
+                                $delegated_sequence[] = $cmid;
+                            }
+                        }
+
+                        // Update the delegated section's sequence.
+                        $DB->set_field('course_sections', 'sequence', implode(',', $delegated_sequence), ['id' => $delegated_section->id]);
+                    }
+                }
+
+                // 5. Delete the h2 labels.
+                foreach ($labels_to_delete as $cmid) {
+                    $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+                    if ($cm) {
+                        $DB->delete_records('label', ['id' => $cm->instance]);
+                        $DB->delete_records('course_modules', ['id' => $cmid]);
+                    }
+                }
+
+                // 6. Update parent section's sequence.
+                $parent_sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
+                $parent_sequence = array_diff($parent_sequence, $modules_to_remove_from_parent);
+                $parent_sequence = array_merge($parent_sequence, $subsection_cms_to_add);
+                $DB->set_field('course_sections', 'sequence', implode(',', $parent_sequence), ['id' => $section->id]);
+            }
+        }
+
+        // Rebuild the course cache ONCE at the end after all changes are complete.
+        rebuild_course_cache($courseid, true);
+
+        return true;
+    } catch (Exception $e) {
+        debugging('Error converting course: ' . $e->getMessage(), DEBUG_DEVELOPER);
+        return false;
+    }
+}
+
+/**
  * Migrate h2 labels to subsections for menutab format courses.
  *
  * This function converts the legacy label-with-h2-tag approach to tabs
@@ -159,22 +420,25 @@ function format_menutab_migrate_labels_to_subsections() {
                     // Track this subsection CM to add to parent sequence later
                     $subsection_cms_to_add[] = $newcm->id;
 
-                    // 3. Create the delegated section using core API.
-                    $cmavailability = $subsection_data['availability'] ?? null;
-                    if (empty($cmavailability)) {
-                        $cmavailability = null;
-                    }
-
-                    $delegated_section = \core_courseformat\formatactions::section($course->id)->create_delegated(
-                        'mod_subsection',
-                        $subsection_instance->id,
-                        (object)[
-                            'name' => $subsection_data['name'],
-                            'visible' => $subsection_data['visible'],
-                            'availability' => $cmavailability,
-                        ]
+                    // 3. Manually create the delegated section record.
+                    // We do this manually to avoid cache refresh during conversion.
+                    $delegated_section = new stdClass();
+                    $delegated_section->course = $course->id;
+                    $delegated_section->section = $DB->get_field_sql(
+                        "SELECT MAX(section) + 1 FROM {course_sections} WHERE course = ?",
+                        [$course->id]
                     );
+                    $delegated_section->name = $subsection_data['name'];
+                    $delegated_section->summary = '';
+                    $delegated_section->summaryformat = FORMAT_HTML;
+                    $delegated_section->visible = $subsection_data['visible'];
+                    $delegated_section->availability = $subsection_data['availability'] ?? null;
+                    $delegated_section->timemodified = time();
+                    $delegated_section->component = 'mod_subsection';
+                    $delegated_section->itemid = $subsection_instance->id;
+                    $delegated_section->sequence = '';
 
+                    $delegated_section->id = $DB->insert_record('course_sections', $delegated_section);
                     mtrace("    Created delegated section ID: {$delegated_section->id}");
 
                     // 4. Move activities to the delegated section.
@@ -193,8 +457,7 @@ function format_menutab_migrate_labels_to_subsections() {
                         }
 
                         // Update delegated section's sequence.
-                        $delegated_section->sequence = implode(',', $delegated_sequence);
-                        $DB->update_record('course_sections', $delegated_section);
+                        $DB->set_field('course_sections', 'sequence', implode(',', $delegated_sequence), ['id' => $delegated_section->id]);
                     }
                 }
 
@@ -214,8 +477,7 @@ function format_menutab_migrate_labels_to_subsections() {
                 $parent_sequence = !empty($section->sequence) ? explode(',', $section->sequence) : [];
                 $parent_sequence = array_diff($parent_sequence, $modules_to_remove_from_parent);
                 $parent_sequence = array_merge($parent_sequence, $subsection_cms_to_add);
-                $section->sequence = implode(',', $parent_sequence);
-                $DB->update_record('course_sections', $section);
+                $DB->set_field('course_sections', 'sequence', implode(',', $parent_sequence), ['id' => $section->id]);
 
                 mtrace("  Updated parent section sequence");
             }

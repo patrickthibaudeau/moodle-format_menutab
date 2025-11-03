@@ -128,3 +128,21 @@ $string['middle_right'] = 'Middle right';
 $string['top_left'] = 'Top left';
 $string['top_center'] = 'Top center';
 $string['top_right'] = 'Top right';
+// Legacy conversion
+$string['convert_legacy'] = 'Convert legacy labels to tabs';
+$string['convert_legacy_title'] = 'Convert Legacy Labels to Subsection Tabs';
+$string['convert_legacy_warning_title'] = 'Warning: This Action Cannot Be Undone';
+$string['convert_legacy_warning'] = 'This will convert all labels with &lt;h2&gt; tags into subsection tabs. The original labels will be deleted, and activities will be moved to the new tabs. Please backup your course before proceeding.';
+$string['conversion_success'] = 'Legacy labels successfully converted to subsection tabs!';
+$string['conversion_error'] = 'An error occurred during conversion. Please check the logs.';
+$string['no_legacy_labels'] = 'No legacy labels found in this course.';
+$string['what_will_happen'] = 'What will happen:';
+$string['conversion_step1'] = 'Labels with &lt;h2&gt; tags will be identified';
+$string['conversion_step2'] = 'New subsection modules (tabs) will be created with the &lt;h2&gt; text as the tab name';
+$string['conversion_step3'] = 'Activities following each &lt;h2&gt; label will be moved into the corresponding tab';
+$string['conversion_step4'] = 'The original &lt;h2&gt; labels will be deleted';
+$string['conversion_step5'] = 'Course cache will be rebuilt to reflect changes';
+$string['labels_to_convert'] = 'The following labels will be converted to tabs:';
+$string['convert_confirm'] = 'Yes, Convert to Subsection Tabs';
+$string['invalidcourseformat'] = 'This course is not using the Menu/Tab format';
+

@@ -1,3 +1,4 @@
 - The code is always working within a container. Do not run PHP tests locally.
 - All code must be updated for Moodle 5.1
 - The stubs folder contains all core Moodle 5.1 files. Use these files as reference. Never update these files.
+- Always use Mustache templating as a first step instead of the html_writer class.
