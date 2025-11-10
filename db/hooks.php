@@ -15,17 +15,20 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Hook callbacks registration for format_menutab.
  *
  * @package     format_menutab
- * @copyright   2022 UIT Innovation  <thibaud@yorku.ca>
+ * @copyright   2024 UIT Innovation  <thibaud@yorku.ca>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'format_menutab';
-$plugin->release = '3.0.1 (Build: 20251110)';
-$plugin->version = 2025111000;
-$plugin->requires = 2025032100;
-$plugin->maturity = MATURITY_STABLE;
+$callbacks = [
+    [
+        'hook' => \core_course\hook\before_course_viewed::class,
+        'callback' => \format_menutab\hook_callbacks::class . '::before_course_viewed',
+        'priority' => 500,
+    ],
+];
+

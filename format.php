@@ -62,6 +62,7 @@ if (($marker >= 0) && has_capability('moodle/course:setcurrentsection', $context
 // Setup the format base instance.
 $renderer =  $format->get_renderer($PAGE);
 
+
 $PAGE->requires->js_call_amd('format_menutab/view', 'init');
 
 // Check if we should show the legacy conversion button.
