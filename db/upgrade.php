@@ -64,5 +64,12 @@ function xmldb_format_menutab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025111002, 'format', 'menutab');
     }
 
+    if ($oldversion < 2025111003) {
+        // Fix numsections count with corrected lib.php that respects stored values.
+        format_menutab_fix_numsections_count();
+
+        upgrade_plugin_savepoint(true, 2025111003, 'format', 'menutab');
+    }
+
     return true;
 }

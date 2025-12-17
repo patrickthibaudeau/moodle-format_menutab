@@ -206,23 +206,34 @@ class format_menutab extends core_courseformat\base
      */
     public function course_format_options($foreditform = false)
     {
-        global $COURSE;
+        global $COURSE, $DB;
         static $courseformatoptions = false;
 
         $context = context_course::instance($COURSE->id);
         if ($courseformatoptions === false) {
-            // Count only regular sections, excluding section 0 and subsections (delegated sections).
-            // This is used as the default value for new courses or when no value is stored.
-            $modinfo = get_fast_modinfo($COURSE->id);
-            $number_of_sections = 0;
-            foreach ($modinfo->get_section_info_all() as $section) {
-                // Skip section 0 and subsections (delegated sections have a component set).
-                if ($section->section > 0 && empty($section->component)) {
-                    $number_of_sections++;
+            $courseconfig = get_config('moodlecourse');
+
+            // For numsections, use the stored value if it exists, otherwise calculate it.
+            // This prevents recalculating and overriding the stored value every time.
+            $stored_numsections = $DB->get_field('course_format_options', 'value',
+                ['courseid' => $COURSE->id, 'format' => 'menutab', 'name' => 'numsections']);
+
+            if ($stored_numsections !== false) {
+                // Use the stored value
+                $number_of_sections = (int)$stored_numsections;
+            } else {
+                // Calculate default for new courses only
+                // Count only regular sections, excluding section 0 and subsections (delegated sections).
+                $modinfo = get_fast_modinfo($COURSE->id);
+                $number_of_sections = 0;
+                foreach ($modinfo->get_section_info_all() as $section) {
+                    // Skip section 0 and subsections (delegated sections have a component set).
+                    if ($section->section > 0 && empty($section->component)) {
+                        $number_of_sections++;
+                    }
                 }
             }
 
-            $courseconfig = get_config('moodlecourse');
             $courseformatoptions = array(
                 'numsections' => array(
                     'default' => $number_of_sections,
