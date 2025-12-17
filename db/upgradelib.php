@@ -512,17 +512,15 @@ function format_menutab_fix_numsections_count() {
     foreach ($courses as $course) {
         mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
-        // Get course modinfo to count sections properly.
-        $modinfo = get_fast_modinfo($course->id);
-        $number_of_sections = 0;
+        // Use direct database query to count sections (cannot use get_fast_modinfo during upgrade).
+        // Count only regular sections, excluding section 0 and subsections (delegated sections).
+        $sql = "SELECT COUNT(*)
+                  FROM {course_sections}
+                 WHERE course = :courseid
+                   AND section > 0
+                   AND (component IS NULL OR component = '')";
 
-        // Count only regular sections, excluding section 0 and subsections.
-        foreach ($modinfo->get_section_info_all() as $section) {
-            // Skip section 0 and subsections (delegated sections have a component set).
-            if ($section->section > 0 && empty($section->component)) {
-                $number_of_sections++;
-            }
-        }
+        $number_of_sections = $DB->count_records_sql($sql, ['courseid' => $course->id]);
 
         // Get the current numsections value.
         $current_numsections = $DB->get_field('course_format_options', 'value',
@@ -549,9 +547,6 @@ function format_menutab_fix_numsections_count() {
                 $DB->insert_record('course_format_options', $record);
                 mtrace("  Inserted numsections with value {$number_of_sections}");
             }
-
-            // Clear the course cache to ensure the new value is used.
-            rebuild_course_cache($course->id, true);
         } else {
             mtrace("  numsections already correct ({$number_of_sections})");
         }
