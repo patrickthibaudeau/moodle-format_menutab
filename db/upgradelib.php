@@ -520,15 +520,14 @@ function format_menutab_fix_numsections_count() {
         mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
         // Use direct database query to count sections (cannot use get_fast_modinfo during upgrade).
-        // Count only regular sections, excluding section 0 and subsections (delegated sections).
+        // Count ALL sections including subsections, excluding only section 0.
         $sql = "SELECT COUNT(*)
                   FROM {course_sections}
                  WHERE course = :courseid
-                   AND section > 0
-                   AND (component IS NULL OR component = '')";
+                   AND section > 0";
 
         $number_of_sections = (int)$DB->count_records_sql($sql, ['courseid' => $course->id]);
-        mtrace("  Counted {$number_of_sections} regular section(s) (excluding section 0 and subsections)");
+        mtrace("  Counted {$number_of_sections} total section(s) including subsections (excluding only section 0)");
 
         // Get the current numsections value.
         $current_numsections = $DB->get_field('course_format_options', 'value',

@@ -223,12 +223,12 @@ class format_menutab extends core_courseformat\base
                 $number_of_sections = (int)$stored_numsections;
             } else {
                 // Calculate default for new courses only
-                // Count only regular sections, excluding section 0 and subsections (delegated sections).
+                // Count ALL sections including subsections, excluding only section 0.
                 $modinfo = get_fast_modinfo($COURSE->id);
                 $number_of_sections = 0;
                 foreach ($modinfo->get_section_info_all() as $section) {
-                    // Skip section 0 and subsections (delegated sections have a component set).
-                    if ($section->section > 0 && empty($section->component)) {
+                    // Skip only section 0, include everything else (regular sections AND subsections).
+                    if ($section->section > 0) {
                         $number_of_sections++;
                     }
                 }
