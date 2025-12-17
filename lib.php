@@ -355,6 +355,11 @@ class format_menutab extends core_courseformat\base
                     'element_type' => 'hidden',
                     'element_attributes' => [[COURSE_DISPLAY_SINGLEPAGE => new \lang_string('coursedisplay_single')]]
                 ),
+                'numsections' => array(
+                    'label' => new lang_string('numsections','format_menutab'),
+                    'element_type' => 'hidden',
+                    'element_attributes' => ''
+                ),
                 'course_title_show' => array(
                     'label' => new lang_string('course_title_show', 'format_menutab'),
                     'element_type' => 'select',

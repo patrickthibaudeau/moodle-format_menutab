@@ -145,4 +145,5 @@ $string['conversion_step5'] = 'Course cache will be rebuilt to reflect changes';
 $string['labels_to_convert'] = 'The following labels will be converted to tabs:';
 $string['convert_confirm'] = 'Yes, Convert to Subsection Tabs';
 $string['invalidcourseformat'] = 'This course is not using the Menu/Tab format';
+$string['numsections'] = 'Number of sections';
 
