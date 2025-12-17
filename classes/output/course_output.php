@@ -480,6 +480,7 @@ class course_output implements \renderable, \templatable
         $image_count = 0;
         $card_number_count = 1;
         $current_card_number = '';
+        $section_cards = [];
         foreach ($this->modinfo->get_section_info_all() as $sectionnum => $section) {
             // Skip subsections (delegated sections) - they should not appear on the course homepage.
             // Subsections have a component set (e.g., 'mod_subsection').
@@ -646,6 +647,7 @@ class course_output implements \renderable, \templatable
         }
 
         // Create array for cards based on number of rows
+        $data['sectionrows'] = [];
         $y = 0; //sectioncards array count
         for ($i = 0; $i < $number_of_rows; $i++) { // Loop through all rows
             for ($x = 0; $x < $data['numcolumns']; $x++) {
