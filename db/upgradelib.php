@@ -519,10 +519,15 @@ function format_menutab_fix_numsections_count() {
     foreach ($courses as $course) {
         mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
-        // Set numsections to 0 for all courses.
-        // A value of 0 means "show all sections" and prevents orphaned sections.
-        $number_of_sections = 0;
-        mtrace("  Setting numsections to 0 (show all sections)");
+        // Use direct database query to count sections (cannot use get_fast_modinfo during upgrade).
+        // Count ALL sections including subsections, excluding only section 0.
+        $sql = "SELECT COUNT(*)
+                  FROM {course_sections}
+                 WHERE course = :courseid
+                   AND section > 0";
+
+        $number_of_sections = (int)$DB->count_records_sql($sql, ['courseid' => $course->id]);
+        mtrace("  Counted {$number_of_sections} total section(s) including subsections (excluding only section 0)");
 
         // Get the current numsections value.
         $current_numsections = $DB->get_field('course_format_options', 'value',
