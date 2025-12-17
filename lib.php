@@ -213,26 +213,9 @@ class format_menutab extends core_courseformat\base
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
 
-            // For numsections, use the stored value if it exists, otherwise calculate it.
-            // This prevents recalculating and overriding the stored value every time.
-            $stored_numsections = $DB->get_field('course_format_options', 'value',
-                ['courseid' => $COURSE->id, 'format' => 'menutab', 'name' => 'numsections']);
-
-            if ($stored_numsections !== false) {
-                // Use the stored value
-                $number_of_sections = (int)$stored_numsections;
-            } else {
-                // Calculate default for new courses only
-                // Count ALL sections including subsections, excluding only section 0.
-                $modinfo = get_fast_modinfo($COURSE->id);
-                $number_of_sections = 0;
-                foreach ($modinfo->get_section_info_all() as $section) {
-                    // Skip only section 0, include everything else (regular sections AND subsections).
-                    if ($section->section > 0) {
-                        $number_of_sections++;
-                    }
-                }
-            }
+            // Set numsections to 0 to prevent orphaned sections.
+            // A value of 0 means "show all sections" and prevents any sections from being hidden.
+            $number_of_sections = 0;
 
             $courseformatoptions = array(
                 'numsections' => array(
@@ -339,17 +322,7 @@ class format_menutab extends core_courseformat\base
         }
         if ($foreditform && !isset($courseformatoptions['coursedisplay']['label'])) {
             $courseconfig = get_config('moodlecourse');
-            $max = (int)$courseconfig->maxsections;
-            $sectionmenu = [];
-            for ($i = 0; $i <= $max; $i++) {
-                $sectionmenu[$i] = "$i";
-            }
             $courseformatoptionsedit = array(
-                'numsections' => array(
-                    'label' => new \lang_string('numberweeks'),
-                    'element_type' => 'select',
-                    'element_attributes' => array($sectionmenu),
-                ),
                 'hiddensections' => array(
                     'label' => new \lang_string('hiddensections'),
                     'element_type' => 'select',
@@ -675,20 +648,9 @@ class format_menutab extends core_courseformat\base
         );
         $PAGE->requires->js_call_amd('format_menutab/edit_form_helper', 'init', $jsparams);
 
-        if (!$forsection && (empty($COURSE->id) || $COURSE->id == SITEID)) {
-            // Add "numsections" to create course form - will force the course pre-populated with empty sections.
-            // The "Number of sections" option is no longer available when editing course.
-            // Instead teachers should delete and add sections when needed.
+        // numsections is not shown in the form - it's always set to 0 to show all sections.
+        // This prevents orphaned sections from appearing.
 
-            $courseconfig = get_config('moodlecourse');
-            $max = (int)$courseconfig->maxsections;
-            $element = $mform->addElement('select', 'numsections', get_string('numberweeks'), range(0, $max ?: 52));
-            $mform->setType('numsections', PARAM_INT);
-            if (is_null($mform->getElementValue('numsections'))) {
-                $mform->setDefault('numsections', $courseconfig->numsections);
-            }
-            array_unshift($elements, $element);
-        }
         return $elements;
     }
 
