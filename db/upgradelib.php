@@ -509,6 +509,13 @@ function format_menutab_fix_numsections_count() {
     // Get all courses using the menutab format.
     $courses = $DB->get_records('course', ['format' => 'menutab']);
 
+    if (empty($courses)) {
+        mtrace("No menutab format courses found.");
+        return;
+    }
+
+    mtrace("Found " . count($courses) . " menutab course(s) to process.");
+
     foreach ($courses as $course) {
         mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
@@ -520,23 +527,32 @@ function format_menutab_fix_numsections_count() {
                    AND section > 0
                    AND (component IS NULL OR component = '')";
 
-        $number_of_sections = $DB->count_records_sql($sql, ['courseid' => $course->id]);
+        $number_of_sections = (int)$DB->count_records_sql($sql, ['courseid' => $course->id]);
+        mtrace("  Counted {$number_of_sections} regular section(s) (excluding section 0 and subsections)");
 
         // Get the current numsections value.
         $current_numsections = $DB->get_field('course_format_options', 'value',
             ['courseid' => $course->id, 'format' => 'menutab', 'name' => 'numsections']);
 
-        if ($current_numsections != $number_of_sections) {
-            mtrace("  Current numsections: {$current_numsections}, Correct value: {$number_of_sections}");
+        // Cast to int for proper comparison (database values are strings).
+        $current_numsections = $current_numsections !== false ? (int)$current_numsections : null;
 
+        if ($current_numsections === null) {
+            mtrace("  No numsections value found in database, inserting {$number_of_sections}");
+        } else {
+            mtrace("  Current numsections value in database: {$current_numsections}");
+        }
+
+        if ($current_numsections !== $number_of_sections) {
             // Update or insert the numsections value.
             $record = $DB->get_record('course_format_options',
                 ['courseid' => $course->id, 'format' => 'menutab', 'name' => 'numsections']);
 
             if ($record) {
+                $old_value = $record->value;
                 $record->value = $number_of_sections;
                 $DB->update_record('course_format_options', $record);
-                mtrace("  Updated numsections to {$number_of_sections}");
+                mtrace("  ✓ Updated numsections from {$old_value} to {$number_of_sections}");
             } else {
                 $record = new \stdClass();
                 $record->courseid = $course->id;
@@ -545,10 +561,15 @@ function format_menutab_fix_numsections_count() {
                 $record->name = 'numsections';
                 $record->value = $number_of_sections;
                 $DB->insert_record('course_format_options', $record);
-                mtrace("  Inserted numsections with value {$number_of_sections}");
+                mtrace("  ✓ Inserted numsections with value {$number_of_sections}");
             }
+
+            // Verify the update.
+            $verify = $DB->get_field('course_format_options', 'value',
+                ['courseid' => $course->id, 'format' => 'menutab', 'name' => 'numsections']);
+            mtrace("  Verification: numsections is now {$verify} in database");
         } else {
-            mtrace("  numsections already correct ({$number_of_sections})");
+            mtrace("  ✓ numsections already correct ({$number_of_sections}), no update needed");
         }
     }
 
