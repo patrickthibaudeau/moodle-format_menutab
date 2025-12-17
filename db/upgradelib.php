@@ -492,3 +492,71 @@ function format_menutab_migrate_labels_to_subsections() {
     mtrace("Migration complete!");
 }
 
+/**
+ * Fix numsections count for all menutab format courses.
+ *
+ * This function recalculates the numsections value for all courses using the menutab format,
+ * ensuring that subsections (delegated sections) are excluded from the count.
+ * This prevents "orphaned sections" from appearing when courses have subsections.
+ *
+ * @return void
+ */
+function format_menutab_fix_numsections_count() {
+    global $DB;
+
+    mtrace("Fixing numsections count for menutab format courses...");
+
+    // Get all courses using the menutab format.
+    $courses = $DB->get_records('course', ['format' => 'menutab']);
+
+    foreach ($courses as $course) {
+        mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
+
+        // Get course modinfo to count sections properly.
+        $modinfo = get_fast_modinfo($course->id);
+        $number_of_sections = 0;
+
+        // Count only regular sections, excluding section 0 and subsections.
+        foreach ($modinfo->get_section_info_all() as $section) {
+            // Skip section 0 and subsections (delegated sections have a component set).
+            if ($section->section > 0 && empty($section->component)) {
+                $number_of_sections++;
+            }
+        }
+
+        // Get the current numsections value.
+        $current_numsections = $DB->get_field('course_format_options', 'value',
+            ['courseid' => $course->id, 'format' => 'menutab', 'name' => 'numsections']);
+
+        if ($current_numsections != $number_of_sections) {
+            mtrace("  Current numsections: {$current_numsections}, Correct value: {$number_of_sections}");
+
+            // Update or insert the numsections value.
+            $record = $DB->get_record('course_format_options',
+                ['courseid' => $course->id, 'format' => 'menutab', 'name' => 'numsections']);
+
+            if ($record) {
+                $record->value = $number_of_sections;
+                $DB->update_record('course_format_options', $record);
+                mtrace("  Updated numsections to {$number_of_sections}");
+            } else {
+                $record = new \stdClass();
+                $record->courseid = $course->id;
+                $record->format = 'menutab';
+                $record->sectionid = 0;
+                $record->name = 'numsections';
+                $record->value = $number_of_sections;
+                $DB->insert_record('course_format_options', $record);
+                mtrace("  Inserted numsections with value {$number_of_sections}");
+            }
+
+            // Clear the course cache to ensure the new value is used.
+            rebuild_course_cache($course->id, true);
+        } else {
+            mtrace("  numsections already correct ({$number_of_sections})");
+        }
+    }
+
+    mtrace("Finished fixing numsections count!");
+}
+

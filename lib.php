@@ -208,7 +208,16 @@ class format_menutab extends core_courseformat\base
     {
         global $COURSE;
         static $courseformatoptions = false;
-        $number_of_sections = count($this->get_sections()) - 1;
+
+        // Count only regular sections, excluding section 0 and subsections (delegated sections).
+        $modinfo = get_fast_modinfo($COURSE->id);
+        $number_of_sections = 0;
+        foreach ($modinfo->get_section_info_all() as $section) {
+            // Skip section 0 and subsections (delegated sections have a component set).
+            if ($section->section > 0 && empty($section->component)) {
+                $number_of_sections++;
+            }
+        }
 
         $context = context_course::instance($COURSE->id);
         if ($courseformatoptions === false) {

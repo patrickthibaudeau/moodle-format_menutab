@@ -50,5 +50,12 @@ function xmldb_format_menutab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025110300, 'format', 'menutab');
     }
 
+    if ($oldversion < 2025111001) {
+        // Fix numsections count to exclude subsections, preventing orphaned sections.
+        format_menutab_fix_numsections_count();
+
+        upgrade_plugin_savepoint(true, 2025111001, 'format', 'menutab');
+    }
+
     return true;
 }
