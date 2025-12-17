@@ -665,20 +665,9 @@ class format_menutab extends core_courseformat\base
         );
         $PAGE->requires->js_call_amd('format_menutab/edit_form_helper', 'init', $jsparams);
 
-        if (!$forsection && (empty($COURSE->id) || $COURSE->id == SITEID)) {
-            // Add "numsections" to create course form - will force the course pre-populated with empty sections.
-            // The "Number of sections" option is no longer available when editing course.
-            // Instead teachers should delete and add sections when needed.
+        // numsections field is hidden from the form - it works automatically in the background.
+        // The value is stored in the database and calculated/updated via upgrade scripts.
 
-            $courseconfig = get_config('moodlecourse');
-            $max = (int)$courseconfig->maxsections;
-            $element = $mform->addElement('select', 'numsections', get_string('numberweeks'), range(0, $max ?: 52));
-            $mform->setType('numsections', PARAM_INT);
-            if (is_null($mform->getElementValue('numsections'))) {
-                $mform->setDefault('numsections', $courseconfig->numsections);
-            }
-            array_unshift($elements, $element);
-        }
         return $elements;
     }
 
