@@ -50,46 +50,16 @@ function xmldb_format_menutab_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025110300, 'format', 'menutab');
     }
 
-    if ($oldversion < 2025111001) {
-        // Fix numsections count to exclude subsections, preventing orphaned sections.
-        format_menutab_fix_numsections_count();
+    if ($oldversion < 2025111007) {
+        // Remove deprecated numsections from course_format_options.
+        // In Moodle 5.1+, numsections is deprecated and the system uses get_last_section_number() instead.
+        // This cleanup removes old numsections entries that are no longer needed.
+        $DB->delete_records('course_format_options', [
+            'format' => 'menutab',
+            'name' => 'numsections'
+        ]);
 
-        upgrade_plugin_savepoint(true, 2025111001, 'format', 'menutab');
-    }
-
-    if ($oldversion < 2025111002) {
-        // Fix numsections count again with improved type handling and verification.
-        format_menutab_fix_numsections_count();
-
-        upgrade_plugin_savepoint(true, 2025111002, 'format', 'menutab');
-    }
-
-    if ($oldversion < 2025111003) {
-        // Fix numsections count with corrected lib.php that respects stored values.
-        format_menutab_fix_numsections_count();
-
-        upgrade_plugin_savepoint(true, 2025111003, 'format', 'menutab');
-    }
-
-    if ($oldversion < 2025111004) {
-        // Fix numsections to include ALL sections (regular sections AND subsections).
-        format_menutab_fix_numsections_count();
-
-        upgrade_plugin_savepoint(true, 2025111004, 'format', 'menutab');
-    }
-
-    if ($oldversion < 2025111005) {
-        // Set numsections to 0 for all courses to prevent orphaned sections.
-        format_menutab_fix_numsections_count();
-
-        upgrade_plugin_savepoint(true, 2025111005, 'format', 'menutab');
-    }
-
-    if ($oldversion < 2025111006) {
-        // Fix courses broken by version 2025111005 - restore proper numsections count.
-        format_menutab_fix_numsections_count();
-
-        upgrade_plugin_savepoint(true, 2025111006, 'format', 'menutab');
+        upgrade_plugin_savepoint(true, 2025111007, 'format', 'menutab');
     }
 
     return true;

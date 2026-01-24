@@ -198,47 +198,24 @@ class format_menutab extends core_courseformat\base
      *
      * Menu/Tab format uses the following options:
      * - coursedisplay
-     * - numsections
      * - hiddensections
+     *
+     * Note: numsections is no longer managed as a format option in Moodle 5.1+
+     * The system automatically determines section visibility via get_last_section_number()
      *
      * @param bool $foreditform
      * @return array of options
      */
     public function course_format_options($foreditform = false)
     {
-        global $COURSE, $DB;
+        global $COURSE;
         static $courseformatoptions = false;
 
         $context = context_course::instance($COURSE->id);
         if ($courseformatoptions === false) {
             $courseconfig = get_config('moodlecourse');
 
-            // For numsections, use the stored value if it exists, otherwise calculate it.
-            // This prevents recalculating and overriding the stored value every time.
-            $stored_numsections = $DB->get_field('course_format_options', 'value',
-                ['courseid' => $COURSE->id, 'format' => 'menutab', 'name' => 'numsections']);
-
-            if ($stored_numsections !== false) {
-                // Use the stored value
-                $number_of_sections = (int)$stored_numsections;
-            } else {
-                // Calculate default for new courses only
-                // Count ALL sections including subsections, excluding only section 0.
-                $modinfo = get_fast_modinfo($COURSE->id);
-                $number_of_sections = 0;
-                foreach ($modinfo->get_section_info_all() as $section) {
-                    // Skip only section 0, include everything else (regular sections AND subsections).
-                    if ($section->section > 0) {
-                        $number_of_sections++;
-                    }
-                }
-            }
-
             $courseformatoptions = array(
-                'numsections' => array(
-                    'default' => $number_of_sections,
-                    'type' => PARAM_INT,
-                ),
                 'hiddensections' => array(
                     'default' => $courseconfig->hiddensections,
                     'type' => PARAM_INT,
@@ -354,11 +331,6 @@ class format_menutab extends core_courseformat\base
                     'label' => new lang_string('coursedisplay'),
                     'element_type' => 'hidden',
                     'element_attributes' => [[COURSE_DISPLAY_SINGLEPAGE => new \lang_string('coursedisplay_single')]]
-                ),
-                'numsections' => array(
-                    'label' => new lang_string('numsections','format_menutab'),
-                    'element_type' => 'hidden',
-                    'element_attributes' => ''
                 ),
                 'course_title_show' => array(
                     'label' => new lang_string('course_title_show', 'format_menutab'),
@@ -688,6 +660,31 @@ class format_menutab extends core_courseformat\base
     public function allow_stealth_module_visibility($cm, $section) {
         // Allow the third visibility state inside visible sections or in section 0.
         return !$section->section || $section->visible;
+    }
+
+    /**
+     * Method used in the renderer and during backup instead of legacy 'numsections'
+     *
+     * Returns the maximum section number for this course.
+     * This includes ALL sections (regular sections AND subsections/delegated sections).
+     *
+     * In Moodle 5.1+, numsections is deprecated. This method ensures all sections
+     * are visible by returning the actual maximum section number from the database.
+     *
+     * @return int The last section number, or -1 if sections are entirely missing
+     */
+    public function get_last_section_number() {
+        $course = $this->get_course();
+        $modinfo = get_fast_modinfo($course);
+        $sections = $modinfo->get_section_info_all();
+
+        // Sections seem to be missing entirely. Avoid subsequent errors and return early.
+        if (count($sections) === 0) {
+            return -1;
+        }
+
+        // Return the maximum section number - this includes subsections/delegated sections
+        return (int)max(array_keys($sections));
     }
 }
 
