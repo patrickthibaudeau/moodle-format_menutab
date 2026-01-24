@@ -474,7 +474,9 @@ class course_output implements \renderable, \templatable
         }
         $data['hasNoSections'] = true;
 
-        $number_of_sections_to_show = $data['numsections'];
+        // Use get_last_section_number() instead of deprecated numsections.
+        // This dynamically calculates the number of sections from the database.
+        $number_of_sections_to_show = $this->format->get_last_section_number();
 
         $countincludedsections = 0;
         $image_count = 0;
