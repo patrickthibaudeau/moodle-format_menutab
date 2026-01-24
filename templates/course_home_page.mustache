@@ -586,8 +586,7 @@ no sectionid, Links and badges will not be printed on the card.
     </div>
     {{#editing}}
         <div class="mdl-left py-2 changenumsections">
-            <a href="{{config.wwwroot}}/course/changenumsections.php?courseid={{courseid}}
-            &insertsection=0&sesskey={{sesskey}}"
+            <a href="{{config.wwwroot}}/course/format/update.php?courseid={{courseid}}&action=section_add&sesskey={{sesskey}}"
             class="increase-sections">
             {{#str}}addsection, format_menutab{{/str}}
             </a>
