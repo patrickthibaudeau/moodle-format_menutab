@@ -478,6 +478,9 @@ class course_output implements \renderable, \templatable
         // This dynamically calculates the number of sections from the database.
         $number_of_sections_to_show = $this->format->get_last_section_number();
 
+        // Add numsections to data for template and JavaScript.
+        $data['numsections'] = $number_of_sections_to_show;
+
         $countincludedsections = 0;
         $image_count = 0;
         $card_number_count = 1;
