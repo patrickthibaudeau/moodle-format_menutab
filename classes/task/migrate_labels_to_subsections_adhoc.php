@@ -48,6 +48,14 @@ class migrate_labels_to_subsections_adhoc extends \core\task\adhoc_task {
 
         mtrace("Processing course: {$course->fullname} (ID: {$course->id})");
 
+        // Determine next available section number once per course.
+        $maxsection = $DB->get_field_sql(
+            "SELECT MAX(section) FROM {course_sections} WHERE course = ?",
+            [$course->id]
+        );
+
+        $nextsection = $maxsection + 1;
+
         // Get all sections for this course (excluding section 0).
         $sections = $DB->get_records_select(
             'course_sections',
@@ -151,10 +159,7 @@ class migrate_labels_to_subsections_adhoc extends \core\task\adhoc_task {
                     // We do this manually to avoid cache refresh during conversion.
                     $delegatedsection = new \stdClass();
                     $delegatedsection->course = $course->id;
-                    $delegatedsection->section = $DB->get_field_sql(
-                        "SELECT MAX(section) + 1 FROM {course_sections} WHERE course = ?",
-                        [$course->id]
-                    );
+                    $delegatedsection->section = $nextsection++;
                     $delegatedsection->name = $subsectiondata['name'];
                     $delegatedsection->summary = '';
                     $delegatedsection->summaryformat = FORMAT_HTML;
@@ -195,10 +200,10 @@ class migrate_labels_to_subsections_adhoc extends \core\task\adhoc_task {
 
                 // 5. Delete the h2 labels.
                 foreach ($labelstodelete as $cmid) {
-                    $cm = $DB->get_record('course_modules', ['id' => $cmid]);
-                    if ($cm) {
-                        $DB->delete_records('label', ['id' => $cm->instance]);
-                        $DB->delete_records('course_modules', ['id' => $cmid]);
+                    // Get the course module object.
+                    if ($cm = get_coursemodule_from_id('label', $cmid)) {
+                        // Use course_delete_module to ensure all related data is cleaned up.
+                        course_delete_module($cmid);
                         mtrace("    Deleted h2 label module {$cmid}");
                     }
                 }
