@@ -228,7 +228,7 @@ class course_output implements \renderable, \templatable
         $data['print_start_button'] = $print_start_button;
         $data['print_overall_progress'] = $print_overall_progress;
         $data['course_image'] = $this->get_course_image($output);
-        $data['sectionreturn'] = $this->format->get_section_number();
+        $data['sectionreturn'] = $this->format->get_sectionnum();
         $data[$this->course->course_title_position] = true;
         $data['course_title_show'] = $this->course->course_title_show;
         $data['userid'] = $USER->id;
@@ -448,6 +448,7 @@ class course_output implements \renderable, \templatable
         if ($this->canviewhidden) {
             $data['availabilitymessage'] = self::temp_section_availability_message($thissection);
         }
+
         return $data;
     }
 
@@ -473,15 +474,25 @@ class course_output implements \renderable, \templatable
         }
         $data['hasNoSections'] = true;
 
-        $maxallowedsections = $this->format->get_max_sections();
-        $sectioncountwarningissued = false;
-        $number_of_sections_to_show = $data['numsections'];
+        // Use get_last_section_number() instead of deprecated numsections.
+        // This dynamically calculates the number of sections from the database.
+        $number_of_sections_to_show = $this->format->get_last_section_number();
+
+        // Add numsections to data for template and JavaScript.
+        $data['numsections'] = $number_of_sections_to_show;
 
         $countincludedsections = 0;
         $image_count = 0;
         $card_number_count = 1;
         $current_card_number = '';
+        $section_cards = [];
         foreach ($this->modinfo->get_section_info_all() as $sectionnum => $section) {
+            // Skip subsections (delegated sections) - they should not appear on the course homepage.
+            // Subsections have a component set (e.g., 'mod_subsection').
+            if (!empty($section->component)) {
+                continue;
+            }
+
             // Show the section if the user is permitted to access it, OR if it's not available
             // but there is some available info text which explains the reason & should display,
             // OR it is hidden but the course has a setting to display hidden sections as unavilable.
@@ -582,8 +593,8 @@ class course_output implements \renderable, \templatable
 
                     // See below about when "hide add cm control" is true.
                     $section_card['hideaddcmcontrol'] = false;
-                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control(
-                        $this->course, $section->section, 0
+                    $section_card['single_sec_add_cm_control_html'] = $this->courserenderer->section_add_cm_controls(
+                        $this->format, $section
                     );
                     $section_cards[] = $section_card;
 
@@ -605,8 +616,8 @@ class course_output implements \renderable, \templatable
         $hidden_sections_exist = false;
         $data['hiddensections'] = array();
         // Split sections into hidden and visible
+        $hidden_sections = [];
         if ($data['hidden_sections_in_container']) {
-            $hidden_sections = [];
             foreach ($section_cards as $key => $section_card) {
                 if ($section_card['visible'] == true && $section_card['uservisible'] == true) {
                     continue;
@@ -641,6 +652,7 @@ class course_output implements \renderable, \templatable
         }
 
         // Create array for cards based on number of rows
+        $data['sectionrows'] = [];
         $y = 0; //sectioncards array count
         for ($i = 0; $i < $number_of_rows; $i++) { // Loop through all rows
             for ($x = 0; $x < $data['numcolumns']; $x++) {
@@ -662,7 +674,8 @@ class course_output implements \renderable, \templatable
 
         $data['hidden_sections_exist'] = $hidden_sections_exist;
         $data['sectioncards'] = $data['sectionrows'];
-        $data['section_zero_add_cm_control_html'] = $this->courserenderer->course_section_add_cm_control($this->course, 0, 0);
+        $seczero = $this->modinfo->get_section_info(0);
+        $data['section_zero_add_cm_control_html'] = $this->courserenderer->section_add_cm_controls($this->format, $seczero);
         if ($this->completionenabled && $data['overall_progress']['num_out_of'] > 0) {
             if (get_config('format_menutab', 'print_progress')) {
                 $data['overall_progress_indicator'] = $this->completion_indicator(
@@ -754,6 +767,8 @@ class course_output implements \renderable, \templatable
     }
 
     /**
+     * Get tabs for a section based on mod_subsection modules (Moodle 5.1+ approach).
+     *
      * @param $section
      * @param $output
      * @return array
@@ -763,112 +778,123 @@ class course_output implements \renderable, \templatable
      */
     private function get_section_tab_list($section, $output)
     {
+        global $DB;
+
         if (!isset($section->section)) {
             debugging("section->section is not set", DEBUG_DEVELOPER);
+            return [];
         }
 
+        // Get course modules for this section.
         if (!isset($this->modinfo->sections[$section->section]) || !$cmids = $this->modinfo->sections[$section->section]) {
             // There are no CMs for the section (i.e. section is empty) so we silently return.
             return [];
         }
+
         if (empty($cmids)) {
-            // There are no CMs for the section (i.e. section is empty) so we silently return.
             return [];
         }
-        $previouswaslabel = false;
-        $sectioncontent = [];
-        $a_tab_exists = false; // Used so that default content tab does not create itself if a label is used after a tab.
+
         $tabs = [];
-        $t = 0;
-        $contents_tab_exists = false; // required so that if several labels exist within the section, only one contents tab get's printed
-        // Create all tab objects
-        foreach ($cmids as $index => $cmid) {
+        $tabindex = 0;
+        $non_subsection_modules = [];
+        $subsection_modules = [];
+
+        // First pass: identify subsections and regular activities.
+        foreach ($cmids as $cmid) {
             $mod = $this->modinfo->get_cm($cmid);
             if ($mod->deletioninprogress) {
                 continue;
             }
-
-            // If no tab available, create a default tab
-            if ($index == 0 && $mod->get_module_type_name()->get_component() != 'label') {
-                $tabs[$t]['title'] = get_String('content', 'format_menutab');
-                $tabs[$t]['tabid'] = $index;
-                $tabs[$t]['user_visible'] = true;
-                $tabs[$t]['cm_index_skip'] = -1;
-                $tabs[$t]['cm_index_start'] = $index;
-                $contents_tab_exists = true;
-            } else if ($mod->get_module_type_name()->get_component() == 'label') {
-                preg_match("#<\s*?h2\b[^>]*>(.*?)</h2\b[^>]*>#s", $mod->get_formatted_content(), $matches);
-
-                if (isset($matches[1])) {
-                    $title = $matches[1];
-                    $tabs[$t]['title'] = $title;
-                    $tabs[$t]['tabid'] = $index;
-                    $tabs[$t]['user_visible'] = $mod->get_user_visible();
-                    // Because this mod is a label and contains a tab, get next module that follows to start the
-                    // content list
-                    $tabs[$t]['cm_index_skip'] = $index;
-                    $tabs[$t]['cm_index_start'] = $index + 1;
-                    $a_tab_exists = true;
-                } else {
-                    if (!$a_tab_exists && !$contents_tab_exists) {
-                        $tabs[$t]['title'] = get_String('content', 'format_menutab');
-                        $tabs[$t]['tabid'] = $index;
-                        $tabs[$t]['user_visible'] = true;
-                        $tabs[$t]['cm_index_skip'] = -1;
-                        $tabs[$t]['cm_index_start'] = $index;
-                        $contents_tab_exists = true;
-                    }
-                }
+            // Skip modules that are completely hidden from the current user.
+            // This covers activities with "Restrict Access" set to hidden (eye icon closed).
+            if (!$mod->uservisible) {
+                continue;
             }
 
-            $t++;
-        }
-        // reset tabs index
-        $tabs = array_values($tabs);
-        // get number of course modules
-        $cm_count = count($cmids);
-        // Loop through tabs and add course modules
-        for ($x = 0; $x < count($tabs); $x++) {
-            if ($x == 0) {
-                $tabs[$x]['class'] = 'show active';
-                $tabs[$x]['active'] = 'active';
+            // Check if this is a subsection module.
+            if ($mod->modname === 'subsection') {
+                $subsection_modules[] = $mod;
             } else {
-                $tabs[$x]['class'] = '';
-                $tabs[$x]['active'] = '';
-            }
-            // If there is an tab after this one, only print the modules for that tab
-            if (isset($tabs[$x + 1])) {
-                for ($i = $tabs[$x]['cm_index_start']; $i < $tabs[$x + 1]['cm_index_skip']; $i++) {
-                    $mod = $this->modinfo->get_cm($cmids[$i]);
-                    if (!$mod->deletioninprogress) {
-                        $moduledata = $this->course_module_data(
-                            $mod,
-                            $section,
-                            $previouswaslabel,
-                            $index == 0,
-                            $output
-                        );
-                        $tabs[$x]['course_modules'][] = $moduledata;
-                    }
-
-                }
-            } else {
-                for ($i = $tabs[$x]['cm_index_start']; $i < $cm_count; $i++) {
-                    $mod = $this->modinfo->get_cm($cmids[$i]);
-                    if (!$mod->deletioninprogress) {
-                        $moduledata = $this->course_module_data(
-                            $mod,
-                            $section,
-                            $previouswaslabel,
-                            $index == 0,
-                            $output
-                        );
-                        $tabs[$x]['course_modules'][] = $moduledata;
-                    }
-
-                }
+                // Regular activity (not a subsection).
+                $non_subsection_modules[] = $mod;
             }
         }
+
+        // If there are regular activities (non-subsection), create a "Content" tab.
+        if (!empty($non_subsection_modules)) {
+            $tabs[0] = [
+                'title' => get_string('content', 'format_menutab'),
+                'tabid' => 0,
+                'user_visible' => true,
+                'class' => 'show active',
+                'active' => 'active',
+                'course_modules' => []
+            ];
+
+            foreach ($non_subsection_modules as $mod) {
+                $moduledata = $this->course_module_data(
+                    $mod,
+                    $section,
+                    false,
+                    false,
+                    $output
+                );
+                $tabs[0]['course_modules'][] = $moduledata;
+            }
+
+            $tabindex = 1;
+        }
+
+        // Process subsection modules as tabs.
+        foreach ($subsection_modules as $subsection_mod) {
+            // Get the delegated section for this subsection.
+            $delegated_section = $subsection_mod->get_delegated_section_info();
+
+            if (!$delegated_section) {
+                // If no delegated section found, skip this subsection.
+                continue;
+            }
+
+            // Create tab with subsection name.
+            $tabs[$tabindex] = [
+                'title' => format_string($subsection_mod->name),
+                'tabid' => $tabindex,
+                'user_visible' => $subsection_mod->uservisible,
+                'class' => $tabindex == 0 ? 'show active' : '',
+                'active' => $tabindex == 0 ? 'active' : '',
+                'course_modules' => []
+            ];
+
+            // Get modules from the delegated section.
+            if (isset($this->modinfo->sections[$delegated_section->section])) {
+                $delegated_cmids = $this->modinfo->sections[$delegated_section->section];
+
+                foreach ($delegated_cmids as $delegated_cmid) {
+                    $delegated_mod = $this->modinfo->get_cm($delegated_cmid);
+                    if ($delegated_mod->deletioninprogress) {
+                        continue;
+                    }
+                    // Skip modules that are completely hidden from the current user.
+                    // This covers activities with "Restrict Access" set to hidden (eye icon closed).
+                    if (!$delegated_mod->uservisible) {
+                        continue;
+                    }
+
+                    $moduledata = $this->course_module_data(
+                        $delegated_mod,
+                        $delegated_section,
+                        false,
+                        false,
+                        $output
+                    );
+                    $tabs[$tabindex]['course_modules'][] = $moduledata;
+                }
+            }
+
+            $tabindex++;
+        }
+
         return $tabs;
     }
 
