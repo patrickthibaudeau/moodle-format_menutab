@@ -806,6 +806,11 @@ class course_output implements \renderable, \templatable
             if ($mod->deletioninprogress) {
                 continue;
             }
+            // Skip modules that are completely hidden from the current user.
+            // This covers activities with "Restrict Access" set to hidden (eye icon closed).
+            if (!$mod->uservisible) {
+                continue;
+            }
 
             // Check if this is a subsection module.
             if ($mod->modname === 'subsection') {
@@ -868,6 +873,11 @@ class course_output implements \renderable, \templatable
                 foreach ($delegated_cmids as $delegated_cmid) {
                     $delegated_mod = $this->modinfo->get_cm($delegated_cmid);
                     if ($delegated_mod->deletioninprogress) {
+                        continue;
+                    }
+                    // Skip modules that are completely hidden from the current user.
+                    // This covers activities with "Restrict Access" set to hidden (eye icon closed).
+                    if (!$delegated_mod->uservisible) {
                         continue;
                     }
 
