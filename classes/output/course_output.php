@@ -806,9 +806,11 @@ class course_output implements \renderable, \templatable
             if ($mod->deletioninprogress) {
                 continue;
             }
-            // Skip modules that are completely hidden from the current user.
-            // This covers activities with "Restrict Access" set to hidden (eye icon closed).
-            if (!$mod->uservisible) {
+            // Skip modules that are completely hidden from the current user with no availability
+            // message to display. This covers activities with "Restrict Access" set to hidden
+            // (eye icon closed). When the eye icon is open and the restriction is not met,
+            // availableinfo is non-empty and the module should still render with a lock message.
+            if (!$mod->uservisible && empty($mod->availableinfo)) {
                 continue;
             }
 
@@ -875,9 +877,11 @@ class course_output implements \renderable, \templatable
                     if ($delegated_mod->deletioninprogress) {
                         continue;
                     }
-                    // Skip modules that are completely hidden from the current user.
-                    // This covers activities with "Restrict Access" set to hidden (eye icon closed).
-                    if (!$delegated_mod->uservisible) {
+                    // Skip modules that are completely hidden from the current user with no availability
+                    // message to display. This covers activities with "Restrict Access" set to hidden
+                    // (eye icon closed). When the eye icon is open and the restriction is not met,
+                    // availableinfo is non-empty and the module should still render with a lock message.
+                    if (!$delegated_mod->uservisible && empty($delegated_mod->availableinfo)) {
                         continue;
                     }
 
@@ -951,6 +955,13 @@ class course_output implements \renderable, \templatable
         foreach ($cmids as $index => $cmid) {
             $mod = $this->modinfo->get_cm($cmid);
             if ($mod->deletioninprogress) {
+                continue;
+            }
+            // Skip modules that are completely hidden from the current user with no availability
+            // message to display. This covers activities with "Restrict Access" set to hidden
+            // (eye icon closed). When the eye icon is open and the restriction is not met,
+            // availableinfo is non-empty and the module should still render with a lock message.
+            if (!$mod->uservisible && empty($mod->availableinfo)) {
                 continue;
             }
 
