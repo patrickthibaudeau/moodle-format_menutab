@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'format_menutab';
-$plugin->release = '1.3.0';
-$plugin->version = 2023070700;
-$plugin->requires = 2022041900;
+$plugin->release = '3.1.1 (Build: 20260605)';
+$plugin->version = 2026060500;
+$plugin->requires = 2025032100;
 $plugin->maturity = MATURITY_STABLE;
